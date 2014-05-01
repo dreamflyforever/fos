@@ -1,0 +1,4 @@
+problem: libc/printf.c:541: undefined reference to `__udivdi3'
+
+solve:#define u_quad_t  unsigned long //unsigned long long
+
