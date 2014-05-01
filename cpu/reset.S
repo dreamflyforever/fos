@@ -6,10 +6,12 @@
 #define STK_FRAME_SIZE (128 + REDZONE)
 
     .global task_switch
-	.global	TimerISR        
+	.global	TimerISR     
+    .global UsrISR   
     .extern old_task
     .extern new_task
     .extern hardware_timer
+    .extern usr_handle
 /* Macro Definitions */
 #define CLEAR_GPR(gpr)				\
     l.or    gpr,r0,r0 
@@ -125,7 +127,7 @@
 /* ---[ 0x800: External interrupt exception ]---------------------------- */
 	.org 0x800
 	
-	//EXCEPTION_HANDLER(UsrISR)
+	EXCEPTION_HANDLER(UsrISR)
  
  /* ---[ 0x900: DTLB miss exception ]------------------------------------- */
 	.org 0x900
@@ -349,6 +351,30 @@ TimerISR:
 
 	/* Timer interrupt handler */
 	l.jal hardware_timer
+	l.nop       
+#if 1
+	l.lwz   r2,PT_PC(r1)		/* load context for task to be resumed */
+	l.mtspr r0,r2,SPR_EPCR_BASE
+	l.lwz   r2,PT_SR(r1)
+	l.mtspr r0,r2,SPR_ESR_BASE
+#endif
+
+	RESTORE_CONTEXT
+	
+	l.addi	r1,r1,STK_FRAME_SIZE
+	l.rfe
+	l.nop	
+
+UsrISR:
+	l.mfspr r3,r0,SPR_EPCR_BASE     /* save program counter that was put in exception register */
+	l.sw    PT_PC(r1),r3
+	l.mfspr r3,r0,SPR_ESR_BASE      /* save status register that was put in exception register */
+	l.sw    PT_SR(r1),r3		
+	
+	STORE_CONTEXT
+
+	/* Timer interrupt handler */
+	l.jal usr_handle
 	l.nop       
 #if 1
 	l.lwz   r2,PT_PC(r1)		/* load context for task to be resumed */
