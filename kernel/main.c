@@ -73,7 +73,8 @@ void fun4(void *arg)
         os_printf("task4 print i = %d\n", i);
         //sem_get(&sem);
         //os_delay(5);
-        schedule();
+        //schedule();
+        os_delay2(10);
         os_printf("after 100 handle\n");
     }
 }
@@ -83,7 +84,7 @@ void main()
 {
     uart_init();
 
-    os_printf("YSJ_OS\n");
+    os_printf("FOS\n");
     
     prio_ready_queue_init();
 
@@ -95,9 +96,8 @@ void main()
     task_creat(&tcb1, fun1, stack1, 5, 1);
     task_creat(&tcb2, fun2, stack2, 3, 1);
     task_creat(&tcb3, fun3, stack3, 1, 1);
-    task_creat(&tcb4, fun4, stack4, 4, 1);
+    task_creat(&tcb4, fun4, stack4, 1, 1);
     task_creat(&idle_tcb, idle_task, idle_stack, 31, 1);
-    
     hw_timer_init();
  
     sem_init(&sem, 1);

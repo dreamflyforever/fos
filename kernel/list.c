@@ -37,6 +37,7 @@ void list_delete(LIST *node)
     if (is_list_last(node))
     {
         node->prev->next = node->prev;
+        return ;
     }
 
     node->prev->next = node->next;

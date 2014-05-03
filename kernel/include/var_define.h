@@ -27,7 +27,7 @@ typedef struct TCB_STR{
     BOOL   state; // Only two state, run or forbit run
 }TCB;
 
-/*for software timer*/
+/*time manage*/
 typedef struct TICK_STR{
     LIST list;
     U8   style; // timer,delay,wait signer
@@ -46,6 +46,11 @@ typedef struct SEM_STR{
     TCB *tcb;
 }SEM;
 
+void sem_init(SEM *semaphore, U32 num);
+void sem_put(SEM *semaphore);
+void sem_get(SEM *semaphore);
+
+
 extern TCB task_prio_queue[SYSTEM_BYTE];
 extern TCB *new_task;
 extern TCB *old_task;
@@ -61,6 +66,9 @@ TCB* bit_first_one_search(U32 num);
 void prio_ready_queue_init();
 void prio_ready_queue_insert(TCB *tcb);
 void schedule();
+void prio_ready_queue_delete(TCB *tcb);
+void prio_ready_queue_insert_head(TCB *tcb);
+
 
 void tick_queue_init();
 void start_which_task(TCB *tcb);

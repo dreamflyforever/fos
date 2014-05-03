@@ -46,7 +46,19 @@ void prio_ready_queue_init()
 
 void prio_ready_queue_insert(TCB *tcb)
 {
+    //list_insert_spec(&task_prio_queue[tcb->prio].list, &tcb->list);
+    list_insert_behind(&task_prio_queue[tcb->prio].list, &tcb->list);
+}
+
+void prio_ready_queue_insert_head(TCB *tcb)
+{
     list_insert_spec(&task_prio_queue[tcb->prio].list, &tcb->list);
+}
+
+
+void prio_ready_queue_delete(TCB *tcb)
+{
+    list_delete(&tcb->list);   
 }
 
 U8 prio_ready_queue_fetch()
@@ -79,9 +91,10 @@ U8 prio_ready_queue_fetch()
    
     if (new_task->prio == tmp->prio){
         //os_printf("old_task->prio == %d--------\n", tmp->prio);
-
-        return 1;
+        if (is_list_last(&task_prio_queue[new_task->prio].list))
+            return 1;
     }
+
     old_task = new_task;
     new_task = tmp;
 

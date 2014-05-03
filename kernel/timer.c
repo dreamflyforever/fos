@@ -15,15 +15,6 @@ void tick_queue_insert(TICK *tick)
 
 void tick_queue_delete(TICK *tick)
 {
-    if (is_list_last(&tick->list)){      
-        //os_printf("delete printf: tick_tmp->list.prev address = %x\n", tick->list.prev);
-
-        tick->list.prev->next = tick->list.prev;
-        //os_printf("tick->list.prev = %x\ttick->list.prev->next = %x\n", tick->list.prev->prev, (&(tick->list))->prev->prev->next);
-        //os_printf("delete printf: tick_tmp->list.prev->next address = %x\n", tick->list.prev->next);
-        return ;
-    }
-
     list_delete(&tick->list);    
 }
 
@@ -66,6 +57,10 @@ void hardware_timer()
             if (tick_tmp->style == DELAY)
             {
                 tick_tmp->tcb->state = 1;
+                
+                prio_ready_queue_delete(tick_tmp->tcb);
+                prio_ready_queue_insert_head(tick_tmp->tcb);
+
               
                 if(is_list_last(tmp)){
 
@@ -74,7 +69,7 @@ void hardware_timer()
                     interrupt_enable(cpu);
                     return;
                 }
-
+                
             }
             
             tick_queue_delete(tick_tmp);
@@ -101,6 +96,7 @@ TICK timer_delay_entry;
 
 void os_delay(U32 timeslice)
 {   
+    U32 cpu = interrupt_disable();
     TICK *timer_delay       = &timer_delay_entry; 
     timer_delay->tcb        = new_task;
     timer_delay->tcb->state = 0;
@@ -108,12 +104,35 @@ void os_delay(U32 timeslice)
     timer_delay->timeout_copy     = timeslice;
     timer_delay->style      = DELAY;
    
-    U32 cpu = interrupt_disable();
+    prio_ready_queue_delete(timer_delay->tcb);
+    prio_ready_queue_insert(timer_delay->tcb);
+
     tick_queue_insert(timer_delay);
     schedule();
     
     interrupt_enable(cpu);
 }
+TICK timer_delay_entry2;
+
+void os_delay2(U32 timeslice)
+{   
+    U32 cpu = interrupt_disable();
+    TICK *timer_delay       = &timer_delay_entry2; 
+    timer_delay->tcb        = new_task;
+    timer_delay->tcb->state = 0;
+    timer_delay->timeout    = timeslice;
+    timer_delay->timeout_copy     = timeslice;
+    timer_delay->style      = DELAY;
+    
+    prio_ready_queue_delete(timer_delay->tcb);
+    prio_ready_queue_insert(timer_delay->tcb);
+
+    tick_queue_insert(timer_delay);
+    schedule();
+    
+    interrupt_enable(cpu);
+}
+
 
 void my_timer(void  *arg)
 {
