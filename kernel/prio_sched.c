@@ -15,20 +15,21 @@ TCB* bit_first_one_search(U32 num)
             prio_list_head = &task_prio_queue[i].list;
             tmp    = list_entry( prio_list_head->next, TCB, list);
 
-            if (tmp->state == 0)
-            {
+            if (tmp->state == 0) {
                 ;
             }
-            else{
+            else {
 
                 return tmp;
             }
         }
+
         i++;
     }
-    //uart_print_str("No bit set\n");
+    
     if (old_task->state == 0)
         return idle_task;
+    
     return old_task;
 }
 

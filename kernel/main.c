@@ -46,6 +46,7 @@ void fun2(void *arg)
     {
         //cpu = interrupt_disable();
         os_printf("task2 runing\n");
+        sem_get(&sem);
         schedule();
         //interrupt_enable(cpu);
         //while (1);
@@ -58,7 +59,8 @@ void fun3(void *arg)
     while (1)
     {
         os_printf("task3 runing\n");
-        schedule();
+        //schedule();
+        os_delay(5);
     }
 }
 
@@ -69,9 +71,9 @@ void fun4(void *arg)
     {
         i++;
         os_printf("task4 print i = %d\n", i);
-        sem_get(&sem);
+        //sem_get(&sem);
         //os_delay(5);
-        //schedule();
+        schedule();
         os_printf("after 100 handle\n");
     }
 }
@@ -91,9 +93,9 @@ void main()
     old_task = NULL;
 
     task_creat(&tcb1, fun1, stack1, 5, 1);
-    //task_creat(&tcb2, fun2, stack2, 3, 1);
-    //task_creat(&tcb3, fun3, stack2, 1, 1);
-    task_creat(&tcb4, fun4, stack2, 4, 1);
+    task_creat(&tcb2, fun2, stack2, 3, 1);
+    task_creat(&tcb3, fun3, stack3, 1, 1);
+    task_creat(&tcb4, fun4, stack4, 4, 1);
     task_creat(&idle_tcb, idle_task, idle_stack, 31, 1);
     
     hw_timer_init();
