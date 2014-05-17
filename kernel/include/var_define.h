@@ -4,6 +4,7 @@
 #include "list.h"
 #include "../../cpu/include/hw_include.h"
 #include "../../libc/include/printf.h"
+#include "queue.h"
 #define SYSTEM_BYTE 32
 
 /*for timer function*/
