@@ -12,6 +12,7 @@ src = Glob('cpu/*.c')
 src = src + Glob('cpu/*.S')
 src = src + Glob('kernel/*.c')
 src = src + Glob('libc/*.c')
+src = src + Glob('app/*.c')
 print src
 env.Program('hello',src)
 

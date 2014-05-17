@@ -1,6 +1,4 @@
 #include "../kernel/include/var_define.h"
-#include "../cpu/include/hw_include.h"
-
 
 U32 stack1[4*100];
 U32 stack2[4*100];
@@ -12,7 +10,6 @@ TCB tcb3;
 TCB tcb4;
 
 SEM sem;
-
 
 void task_creat(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
 {
