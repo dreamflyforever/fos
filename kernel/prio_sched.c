@@ -70,7 +70,7 @@ U8 prio_ready_queue_fetch()
     TCB *tmp =  bit_first_one_search(task_prio_map);
 
     /* task have two state
-     * one condition: state == 0, if the hight priority task equal now task 
+     * one condition: state == 0, if the hight priority task equal current task 
      * , switch to old task, else return, not schedule.
      * the other conditon: state == 1, see the flow.
      * return value: 0 schedule

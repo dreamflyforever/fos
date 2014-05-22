@@ -1,6 +1,9 @@
 #include "include/queue.h"
+#include "include/block.h"
 
-void queue_create(QUEUE *entry, U32 length, U8 *name, U32 id)
+BLOCK block_queue;
+
+void msg_queue_create(QUEUE *entry, U32 length, U8 *name, U32 id)
 {
     list_init(&entry->head);
     entry->length = length;
@@ -10,17 +13,35 @@ void queue_create(QUEUE *entry, U32 length, U8 *name, U32 id)
 
 void msg_put(QUEUE *entry, MSG *msg, U8 mathod)
 {
+    BLOCK *block;
+    if (!is_list_last(&block_queue.list))
+    {
+        block = list_entry(block_queue.list.next, BLOCK, list);
+        block->tcb->state = 1;
+        block_queue_delete(block);      
+    }
     if (mathod == FIFO)
         list_insert_behind(&entry->head, &msg->list);
     else
-         list_insert_spec(&entry->head, &msg->list);
+        list_insert_spec(&entry->head, &msg->list);
+    //schedule();
 }
+   
 
 void msg_get(QUEUE *entry, void *buffer)
 {
-    //list_entry(entry->head.next, MSG, );
+    BLOCK block_tmp;
+
+    if (is_list_last(&entry->head)){
+                   
+        block_tmp.tcb = new_task;
+        if ( block_tmp.tcb->state == 1){
+            block_tmp.tcb->state = 0;
+            block_queue_insert(&block_tmp);
+        }
+        schedule();
+    }
     MSG *msg = list_entry(entry->head.next, MSG, list);  
-    //buffer   = msg->buff;
     memcpy(buffer, msg->buff, 5);
     list_delete(entry->head.next);
 }
