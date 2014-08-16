@@ -1,5 +1,9 @@
 #include "../kernel/include/var_define.h"
 #include "include/hw_include.h"
+
+U32 int_stack[32][4*100];
+TCB int_tcb[32];
+
 /* Disable or1200 interrupt */
 U32 interrupt_disable(void)
 {
@@ -29,23 +33,22 @@ int hw_interrupt_init()
 		int_handlers[i].handler = 0;
 		int_handlers[i].arg = 0;
   	}
+
   	mtspr(SPR_PICMR, 0x00000000);
 	//set OR1200 to accept exceptions
 	mtspr(SPR_SR, mfspr(SPR_SR) | SPR_SR_IEE);
-
-
 	
 	return 0;
 }
 
 /* Add interrupt handler */ 
-int hw_interrupt_install(unsigned long vect, void (* handler)(void *), void *arg)
+int hw_interrupt_install_by_prio(unsigned long vect, void (* handler)(void *), void *prio)
 {
 	if(vect >= MAX_INT_HANDLERS)
 		return -1;
 
 	int_handlers[vect].handler = handler;
-	int_handlers[vect].arg = arg;
+	int_handlers[vect].arg = prio;
 
 	mtspr(SPR_PICMR, mfspr(SPR_PICMR) | (0x00000001L << vect));
 
@@ -82,10 +85,12 @@ void usr_handle()
 
 	while(i < 32) {
 		if((picsr & (0x01L << i)) && (int_handlers[i].handler != 0)) {
-			(*int_handlers[i].handler)(int_handlers[i].arg); 
+            task_creat(&int_tcb[i], int_handlers[i].handler, int_stack[i], (U8 *)(int_handlers[i].arg), 1);
+			//int_handlers[i].handler(int_handlers[i].arg); 
 		}
 		i++;
 	}
+
 	mtspr(SPR_PICSR, 0);	//clear interrupt status: all modules have level interrupts, which have to be cleared by software,
 					//thus this is safe, since non processed interrupts will get re-asserted soon enough
 }

@@ -5,7 +5,11 @@
 #include "../../cpu/include/hw_include.h"
 #include "../../libc/include/printf.h"
 #include "queue.h"
+
 #define SYSTEM_BYTE 32
+#define TURE  1
+#define FLASE 0
+#define DEBUG 0
 
 /*for timer function*/
 #define SOFTWARE_TIMER 0
@@ -47,11 +51,13 @@ typedef struct SEM_STR{
     TCB *tcb;
 }SEM;
 
+void task_creat(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
+
 void sem_init(SEM *semaphore, U32 num);
 void sem_put(SEM *semaphore);
 void sem_get(SEM *semaphore);
 
-
+extern BOOL schedule_is_lock;
 extern TCB task_prio_queue[SYSTEM_BYTE];
 extern TCB *new_task;
 extern TCB *old_task;
@@ -59,6 +65,7 @@ extern U32 task_prio_map;
 
 extern TCB idle_tcb;
 extern U32 idle_stack[4*100];
+extern U32 task_prio_map;
 
 #define bit_clear(num, i) num = num & (~(1<<i))
 #define bit_set(num, i)   num = num | (1<<i)
@@ -72,8 +79,10 @@ void prio_ready_queue_insert_head(TCB *tcb);
 
 
 void tick_queue_init();
-void start_which_task(TCB *tcb);
 
+void start_which_task(TCB *tcb);
 void idle_task(void *arg);
+void schedule_lock();
+void schedule_unlock();
 
 #endif

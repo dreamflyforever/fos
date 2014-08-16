@@ -1,3 +1,8 @@
+/*
+ * The part of FOS, test FOS api
+ * Autor Shanjin Yang
+ *
+ * */
 #include "../kernel/include/var_define.h"
 
 U32 stack1[4*100];
@@ -16,15 +21,6 @@ MSG msg1;
 MSG msg2;
 MSG msg3;
 U8 buffer[10];
-
-void task_creat(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
-{
-    tcb->stack_ptr = stack_init(stack, 4*100, fun);
-    tcb->prio      = prio;
-    tcb->state     = state;
-    bit_set(task_prio_map, prio);
-    prio_ready_queue_insert(tcb);
-}
 
 void fun1(void *arg)
 {

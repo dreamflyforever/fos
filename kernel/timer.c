@@ -1,6 +1,5 @@
 #include "include/var_define.h"
 	
-
 TICK tick_queue;
 
 void tick_queue_init()
@@ -18,19 +17,16 @@ void tick_queue_delete(TICK *tick)
     list_delete(&tick->list);    
 }
 
-
 void hardware_timer()
 {
     hw_timer_clear_interrupt();
 
     U32 cpu = interrupt_disable();
-    TICK *tick_tmp; //= &tick_queue;
+    TICK *tick_tmp; 
     LIST *tmp = &tick_queue.list;
-    static uint i = 0;
     
-    //while (!is_list_last(&tick_tmp->list)){
     while (!is_list_last(tmp)) {       
-        //tick_tmp = list_entry((&(tick_tmp->list))->next, TICK, list);
+        
         tick_tmp = list_entry(tmp->next, TICK, list);
         tmp = tmp->next;
        

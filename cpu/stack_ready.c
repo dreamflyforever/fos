@@ -4,17 +4,9 @@
 void *stack_init( STACK_COPY *p_stk_base, U32 stk_size, TASK_ENTRY_COPY p_task)
 {
 	U32 *stk;
-	U32 *fp;
 	U32 temp = (U32)(p_stk_base + stk_size - 128);
 	stk = (U32  *)temp;	
-	
 	stk--;	
-        
-	// *stk-- = (U32)(p_arg);               /* fp+0 -> parameter 0    */
-	// fp     = stk;
-	// *stk-- = (U32)fp;                    /* sp+4 -> previous fp    */
-	// *stk-- = (U32)0;                     /* sp+0 -> return address */
-         
 	*stk-- = (U32)31;                     /* r31 = 0  */
 	*stk-- = (U32)30;                     /* r30 = 0  */
 	*stk-- = (U32)29;                     /* r29 = 0  */
@@ -44,7 +36,7 @@ void *stack_init( STACK_COPY *p_stk_base, U32 stk_size, TASK_ENTRY_COPY p_task)
 	*stk-- = (U32)5;                     /* r05 = 0 */
 	*stk-- = (U32)4;                     /* r04 = 0 */
 	*stk-- = (U32)3;               /* r03 = arg0 */
-	*stk-- = (U32)fp;                    /* r02 = frame pointer */
+	*stk-- = (U32)2;                    /* r02 = frame pointer */
 	*stk-- = (U32)(SPR_SR_IEE | SPR_SR_TEE | SPR_SR_SM);         /* status word */
 	*stk   = (U32)(p_task);                /* program counter */
  
