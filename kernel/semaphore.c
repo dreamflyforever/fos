@@ -10,7 +10,9 @@ void sem_get(SEM *semaphore)
     semaphore->tcb = new_task;
     if (semaphore->count > 0)
     {
+        schedule_lock();
         semaphore->count--;
+        schedule_unlock();
         return;
     }
     else
@@ -24,6 +26,8 @@ void sem_get(SEM *semaphore)
 
 void sem_put(SEM *semaphore)
 {
+    schedule_lock();
     semaphore->count++;
+    schedule_unlock();
     semaphore->tcb->state = 1;   
 }
