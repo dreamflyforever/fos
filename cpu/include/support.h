@@ -6,7 +6,10 @@
 #include "or1200-utils.h"
 
 /* Max and min functions */
+#ifndef MIN
 #define MIN(a,b) (((a)<(b))?(a):(b))
+#endif
+
 #define MAX(a,b) (((a)>(b))?(a):(b))
 	
 /* Register access macros */

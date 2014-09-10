@@ -85,7 +85,7 @@ void usr_handle()
 
 	while(i < 32) {
 		if((picsr & (0x01L << i)) && (int_handlers[i].handler != 0)) {
-            task_creat(&int_tcb[i], int_handlers[i].handler, int_stack[i], (U8 *)(int_handlers[i].arg), 1);
+            task_creat(&int_tcb[i], int_handlers[i].handler, int_stack[i], *((U8 *)int_handlers[i].arg), 1);
 			//int_handlers[i].handler(int_handlers[i].arg); 
 		}
 		i++;

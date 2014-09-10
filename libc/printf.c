@@ -158,7 +158,9 @@ CYG_MACRO_END
 int 
 print_back_to_string(char * ptr, int len, size_t * n, int * ret, char ** stream)
 {
+#ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
   do {
     int length = MIN( (int) len, *n - *ret - 1);
     memcpy(*stream + *ret, ptr, length);
@@ -658,7 +660,6 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
   }
   
  done:
- error:
   return ret;// remove this error stuff (((Cyg_OutputStream *) stream)->get_error() ? EOF : ret);
   /* NOTREACHED */
 }

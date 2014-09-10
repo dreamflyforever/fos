@@ -3,6 +3,7 @@
 
 #include "list.h"
 #include "../../cpu/include/hw_include.h"
+#include "../../libc/include/lib.h"
 #include "../../libc/include/printf.h"
 #include "queue.h"
 
