@@ -24,4 +24,7 @@ void *memchr(const void *s, int c, size_t n);
 unsigned long int rand ();
 
 void *memset(void *src, unsigned char byte, unsigned int count);
+
+int strcmp(const char *cs, const char *ct);
+
 #endif

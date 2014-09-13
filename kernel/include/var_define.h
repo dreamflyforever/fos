@@ -47,6 +47,7 @@ typedef struct TICK_STR{
 
 /*for semaphore*/
 typedef struct SEM_STR{
+    LIST list;
     U32 count;
     U8  *name;
     TCB *tcb;
@@ -54,10 +55,12 @@ typedef struct SEM_STR{
 
 void task_creat(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
 
-void sem_init(SEM *semaphore, U32 num);
+void sem_block_queue_init();
+void sem_init(SEM *semaphore, U8 *name, U32 num);
 void sem_put(SEM *semaphore);
 void sem_get(SEM *semaphore);
 
+extern SEM sem_block_queue;
 extern BOOL schedule_is_lock;
 extern TCB task_prio_queue[SYSTEM_BYTE];
 extern TCB *new_task;
