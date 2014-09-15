@@ -1,27 +1,18 @@
 #include "include/lib.h"
 
-/* Simple C functions */
-
-/* memcpy */
+/* Based C function lib */
 
 void* memcpy( void* s1, void* s2, size_t n)
 {
   char* r1 = (char *) s1;
   const char* r2 =  (const char*) s2;
-#ifdef __BCC__
-  while (n--) {
-    *r1++ = *r2++;
-  }
-#else
   while (n) {
     *r1++ = *r2++;
     --n;
   }
-#endif
   return s1;
 }
 
-/* strlen */
 size_t strlen(const char*s)
 {
   const char* p;
@@ -29,35 +20,20 @@ size_t strlen(const char*s)
   return p - s;
 }
 
-/* memchr */
 void *memchr(const void *s, int c, size_t n)
 {
-         const unsigned char *r = (const unsigned char *) s;
-#ifdef __BCC__
-        /* bcc can optimize the counter if it thinks it is a pointer... */
-        const char *np = (const char *) n;
-#else
-# define np n
-#endif
-
-        while (np) {
-                if (*r == ((unsigned char)c)) {
-                        return (void *) r;     /* silence the warning */
-                }
-                ++r;
-                --np;
+    const unsigned char *r = (const unsigned char *) s;
+#define np n
+    while (np) {
+        if (*r == ((unsigned char)c)) {
+            return (void *) r;     /* silence the warning */
         }
-
-        return NULL;
+        ++r;
+        --np;
+    }
+    return NULL;
 }
 
-/* --------------------------------------------------------------------------*/
-/*!Pseudo-random number generator
-
-   This should return pseudo-random numbers, based on a Galois LFSR
-
-   @return The next pseudo-random number                                     */
-/* --------------------------------------------------------------------------*/
 unsigned long int
 rand ()
 {
@@ -81,7 +57,6 @@ void *memset(void *src, unsigned char byte, unsigned int count)
 	return src;
 }
 
-#if 1
 int strcmp(const char *cs, const char *ct)
 {
 	unsigned char c1, c2;
@@ -96,4 +71,3 @@ int strcmp(const char *cs, const char *ct)
 	}
 	return 0;
 }
-#endif
