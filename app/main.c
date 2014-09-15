@@ -109,11 +109,11 @@ int main()
 
     old_task = NULL;
 
-    task_creat(&tcb1, fun1, stack1, 5, 1);
-    task_creat(&tcb2, fun2, stack2, 3, 1);
-    //task_creat(&tcb3, fun3, stack3, 1, 1);
-    //task_creat(&tcb4, fun4, stack4, 1, 1);
-    task_creat(&idle_tcb, idle_task, idle_stack, 31, 1);
+    task_create(&tcb1, fun1, stack1, 5, 1);
+    task_create(&tcb2, fun2, stack2, 3, 1);
+    //task_create(&tcb3, fun3, stack3, 1, 1);
+    //task_create(&tcb4, fun4, stack4, 1, 1);
+    task_create(&idle_tcb, idle_task, idle_stack, 31, 1);
     hw_timer_init();
 
 #if sem_test

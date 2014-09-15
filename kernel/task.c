@@ -1,5 +1,5 @@
 #include "./include/var_define.h"
-void task_creat(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
+void task_create(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
 {
     tcb->stack_ptr = stack_init(stack, 4*100, fun);
     tcb->prio      = prio;

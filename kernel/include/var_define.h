@@ -53,7 +53,7 @@ typedef struct SEM_STR{
     TCB *tcb;
 }SEM;
 
-void task_creat(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
+void task_create(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
 
 void sem_block_queue_init();
 void sem_init(SEM *semaphore, U8 *name, U32 num);
