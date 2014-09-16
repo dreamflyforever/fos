@@ -1,4 +1,5 @@
 #include "include/list.h"
+
 void list_init(LIST *head)
 {
     head->next = head;
@@ -9,7 +10,6 @@ BOOL is_list_last(LIST *head)
 {
     return (head->next == head);
 }
-
 
 void list_insert(LIST *head, LIST *node)
 {

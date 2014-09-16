@@ -1,11 +1,13 @@
 /*
- * The part of FOS, test FOS api
+ * The part of FOS, destinate to test FOS api.
  * Autor Shanjin Yang
  *
  * */
 #define msg_queue_test 0
 #define sem_test 0
-#define tick_test 0
+#define tick_tes 0
+#define mutex_test 1
+
 #include "../kernel/include/var_define.h"
 
 U32 stack1[4*100];
@@ -19,6 +21,11 @@ TCB tcb4;
 
 #if sem_test 
 SEM sem;
+#endif
+
+#if mutex_test 
+static int mutex_resource;
+MUTEX mutex;
 #endif
 
 #if msg_queue_test
@@ -43,6 +50,14 @@ void fun1(void *arg)
         sem_put(&sem);
         os_printf("task1 = %d\n", sem.count );
 #endif
+
+#if mutex_test
+        mut_get(&mutex);
+        mutex_resource++;
+        os_printf("task1 mutex_resource:%d\n", mutex_resource );
+        mut_put(&mutex);
+#endif 
+
         os_printf("task1 running\n" );
         schedule();
     }
@@ -62,6 +77,7 @@ void fun2(void *arg)
         sem_get(&sem);
         os_printf("task2: %d\n", sem.count);
 #endif
+
         os_printf("task2 running\n" );
         os_delay(3);
         schedule();
@@ -98,6 +114,8 @@ int main()
     prio_ready_queue_init();
 
     sem_block_queue_init();
+
+    mut_block_queue_init();
    
     tick_queue_init();
 
@@ -120,6 +138,10 @@ int main()
     sem_init(&sem, "sem1", 1);
 #endif 
 
+#if mutex_test
+    mut_init(&mutex, "mutex1");
+#endif 
+
 #if tick_test    
     extern void test_tick();
     test_tick();
@@ -137,7 +159,6 @@ int main()
      while (1)
     {
         os_printf("hello");
-        ;
     };
 
     return 0;

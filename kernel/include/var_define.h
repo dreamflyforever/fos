@@ -53,6 +53,15 @@ typedef struct SEM_STR{
     TCB *tcb;
 }SEM;
 
+#define PRIO_MUTEX 1
+typedef struct MUTEX{
+   LIST list;
+   BOOL flag;
+   U8 *name;
+   U32 copy_prio;
+   TCB *tcb; 
+}MUTEX;
+
 void task_create(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
 
 void sem_block_queue_init();
@@ -60,6 +69,14 @@ void sem_init(SEM *semaphore, U8 *name, U32 num);
 void sem_put(SEM *semaphore);
 void sem_get(SEM *semaphore);
 
+void mut_block_queue_init();
+void mut_init(MUTEX *mutex, U8 *name);
+void mut_put(MUTEX *mutex);
+void mut_get(MUTEX *mutex);
+
+void block_queue_init();
+
+extern MUTEX mut_block_queue;
 extern SEM sem_block_queue;
 extern BOOL schedule_is_lock;
 extern TCB task_prio_queue[SYSTEM_BYTE];

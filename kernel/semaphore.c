@@ -19,12 +19,18 @@ void sem_block_queue_delete(SEM *semphore)
 
 void sem_init(SEM *semaphore, U8 *name, U32 num)
 {
+    if (semaphore == NULL)
+        return;
+
     semaphore->count = num;
     semaphore->name  = name;
 }
 
 void sem_get(SEM *semaphore)
 {
+    if (semaphore == NULL)
+        return;
+
     schedule_lock();
     semaphore->count--;
     schedule_unlock();
@@ -41,6 +47,9 @@ void sem_get(SEM *semaphore)
 
 void sem_put(SEM *semaphore)
 {
+    if (semaphore == NULL)
+        return;
+
     SEM *sem_tmp;
     LIST *tmp = &sem_block_queue.list;
     while ( !is_list_last(tmp)){

@@ -5,7 +5,6 @@
 #define NULL ((void *)0)
 #endif
 
-// size_t and wchar definitions
 typedef unsigned int size_t;
 
 /* memcpy */

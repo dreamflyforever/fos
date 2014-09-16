@@ -1,6 +1,5 @@
 #include "include/block.h"
 
-
 void block_queue_init()
 {
     list_init(&block_queue.list);
@@ -15,5 +14,3 @@ void block_queue_delete(BLOCK *block)
 {
     list_delete(&block->list);    
 }
-
-

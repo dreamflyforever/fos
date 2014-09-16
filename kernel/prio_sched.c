@@ -22,7 +22,8 @@ TCB* bit_first_one_search(U32 num)
     }
     
     if (old_task->state == 0)
-        return idle_task;
+		return &idle_tcb;
+        //return idle_task;
     
     return old_task;
 }
