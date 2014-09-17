@@ -64,7 +64,7 @@
 /* Restore the cpu context from the stack */
 #define RESTORE_CONTEXT	;\
 	l.lwz r2 ,PT_GPR2(r1);\
-	l.lwz r3 ,PT_GPR3(r1);\	
+	l.lwz r3 ,PT_GPR3(r1);\
 	l.lwz r4 ,PT_GPR4(r1);\
 	l.lwz r5 ,PT_GPR5(r1);\
 	l.lwz r6 ,PT_GPR6(r1);\

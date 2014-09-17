@@ -22,12 +22,10 @@ TCB* bit_first_one_search(U32 num)
     }
     
     if (old_task->state == 0)
-		return &idle_tcb;
-        //return idle_task;
+        return &idle_tcb;
     
     return old_task;
 }
-
 
 void prio_ready_queue_init()
 {
@@ -41,17 +39,38 @@ void prio_ready_queue_init()
 
 void prio_ready_queue_insert(TCB *tcb)
 {
+    bit_set(task_prio_map, tcb->prio);
     list_insert_behind(&task_prio_queue[tcb->prio].list, &tcb->list);
 }
 
 void prio_ready_queue_insert_head(TCB *tcb)
 {
+    bit_set(task_prio_map, tcb->prio);
     list_insert_spec(&task_prio_queue[tcb->prio].list, &tcb->list);
 }
 
 void prio_ready_queue_delete(TCB *tcb)
 {
-    list_delete(&tcb->list);   
+    list_delete(&tcb->list);
+
+	/* If the task ready queue have not task, clear the corresponding task_prio_map*/
+    if (is_list_last(&task_prio_queue[tcb->prio].list)){	
+        bit_clear(task_prio_map, tcb->prio);
+		return ;
+	}
+#ifdef mutex_debug
+	LIST *tmp = &task_prio_queue[tcb->prio].list;
+	TCB *tcb_tmp = &task_prio_queue[tcb->prio];
+	int i = 0;
+	while (!is_list_last(tmp)){
+		tmp = task_prio_queue[tcb->prio].list.next;
+		i++;
+		os_printf("i = %d\n", i);
+		os_printf("prio = %d\n", tcb->prio);
+        tcb_tmp = list_entry(tmp->next, TCB, list);		
+		os_printf("tmp rio = %d\n", tcb_tmp->prio);
+	}
+#endif
 }
 
 U8 prio_ready_queue_fetch()

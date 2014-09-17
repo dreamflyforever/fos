@@ -7,6 +7,7 @@
 #define sem_test 0
 #define tick_tes 0
 #define mutex_test 1
+#define task_prio_change_test 0 
 
 #include "../kernel/include/var_define.h"
 
@@ -57,8 +58,11 @@ void fun1(void *arg)
         os_printf("task1 mutex_resource:%d\n", mutex_resource );
         mut_put(&mutex);
 #endif 
+        os_printf("task1 running\n");
 
-        os_printf("task1 running\n" );
+#if task_prio_change_test
+        task_prio_change(&tcb1, 5);
+#endif
         schedule();
     }
 }
@@ -80,7 +84,6 @@ void fun2(void *arg)
 
         os_printf("task2 running\n" );
         os_delay(3);
-        schedule();
     };
 }
 
@@ -153,6 +156,10 @@ int main()
     msg3.buff = "abcf";
 #endif
 
+#if task_prio_change_test
+    task_prio_change(&tcb1, 1);
+#endif 
+
     start_which_task(&tcb2); 
       
     /*Never reach here*/
@@ -163,7 +170,3 @@ int main()
 
     return 0;
 }
-
-
-
-

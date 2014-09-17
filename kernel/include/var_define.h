@@ -63,6 +63,7 @@ typedef struct MUTEX{
 }MUTEX;
 
 void task_create(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
+void task_prio_change(TCB *tcb, U32 prio);
 
 void sem_block_queue_init();
 void sem_init(SEM *semaphore, U8 *name, U32 num);

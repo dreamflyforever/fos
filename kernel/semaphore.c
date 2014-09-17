@@ -70,7 +70,6 @@ void sem_put(SEM *semaphore)
                 return ;
             }
         }
-        
     }
     schedule_lock();
     semaphore->count++;
