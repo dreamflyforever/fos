@@ -171,6 +171,11 @@ void schedule()
 
 void start_which_task(TCB *first_task)
 {
+    if (first_task == NULL)
+    {
+        os_printf("error: First task is NULL\n");
+        return ;
+    }
     new_task = first_task;
     extern void start_schedule();
     start_schedule();

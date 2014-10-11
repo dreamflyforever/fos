@@ -31,13 +31,13 @@
 
 /* Store the cpu context on the stack */
 #define STORE_CONTEXT		;\
-	l.sw PT_GPR2(r1) ,r2		;\
-	l.sw PT_GPR4(r1) ,r4		;\
-	l.sw PT_GPR5(r1) ,r5		;\
-	l.sw PT_GPR6(r1) ,r6		;\
-	l.sw PT_GPR7(r1) ,r7		;\
-	l.sw PT_GPR8(r1) ,r8		;\
-	l.sw PT_GPR9(r1) ,r9		;\
+	l.sw PT_GPR2(r1) ,r2	;\
+	l.sw PT_GPR4(r1) ,r4	;\
+	l.sw PT_GPR5(r1) ,r5	;\
+	l.sw PT_GPR6(r1) ,r6	;\
+	l.sw PT_GPR7(r1) ,r7	;\
+	l.sw PT_GPR8(r1) ,r8	;\
+	l.sw PT_GPR9(r1) ,r9	;\
 	l.sw PT_GPR10(r1) ,r10	;\
 	l.sw PT_GPR11(r1) ,r11	;\
 	l.sw PT_GPR12(r1) ,r12	;\
@@ -59,18 +59,18 @@
 	l.sw PT_GPR28(r1) ,r28	;\
 	l.sw PT_GPR29(r1) ,r29	;\
 	l.sw PT_GPR30(r1) ,r30	;\
-	l.sw PT_GPR31(r1) ,r31	;\
+	l.sw PT_GPR31(r1) ,r31	;
 
 /* Restore the cpu context from the stack */
-#define RESTORE_CONTEXT	;\
-	l.lwz r2 ,PT_GPR2(r1);\
-	l.lwz r3 ,PT_GPR3(r1);\
-	l.lwz r4 ,PT_GPR4(r1);\
-	l.lwz r5 ,PT_GPR5(r1);\
-	l.lwz r6 ,PT_GPR6(r1);\
-	l.lwz r7 ,PT_GPR7(r1);\
-	l.lwz r8 ,PT_GPR8(r1);\
-	l.lwz r9 ,PT_GPR9(r1);\
+#define RESTORE_CONTEXT	    ;\
+	l.lwz r2 ,PT_GPR2(r1)   ;\
+	l.lwz r3 ,PT_GPR3(r1)   ;\
+	l.lwz r4 ,PT_GPR4(r1)   ;\
+	l.lwz r5 ,PT_GPR5(r1)   ;\
+	l.lwz r6 ,PT_GPR6(r1)   ;\
+	l.lwz r7 ,PT_GPR7(r1)   ;\
+	l.lwz r8 ,PT_GPR8(r1)   ;\
+	l.lwz r9 ,PT_GPR9(r1)   ;\
 	l.lwz r10 ,PT_GPR10(r1)	;\
 	l.lwz r11 ,PT_GPR11(r1)	;\
 	l.lwz r12 ,PT_GPR12(r1)	;\
@@ -92,7 +92,7 @@
 	l.lwz r28 ,PT_GPR28(r1)	;\
 	l.lwz r29 ,PT_GPR29(r1)	;\
 	l.lwz r30 ,PT_GPR30(r1)	;\
-	l.lwz r31 ,PT_GPR31(r1)	;\
+	l.lwz r31 ,PT_GPR31(r1)	;
 
 /* Linked from 0x0 */
 .section .vectors, "ax"
@@ -129,7 +129,7 @@
 	
 	EXCEPTION_HANDLER(UsrISR)
  
- /* ---[ 0x900: DTLB miss exception ]------------------------------------- */
+ /* ---[ 0x900: DTLB miss exception ]------------------------------------ */
 	.org 0x900
 
 /* ---[ 0xa00: ITLB miss exception ]------------------------------------- */
@@ -139,7 +139,7 @@
 	.org 0xb00
 
 	
-/*c00: Syscall exception ]--------------------------------------- */
+/*c00: Syscall exception ]------------------------------------------------ */
 	.org 0xc00
 	EXCEPTION_HANDLER(task_switch)	
 

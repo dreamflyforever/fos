@@ -95,7 +95,7 @@ void fun1(void *arg)
 #if task_prio_change_test
         task_prio_change(&tcb1, 5);
 #endif
-        schedule();
+        os_delay(10);
     }
 }
 
@@ -130,13 +130,10 @@ void fun3(void *arg)
 
 void fun4(void *arg)
 {
-    U32 i = 0;
     while (1)
     {
-        i++;
-        os_printf("task4 print i = %d\n", i);
-        os_delay(10);
-        os_printf("after 100 handle\n");
+        os_printf("task4 runing\n");
+        os_delay(5);
     }
 }
 
@@ -144,7 +141,7 @@ int main()
 {
     uart_init();
 
-    os_printf("FOS\n");
+    os_printf("FOS by Shanjin Yang\n\n");
     
     prio_ready_queue_init();
 
@@ -161,9 +158,12 @@ int main()
     block_queue_init();
 
     old_task = NULL;
-
-    task_create(&tcb1, fun1, stack1, 5, 1);
-    task_create(&tcb2, fun2, stack2, 3, 1);
+   
+    extern void shell_init();
+    shell_init();
+    
+    //task_create(&tcb1, fun1, stack1, 5, 1);
+    //task_create(&tcb2, fun2, stack2, 3, 1);
     //task_create(&tcb3, fun3, stack3, 1, 1);
     //task_create(&tcb4, fun4, stack4, 1, 1);
     task_create(&idle_tcb, idle_task, idle_stack, 31, 1);
@@ -174,7 +174,7 @@ int main()
 #endif 
 
 #if mutex_test
-    mut_init(&mutex, "mutex1");
+    mut_init(&mutex, (U8 *)"mutex1");
 #endif 
 
 #if tick_test
@@ -192,7 +192,8 @@ int main()
     task_prio_change(&tcb1, 1);
 #endif 
 
-    start_which_task(&tcb2); 
+    /*which task run first*/
+    start_which_task(&idle_tcb); 
  
     /*Never reach here*/
      while (1)

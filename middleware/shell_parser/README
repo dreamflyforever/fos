@@ -1,0 +1,5 @@
+shell_parser
+============
+
+Parser the input command, and execute the corresponding function in the kernel.
+User is easy to add his function in the kernel.
