@@ -39,23 +39,23 @@
 
 TCB* bit_first_one_search(U32 num)
 {
-    U8 i; 
     LIST *prio_list_head;
-    TCB *tmp;
-
-    i = 0;
-    while(i < 32)
-    {
-        if ((num >> i) & 0x01) 
+    TCB *ret;
+   
+    U8 i = 0; 
+    for (; i < SYSTEM_WORD; i++)
+    { 
+        /* The first task of each priority queue must be representative, if it 
+         * can not run, then all task of the queue behind the task can not run
+         */
+        if ((num >> i) & 0x01)  
         {   
             prio_list_head = &task_prio_queue[i].list;
-            tmp            = list_entry( prio_list_head->next, TCB, list);
-            
-            if (tmp->state == TRUE)
-                return tmp;
+            ret            = list_entry( prio_list_head->next, TCB, list);
+               
+            if (ret->state == TRUE) 
+                return ret;
         }
-
-        i++;
     }
     
     if (old_task->state == 0)
@@ -129,19 +129,22 @@ U8 prio_ready_queue_fetch()
 #endif
             if (old_task == NULL)
                 old_task = &idle_tcb;
+            
             new_task = old_task;
             old_task = tmp;
-            return 0;
+            
+            return FALSE;
         }
-        return 1;
+        return TRUE;
     }
    
     if (new_task->prio == tmp->prio){
 #if DEBUG
         os_printf("old_task->prio == %d--------\n", tmp->prio);
 #endif
+        /* Why this operate, I forget */
         if (is_list_last(&task_prio_queue[new_task->prio].list))
-            return 1;
+            return TRUE;
     }
 
     old_task = new_task;
@@ -150,7 +153,7 @@ U8 prio_ready_queue_fetch()
     os_printf("old_task->prio == %d\n", old_task->prio);
     os_printf("new_task->prio == %d\n", new_task->prio);
 #endif
-    return 0;
+    return FLASE;
 }
 
 void schedule()

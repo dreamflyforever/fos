@@ -44,7 +44,7 @@
 #include "../../libc/include/printf.h"
 #include "queue.h"
 
-#define SYSTEM_BYTE 32
+#define SYSTEM_WORD 32
 #define TURE  1
 #define FLASE 0
 #define DEBUG 0
@@ -121,7 +121,7 @@ void block_queue_init();
 extern MUTEX mut_block_queue;
 extern SEM sem_block_queue;
 extern BOOL schedule_is_lock;
-extern TCB task_prio_queue[SYSTEM_BYTE];
+extern TCB task_prio_queue[SYSTEM_WORD];
 extern TCB *new_task;
 extern TCB *old_task;
 extern U32 task_prio_map;

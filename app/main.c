@@ -40,6 +40,7 @@
 #define tick_tes 0
 #define mutex_test 1
 #define task_prio_change_test 0 
+#define SHELL
 
 #include "../kernel/include/var_define.h"
 
@@ -71,8 +72,8 @@ U8 buffer[10];
 
 void fun1(void *arg)
 {
-    while (1)
-    {
+    while (1){
+
 #if msg_queue_test
         msg_put(&my_queue, &msg1, FIFO); 
         msg_put(&my_queue, &msg2, FIFO); 
@@ -137,8 +138,10 @@ void fun4(void *arg)
     }
 }
 
-int main()
+void system_init()
 {
+    hw_interrupt_init();
+    
     uart_init();
 
     os_printf("FOS by Shanjin Yang\n\n");
@@ -151,20 +154,23 @@ int main()
    
     tick_queue_init();
 
-#if msg_queue_test
-    msg_queue_create(&my_queue, 1000, "first", 0);
-#endif
-
     block_queue_init();
 
     old_task = NULL;
-   
+}
+
+int main(void)
+{
+    system_init();
+
+#ifdef SHELL
     extern void shell_init();
     shell_init();
-    
+#endif
+
     //task_create(&tcb1, fun1, stack1, 5, 1);
-    //task_create(&tcb2, fun2, stack2, 3, 1);
-    //task_create(&tcb3, fun3, stack3, 1, 1);
+    task_create(&tcb2, fun2, stack2, 3, 1);
+    //task_create(&tcb3, fun3, stack3, 3, 1);
     //task_create(&tcb4, fun4, stack4, 1, 1);
     task_create(&idle_tcb, idle_task, idle_stack, 31, 1);
     hw_timer_init();

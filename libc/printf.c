@@ -1,3 +1,9 @@
+/*
+ * * File      : printf.c
+ * This file is part of FOS RTOS
+ * COPYRIGHT (C) 2013, Shanjin Yang
+ *
+ * */
 // Ripped out of latest ecos build from 
 //http://sources-redhat.mirrors.airband.net/ecos/releases/ecos-3.0b1/ecos-3.0beta1.i386linux.tar.bz2
 // File: ecos-3.0b1/packages/language/c/libc/stdio/v3_0b1/src/output/vfnprintf.cxx
@@ -239,11 +245,10 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
     goto done;								\
     }									\
     CYG_MACRO_END
-  */
   
-	//PRINT(with, PADSIZE);						\
-      //PRINT(with, x);							\
-  
+	PRINT(with, PADSIZE);						\
+    PRINT(with, x);							\
+ */ 
 #define PAD(howmany, with)						\
   CYG_MACRO_START							\
     if ((x = (howmany)) > 0) {						\
