@@ -59,7 +59,9 @@ void hardware_timer()
     hw_timer_clear_interrupt();
 
     U32 cpu = interrupt_disable();
+
     TICK *tick_tmp; 
+
     LIST *tmp = &tick_queue.list;
 
     while ( !is_list_last(tmp) ) {
@@ -102,7 +104,7 @@ void hardware_timer()
                     return;
                 }
             }
-            
+
             tick_queue_delete(tick_tmp);
         }
 
@@ -115,6 +117,7 @@ void hardware_timer()
 
 void timer_req( TICK *timer, FUNC_PTR func, U32 timeout, BOOL period, void *arg )
 {
+    U32 cpu = interrupt_disable();
     timer->func         = func;
     timer->timeout      = timeout;
     timer->period       = period;
@@ -122,6 +125,7 @@ void timer_req( TICK *timer, FUNC_PTR func, U32 timeout, BOOL period, void *arg 
     timer->style        = SOFTWARE_TIMER;
     timer->func_arg = arg;
     tick_queue_insert(timer);
+    interrupt_enable(cpu);
 }
 
 void os_delay( U32  timeslice )

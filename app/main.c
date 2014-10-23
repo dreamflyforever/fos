@@ -138,14 +138,15 @@ void fun4(void *arg)
     }
 }
 
+/*init hardware and system resource*/
 void system_init()
 {
     hw_interrupt_init();
-    
+
     uart_init();
 
-    os_printf("FOS by Shanjin Yang\n\n");
-    
+    os_printf("FOS Copyright by Shanjin Yang\n\n");
+
     prio_ready_queue_init();
 
     sem_block_queue_init();
@@ -169,7 +170,7 @@ int main(void)
 #endif
 
     //task_create(&tcb1, fun1, stack1, 5, 1);
-    task_create(&tcb2, fun2, stack2, 3, 1);
+    //task_create(&tcb2, fun2, stack2, 3, 1);
     //task_create(&tcb3, fun3, stack3, 3, 1);
     //task_create(&tcb4, fun4, stack4, 1, 1);
     task_create(&idle_tcb, idle_task, idle_stack, 31, 1);

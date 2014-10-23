@@ -8,11 +8,12 @@ env = Environment(tools = ['mingw'],
 	LINK = config.LINK, LINKFLAGS = config.LFLAGS)
 env.PrependENVPath('PATH', config.EXEC_PATH)
 
-src = Glob('cpu/*.c')
+src = Glob('libc/*.c')
 src = src + Glob('cpu/*.S')
 src = src + Glob('kernel/*.c')
-src = src + Glob('libc/*.c')
+src = src + Glob('cpu/*.c')
 src = src + Glob('app/*.c')
+src = src + Glob('middleware/shell_parser/*.c')
 print src
 env.Program('hello',src)
 

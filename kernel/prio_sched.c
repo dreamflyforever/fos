@@ -43,6 +43,9 @@ TCB* bit_first_one_search(U32 num)
     TCB *ret;
    
     U8 i = 0; 
+    
+    U32 cpu_sr =  interrupt_disable();
+   
     for (; i < SYSTEM_WORD; i++)
     { 
         /* The first task of each priority queue must be representative, if it 
@@ -57,8 +60,9 @@ TCB* bit_first_one_search(U32 num)
                 return ret;
         }
     }
-    
-    if (old_task->state == 0)
+    interrupt_enable(cpu_sr);
+   
+    if (old_task->state == NON_RUNNING_STATE)
         return &idle_tcb;
     
     return old_task;
@@ -76,42 +80,55 @@ void prio_ready_queue_init()
 
 void prio_ready_queue_insert_tail(TCB *tcb)
 {
+    U32 cpu_sr =  interrupt_disable();
+
     bit_set(task_prio_map, tcb->prio);
     list_insert_behind(&task_prio_queue[tcb->prio].list, &tcb->list);
+    
+    interrupt_enable(cpu_sr);
 }
 
 void prio_ready_queue_insert_head(TCB *tcb)
 {
+    U32 cpu_sr =  interrupt_disable();
+    
     bit_set(task_prio_map, tcb->prio);
     list_insert_spec(&task_prio_queue[tcb->prio].list, &tcb->list);
+
+    interrupt_enable(cpu_sr);
 }
 
 void prio_ready_queue_delete(TCB *tcb)
 {
+    U32 cpu_sr =  interrupt_disable();
+    
     list_delete(&tcb->list);
 
-	/* If the task ready queue have no task, clear the corresponding task_prio_map*/
-    if (is_list_last(&task_prio_queue[tcb->prio].list)){	
+    /* If the task ready queue have no task, clear the corresponding task_prio_map*/
+    if (is_list_last(&task_prio_queue[tcb->prio].list)){
         bit_clear(task_prio_map, tcb->prio);
-		return ;
-	}
+        return ;
+    }
 #ifdef mutex_debug
-	LIST *tmp = &task_prio_queue[tcb->prio].list;
-	TCB *tcb_tmp = &task_prio_queue[tcb->prio];
-	int i = 0;
-	while (!is_list_last(tmp)){
-		tmp = task_prio_queue[tcb->prio].list.next;
-		i++;
-		os_printf("i = %d\n", i);
-		os_printf("prio = %d\n", tcb->prio);
-        tcb_tmp = list_entry(tmp->next, TCB, list);		
-		os_printf("tmp rio = %d\n", tcb_tmp->prio);
-	}
+    LIST *tmp = &task_prio_queue[tcb->prio].list;
+    TCB *tcb_tmp = &task_prio_queue[tcb->prio];
+    int i = 0;
+    while (!is_list_last(tmp)){
+        tmp = task_prio_queue[tcb->prio].list.next;
+        i++;
+        os_printf("i = %d\n", i);
+        os_printf("prio = %d\n", tcb->prio);
+        tcb_tmp = list_entry(tmp->next, TCB, list);
+        os_printf("tmp rio = %d\n", tcb_tmp->prio);
+    }
 #endif
+    interrupt_enable(cpu_sr);
 }
 
 U8 prio_ready_queue_fetch()
 {
+    U32 cpu_sr =  interrupt_disable();
+    
     TCB *tmp =  bit_first_one_search(task_prio_map);
 
     /* task have two state
@@ -124,7 +141,7 @@ U8 prio_ready_queue_fetch()
     if (!tmp->state)
     {
         if (new_task->prio == tmp->prio){
-#if DEBUG    
+#if DEBUG
             os_printf("-----------%0x\n", old_task);
 #endif
             if (old_task == NULL)
@@ -147,8 +164,11 @@ U8 prio_ready_queue_fetch()
             return TRUE;
     }
 
+    interrupt_enable(cpu_sr);
+    
     old_task = new_task;
     new_task = tmp;
+
 #if DEBUG
     os_printf("old_task->prio == %d\n", old_task->prio);
     os_printf("new_task->prio == %d\n", new_task->prio);
@@ -158,13 +178,11 @@ U8 prio_ready_queue_fetch()
 
 void schedule()
 {
-    U8 judge;
 
     if (schedule_is_lock == TURE)
         return ;
    
-    judge = prio_ready_queue_fetch();
-    if (judge){
+    if (prio_ready_queue_fetch()){
         return ;
     }
 
@@ -179,23 +197,22 @@ void start_which_task(TCB *first_task)
         os_printf("error: First task is NULL\n");
         return ;
     }
+
     new_task = first_task;
-    extern void start_schedule();
+    
+    U32 cpu_sr = interrupt_disable();
+    
     start_schedule();
+    
+    interrupt_enable(cpu_sr);
 }
 
 void schedule_lock()
 {
-    U32 cpu_sr;
-    cpu_sr = interrupt_disable();
     schedule_is_lock = TURE;
-    interrupt_enable(cpu_sr);    
 }
 
 void schedule_unlock()
 {
-    U32 cpu_sr;
-    cpu_sr = interrupt_disable();
     schedule_is_lock = FLASE;
-    interrupt_enable(cpu_sr); 
 }

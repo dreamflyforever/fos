@@ -45,6 +45,8 @@ void idle_task(void *arg)
     while (1)
     {
         //os_printf("Enter idle task\n");
+        U32 cpu_sr = interrupt_disable();
         schedule();
+        interrupt_enable(cpu_sr);
     }
 }

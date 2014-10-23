@@ -129,6 +129,7 @@ extern U32 task_prio_map;
 extern TCB idle_tcb;
 extern U32 idle_stack[4*100];
 extern U32 task_prio_map;
+extern void start_schedule();
 
 #define bit_clear(num, i) num = num & (~(1<<i))
 #define bit_set(num, i)   num = num | (1<<i)
