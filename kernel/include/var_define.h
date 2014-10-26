@@ -143,7 +143,7 @@ void prio_ready_queue_insert_head(TCB *tcb);
 
 void tick_queue_init();
 
-void start_which_task(TCB *tcb);
+BOOL start_which_task(TCB *tcb);
 void idle_task(void *arg);
 void schedule_lock();
 void schedule_unlock();

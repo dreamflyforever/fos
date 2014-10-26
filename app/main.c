@@ -38,7 +38,7 @@
 #define msg_queue_test 0
 #define sem_test 0
 #define tick_tes 0
-#define mutex_test 1
+#define mutex_test 0
 #define task_prio_change_test 0 
 #define SHELL
 
@@ -96,7 +96,7 @@ void fun1(void *arg)
 #if task_prio_change_test
         task_prio_change(&tcb1, 5);
 #endif
-        os_delay(10);
+        os_delay(3);
     }
 }
 
@@ -116,7 +116,7 @@ void fun2(void *arg)
 #endif
 
         os_printf("task2 running\n" );
-        os_delay(3);
+        os_delay(10);
     };
 }
 
@@ -200,7 +200,9 @@ int main(void)
 #endif 
 
     /*which task run first*/
-    start_which_task(&idle_tcb); 
+    BOOL result = start_which_task(&idle_tcb);
+    if ( !result )
+        return ;
  
     /*Never reach here*/
      while (1)

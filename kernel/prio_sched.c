@@ -190,12 +190,12 @@ void schedule()
     __asm__ ("l.nop");
 }
 
-void start_which_task(TCB *first_task)
+BOOL start_which_task(TCB *first_task)
 {
     if (first_task == NULL)
     {
         os_printf("error: First task is NULL\n");
-        return ;
+        return FALSE;
     }
 
     new_task = first_task;
@@ -205,6 +205,8 @@ void start_which_task(TCB *first_task)
     start_schedule();
     
     interrupt_enable(cpu_sr);
+
+    return TRUE;
 }
 
 void schedule_lock()
