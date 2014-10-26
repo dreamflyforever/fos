@@ -1,4 +1,13 @@
-#include "../kernel/include/var_define.h"
+/*
+ * Copyright (c) 2013, Shanjin Yang.<sjyangv0@gmail.com>
+ * All rights reserved.
+ *
+ * This file is part of the FOS.
+ *
+ * The latest version of FOS download by <https://github.com/yangshanjin/YSJ_OS>
+ *
+ */
+
 #include "include/hw_include.h"
 
 /* For writing into SPR. */

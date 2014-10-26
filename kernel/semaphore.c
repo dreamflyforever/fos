@@ -68,17 +68,19 @@ void sem_get(SEM *semaphore)
     if (semaphore == NULL)
         return;
 
-    schedule_lock();
+    U32 cpu_sr =  interrupt_disable();
+    
     semaphore->count--;
-    schedule_unlock();
 
-    if(semaphore->count < 1){
+    if (semaphore->count < 1){
         semaphore->tcb = new_task;
-        semaphore->tcb->state = 0;
+        semaphore->tcb->state = NON_RUNNING_STATE;
         prio_ready_queue_delete(semaphore->tcb);
-        sem_block_queue_insert(semaphore);    
+        sem_block_queue_insert(semaphore);
         schedule();
     }
+
+    interrupt_enable(cpu_sr);
     return;
 }
 
@@ -89,26 +91,29 @@ void sem_put(SEM *semaphore)
 
     SEM *sem_tmp;
     LIST *tmp = &sem_block_queue.list;
-    while ( !is_list_last(tmp)){
+
+    U32 cpu_sr =  interrupt_disable();
+
+    while ( !is_list_last(tmp) ){
         sem_tmp = list_entry(tmp->next, SEM, list);
         tmp = tmp->next;
 
         if (!(strcmp(sem_tmp->name, semaphore->name)))
         {
-            schedule_lock();
             sem_tmp->count++;
-            schedule_unlock();
             if (sem_tmp->count > 0)
             {
-                semaphore->tcb->state = 1;   
+                semaphore->tcb->state = CAN_RUNNING_STATE;   
                 sem_block_queue_delete(sem_tmp);
                 prio_ready_queue_insert_head(sem_tmp->tcb);
                 schedule();
+
+                interrupt_enable(cpu_sr);
                 return ;
             }
         }
     }
-    schedule_lock();
     semaphore->count++;
-    schedule_unlock();    
+    
+    interrupt_enable(cpu_sr);
 }

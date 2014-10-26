@@ -56,33 +56,46 @@ void mut_block_queue_delete(MUTEX *mutex)
 
 void mut_init(MUTEX *mutex, const U8 *name)
 {
-    if (mutex == NULL) return ; 
+    if (mutex == NULL)
+        return ; 
+   
     mutex->name = name;
     mutex->flag = TRUE;
 }
 
 void mut_get(MUTEX *mutex)
 {
-    if (mutex == NULL) return ;
+    if (mutex == NULL)
+        return ;
+
+    U32 cpu_sr =  interrupt_disable();
 
     if (mutex->flag == TRUE)
     {
         mutex->flag = FALSE;
         mutex->copy_prio = new_task->prio;
         task_prio_change(new_task, PRIO_MUTEX);
+
+        interrupt_enable(cpu_sr);
         return ;
     }
+
     mutex->tcb = new_task;
     mutex->tcb->state = 0;   
     prio_ready_queue_delete(mutex->tcb);
-    mut_block_queue_insert(mutex);    
+    mut_block_queue_insert(mutex);
+
+    interrupt_enable(cpu_sr);
 }
 
 void mut_put(MUTEX *mutex)
 {
-    if (mutex == NULL) return ;
+    if (mutex == NULL)
+        return ;
    
-       mutex->flag = TRUE;
+    mutex->flag = TRUE;
+
+    U32 cpu_sr =  interrupt_disable();
 
     task_prio_change(new_task, mutex->copy_prio);
     
@@ -98,7 +111,11 @@ void mut_put(MUTEX *mutex)
             mut_block_queue_delete(mut_tmp);
             prio_ready_queue_insert_head(mut_tmp->tcb);
             schedule();
+
+            interrupt_enable(cpu_sr);
             return ;
         }
     }
+
+    interrupt_enable(cpu_sr);
 }
