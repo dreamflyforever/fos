@@ -158,6 +158,8 @@ void system_init()
     block_queue_init();
 
     old_task = NULL;
+
+    ethoc_initialize(0, 0x92000000);    
 }
 
 int main(void)
@@ -202,7 +204,7 @@ int main(void)
     /*which task run first*/
     BOOL result = start_which_task(&idle_tcb);
     if ( !result )
-        return ;
+        return 0;
  
     /*Never reach here*/
      while (1)

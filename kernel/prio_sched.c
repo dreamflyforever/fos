@@ -48,7 +48,7 @@ TCB* bit_first_one_search(U32 num)
    
     for (; i < SYSTEM_WORD; i++)
     { 
-        /* The first task of each priority queue must be representative, if it 
+        /* The first task of each priority queue must be representative, if it
          * can not run, then all task of the queue behind the task can not run
          */
         if ((num >> i) & 0x01)  

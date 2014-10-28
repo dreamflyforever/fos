@@ -40,7 +40,7 @@ struct ihnd int_handlers[MAX_INT_HANDLERS];
 int hw_interrupt_init()
 {
     int i;
-        
+
     for(i = 0; i < MAX_INT_HANDLERS; i++){
         int_handlers[i].handler = NULL;
         int_handlers[i].arg = NULL;
@@ -49,7 +49,7 @@ int hw_interrupt_init()
     mtspr(SPR_PICMR, 0x00000000);
     /* set OR1200 to accept exceptions */
     mtspr(SPR_SR, mfspr(SPR_SR) | SPR_SR_IEE);
-    
+
     return 0;
 }
 

@@ -36,8 +36,9 @@
  */
 
 #include "include/var_define.h"
-	
+
 TICK tick_queue;
+ULONG fos_tick;
 
 void tick_queue_init()
 {
@@ -54,6 +55,11 @@ void tick_queue_delete( TICK *tick )
     list_delete(&tick->list);
 }
 
+ULONG tick_get()
+{
+    return fos_tick;
+}
+
 void hardware_timer()
 {
     hw_timer_clear_interrupt();
@@ -63,6 +69,8 @@ void hardware_timer()
     TICK *tick_tmp; 
 
     LIST *tmp = &tick_queue.list;
+
+    fos_tick++;
 
     while ( !is_list_last(tmp) ) {
         

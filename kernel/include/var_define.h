@@ -125,6 +125,7 @@ extern TCB task_prio_queue[SYSTEM_WORD];
 extern TCB *new_task;
 extern TCB *old_task;
 extern U32 task_prio_map;
+extern ULONG fos_tick;
 
 extern TCB idle_tcb;
 extern U32 idle_stack[4*100];
@@ -142,6 +143,7 @@ void prio_ready_queue_delete(TCB *tcb);
 void prio_ready_queue_insert_head(TCB *tcb);
 
 void tick_queue_init();
+ULONG tick_get();
 
 BOOL start_which_task(TCB *tcb);
 void idle_task(void *arg);
