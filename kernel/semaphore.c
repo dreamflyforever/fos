@@ -35,7 +35,7 @@
  *
  */
 
-#include "include/var_define.h"
+#include <var_define.h>
 
 SEM sem_block_queue;
 
@@ -98,7 +98,7 @@ void sem_put(SEM *semaphore)
         sem_tmp = list_entry(tmp->next, SEM, list);
         tmp = tmp->next;
 
-        if (!(strcmp(sem_tmp->name, semaphore->name)))
+        if (!(strcmp((const char *)sem_tmp->name, (const char *)semaphore->name)))
         {
             sem_tmp->count++;
             if (sem_tmp->count > 0)

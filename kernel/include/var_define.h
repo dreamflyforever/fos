@@ -38,11 +38,11 @@
 #ifndef __VAR_DEFIEN__
 #define __VAR_DEFINE__
 
-#include "list.h"
-#include "../../cpu/include/hw_include.h"
-#include "../../libc/include/lib.h"
-#include "../../libc/include/printf.h"
-#include "queue.h"
+#include <list.h>
+#include <hw_include.h>
+#include <lib.h>
+#include <printf.h>
+#include <queue.h>
 
 #define SYSTEM_WORD 32
 #define TURE  1

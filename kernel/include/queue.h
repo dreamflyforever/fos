@@ -1,7 +1,7 @@
 #ifndef __QUEUE_H__
 #define __QUEUE_H__
 
-#include "list.h"
+#include <list.h>
 
 #define FIFO 1
 

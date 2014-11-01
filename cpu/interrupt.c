@@ -8,8 +8,8 @@
  *
  */
 
-#include "../kernel/include/var_define.h"
-#include "include/hw_include.h"
+#include <var_define.h>
+#include <hw_include.h>
 
 #if 0
 U32 int_stack[32][4*100];

@@ -3,7 +3,7 @@
 
 
 /* include common defines for or1200 */
-#include "or1200-utils.h"
+#include <or1200-utils.h>
 
 /* Max and min functions */
 #ifndef MIN

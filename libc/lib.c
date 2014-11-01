@@ -8,7 +8,7 @@
  *
  */
 
-#include "include/lib.h"
+#include <lib.h>
 
 /* Based C function lib */
 

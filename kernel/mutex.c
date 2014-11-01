@@ -35,7 +35,7 @@
  *
  */
 
-#include "include/var_define.h"
+#include <var_define.h>
 
 MUTEX mut_block_queue;
 
@@ -105,7 +105,7 @@ void mut_put(MUTEX *mutex)
         mut_tmp = list_entry(tmp->next, MUTEX, list);
         tmp = tmp->next;
 
-        if (!(strcmp(mut_tmp->name, mutex->name)))
+        if (!(strcmp((const char *)mut_tmp->name, (const char *)mutex->name)))
         {
             mutex->tcb->state = 1;   
             mut_block_queue_delete(mut_tmp);

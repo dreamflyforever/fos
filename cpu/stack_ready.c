@@ -8,7 +8,7 @@
  *
  */
 
-#include "include/hw_include.h"
+#include <hw_include.h>
 
 void *stack_init( STACK_COPY *p_stk_base, U32 stk_size, TASK_ENTRY_COPY p_task)
 {

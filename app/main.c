@@ -42,7 +42,7 @@
 #define task_prio_change_test 0 
 #define SHELL
 
-#include "../kernel/include/var_define.h"
+#include <var_define.h>
 
 U32 stack1[4*100];
 U32 stack2[4*100];
@@ -159,7 +159,7 @@ void system_init()
 
     old_task = NULL;
 
-    ethoc_initialize(0, 0x92000000);    
+    //ethoc_initialize(0, 0x92000000);    
 }
 
 int main(void)

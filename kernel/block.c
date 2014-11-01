@@ -35,7 +35,7 @@
  *
  */
 
-#include "include/block.h"
+#include <block.h>
 
 void block_queue_init()
 {

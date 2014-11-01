@@ -35,8 +35,8 @@
  *
  */
 
-#include "include/queue.h"
-#include "include/block.h"
+#include <queue.h>
+#include <block.h>
 
 BLOCK block_queue;
 

@@ -5,7 +5,8 @@ env = Environment(tools = ['mingw'],
 	AS = config.AS, ASFLAGS = config.AFLAGS,
 	CC = config.CC, CCFLAGS = config.CFLAGS,
 	AR = config.AR, ARFLAGS = '-rc',
-	LINK = config.LINK, LINKFLAGS = config.LFLAGS)
+	LINK = config.LINK, LINKFLAGS = config.LFLAGS,
+	CPPPATH = ['kernel/include', 'cpu/include', 'libc/include'])
 env.PrependENVPath('PATH', config.EXEC_PATH)
 
 src = Glob('libc/*.c')
@@ -14,6 +15,10 @@ src = src + Glob('kernel/*.c')
 src = src + Glob('cpu/*.c')
 src = src + Glob('app/*.c')
 src = src + Glob('middleware/shell_parser/*.c')
+#src = src + Glob('middleware/uip/fos_uip/*.c')
+#src = src + Glob('middleware/uip/lib/*.c')
+#src = src + Glob('middleware/uip/apps/*.c')
+#src = src + Glob('middleware/uip/apps/webserver/*.c')
 print src
 env.Program('hello',src)
 

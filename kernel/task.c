@@ -35,7 +35,7 @@
  *
  */
 
-#include "./include/var_define.h"
+#include <var_define.h>
 
 void task_create(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
 {

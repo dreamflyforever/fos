@@ -113,7 +113,7 @@
 
 //jb#include <stddef.h> // for null, va_lsit
 
-#include "include/lib-utils.h" // has all these required basic c functions now
+#include <lib-utils.h> // has all these required basic c functions now
 
 //#include <cyg/infra/cyg_type.h>   // Common type definitions and support
 #define CYG_MACRO_START do {

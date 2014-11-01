@@ -35,7 +35,7 @@
  *
  */
 
-#include "include/var_define.h"
+#include <var_define.h>
 
 TCB* bit_first_one_search(U32 num)
 {

@@ -1,7 +1,7 @@
 #ifndef __LIST_H_A_
 #define __LIST_h_A_
 
-#include "../../kernel/include/var_define.h"
+#include <var_define.h>
 
 #define NULL (void *)0
 

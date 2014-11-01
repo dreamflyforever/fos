@@ -8,8 +8,8 @@
  *
  */
 
-#include "include/spr-defs.h"
-#include "include/ptrace.h"
+#include <spr-defs.h>
+#include <ptrace.h>
 
 /* parameter defines */
 #define REDZONE 128

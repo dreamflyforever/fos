@@ -5,7 +5,8 @@
  *
  */
 
-#include "include/hw_include.h"
+#include <hw_include.h>
+
 /* both THR and TSR empty */
 #define BOTH_EMPTY (UART_LSR_TEMT | UART_LSR_THRE)
 
@@ -50,28 +51,29 @@ void uart_isr(unsigned char *buffer)
         /* If no error on RLS, normal ready, save into the data buffer. */
         /* Note: read RBR will clear the interrupt */
         char buf = REG8(UART_BASE + UART_RX);
-        uart_putc('b');
+        uart_putc(buf);
     }
     uart_putc('a');
 }
 
-void uart_init(void){
+void uart_init(void)
+{
     int divisor;
     float float_divisor;
-    
+
     /* Reset receiver and transmiter */
     //start up FIFO ,clear RCVR FIFO and XMIT FIFO ,and set FIFO size for 4 bytes
     REG8(UART_BASE + UART_FCR) = UART_FCR_ENABLE_FIFO | UART_FCR_CLEAR_RCVR | UART_FCR_CLEAR_XMIT | UART_FCR_TRIGGER_4;
     
     /* Disable all interrupts */
     REG8(UART_BASE + UART_IER) = 0x0;
-    
+
     /* Enable RX and TX interrupt */
     //REG8(UART_BASE + UART_IER) = UART_IER_RDI | UART_IER_THRI;
-    
+
     /* Set 8 bit char, 1 stop bit, no parity */
     REG8(UART_BASE + UART_LCR) = UART_LCR_WLEN8 & ~(UART_LCR_STOP | UART_LCR_PARITY);
-    
+
     /* Set baud rate */
     float_divisor = (float)SYS_CLK/(16 * UART_BAUD_RATE);
     float_divisor += 0.50f; // Ensure round up
@@ -88,8 +90,8 @@ void uart_init(void){
 }
 
 /* print a character via uart */
-void uart_putc(char c){
-    
+void uart_putc(char c)
+{
     unsigned char lsr;
     WAIT_FOR_THRE;
     REG8(UART_BASE + UART_TX) = c;
@@ -103,76 +105,75 @@ void uart_putc(char c){
 }
 
 /* Only used when we know THRE is empty, typically in interrupt */
-void uart_putc_noblock(char c){
-
+void uart_putc_noblock(char c)
+{
     REG8(UART_BASE + UART_TX) = c;
 }
 
 /* get a character via uart */
-char uart_getc(void){
-
+char uart_getc(void)
+{
     unsigned char lsr;
     char c;
-    
+
     WAIT_FOR_CHAR;
     c = REG8(UART_BASE + UART_RX);
     return c;
 }
 
 /* print a string via uart */
-void uart_print_str(char *p){
-    
+void uart_print_str(char *p)
+{
     while(*p != 0) {
-
         uart_putc(*p);
         p++;
     }
 }
 
-char uart_check_for_char(){
-
+char uart_check_for_char()
+{
     return CHECK_FOR_CHAR;
 }
 
 /* Enable receiver data interrupt */
-void uart_rxint_enable(){
-
+void uart_rxint_enable()
+{
     REG8(UART_BASE + UART_IER) |= UART_IER_RDI;
 }
 
 /* Disable receiver data interrupt */
-void uart_rxint_disable(){
-
+void uart_rxint_disable()
+{
     REG8(UART_BASE + UART_IER) &= ~(UART_IER_RDI);
 }
 
 /* Enable Transmitter holding register int. */
-void uart_txint_enable(){
-
+void uart_txint_enable()
+{
     REG8(UART_BASE + UART_IER) |= UART_IER_THRI;
 }
 
 /* Disable Transmitter holding register int. */
-void uart_txint_disable(){
-
+void uart_txint_disable()
+{
     REG8(UART_BASE + UART_IER) &= ~(UART_IER_THRI);
 }
 
 /* get status from IIR */
-char uart_get_iir(){
-
+char uart_get_iir()
+{
     return REG8(UART_BASE + UART_IIR);
 }
 
 /* get status from LSR */
-char uart_get_lsr(){
-
+char uart_get_lsr()
+{
     return REG8(UART_BASE + UART_LSR);
 }
 
 /* print 0x... */
-void uart_print_long(unsigned long ul){
-
+void uart_print_long(unsigned long ul)
+{
     int i;
     char c;
 
@@ -191,8 +192,8 @@ void uart_print_long(unsigned long ul){
 }
 
 /* print 0x0.. */
-void uart_print_short(unsigned long ul){
-
+void uart_print_short(unsigned long ul)
+{
     int i;
     char c;
     char flag = 0;

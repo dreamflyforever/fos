@@ -35,7 +35,7 @@
  *
  */
 
-#include "include/var_define.h"
+#include <var_define.h>
 
 TCB idle_tcb;
 U32 idle_stack[4*100];

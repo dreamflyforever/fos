@@ -49,7 +49,7 @@ int parser(U8 *cmd)
     for (; !_is_list_empty(tmp); tmp = tmp->next)
     { 
         sym_tmp = _list_entry(tmp->next, SYMBOL, list);
-        if (!strcmp(cmd, sym_tmp->name))
+        if (!strcmp((const char *)cmd, (const char *)sym_tmp->name))
         {
             sym_tmp->func(NULL);
             return TURE;
