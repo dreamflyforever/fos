@@ -16,17 +16,18 @@
 #define STK_FRAME_SIZE (128 + REDZONE)
 
     .global task_switch
-    .global TimerISR
-    .global UsrISR   
+    .global timer_isr
+    .global usr_isr   
     .extern old_task
     .extern new_task
     .extern hardware_timer
     .extern usr_handle
+    .extern find_high_ready_task
 /* Macro Definitions */
 #define CLEAR_GPR(gpr)                       \
     l.or    gpr,r0,r0 
 
-#define LOAD_SYMBOL_2_GPR(gpr,symbol)        \
+#define LOAD_SYMBOL_TO_GPR(gpr,symbol)       \
     .global symbol;                          \
     l.movhi gpr,hi(symbol);                  \
     l.ori   gpr,gpr,lo(symbol)
@@ -35,7 +36,7 @@
 #define EXCEPTION_HANDLER(symbol);           \
     l.addi  r1,r1, -STK_FRAME_SIZE;          \
     l.sw    PT_GPR3(r1), r3;    /* we mass r3 ,so save r3 to stack first */\
-    LOAD_SYMBOL_2_GPR(r3,symbol);            \
+    LOAD_SYMBOL_TO_GPR(r3,symbol);           \
     l.jr r3;                                 \
     l.nop
 
@@ -107,10 +108,10 @@
 /* Linked from 0x0 */
 .section .vectors, "ax"
 
-/* ===========================[ exceptions]========================== === */
+/* ===========================[ exceptions]============================== */
 /* ---[ 0x100: RESET exception ]----------------------------------------- */
     .org 0x100
-    LOAD_SYMBOL_2_GPR(r3, _reset)
+    LOAD_SYMBOL_TO_GPR(r3, _reset)
     l.jr    r3
     l.nop
 /* ---[ 0x200: BUS exception ]------------------------------------------- */
@@ -122,10 +123,9 @@
 /* ---[ 0x400: Insn Page Fault exception ]------------------------------- */
     .org 0x400
  
-
 /* ---[ 0x500: Timer exception ]----------------------------------------- */
     .org 0x500
-    EXCEPTION_HANDLER(TimerISR)
+    EXCEPTION_HANDLER(timer_isr)
 
 /* ---[ 0x600: Aligment exception ]-------------------------------------- */
     .org 0x600
@@ -136,8 +136,7 @@
  
 /* ---[ 0x800: External interrupt exception ]---------------------------- */
     .org 0x800
-    
-    EXCEPTION_HANDLER(UsrISR)
+    EXCEPTION_HANDLER(usr_isr)
  
  /* ---[ 0x900: DTLB miss exception ]------------------------------------ */
     .org 0x900
@@ -210,20 +209,20 @@
     .org 0x1f00
 
 /* =============================== [ entry ] ============================= */
-  //.org 0x2000
+    //.org 0x2000
 
     .section .text
 _reset :
     l.movhi r0,0x0000     ; #r0 = 0
     l.ori r0,r0,0x0000    ;
     
-        /* set up super mode */
-        l.addi  r3,r0,SPR_SR_SM
-        l.mtspr r0,r3,SPR_SR
+    /* set up super mode */
+    l.addi  r3,r0,SPR_SR_SM
+    l.mtspr r0,r3,SPR_SR
 
     /* Clear BSS */
-    LOAD_SYMBOL_2_GPR(r28,___bss_start)
-    LOAD_SYMBOL_2_GPR(r30,__end)
+    LOAD_SYMBOL_TO_GPR(r28,___bss_start)
+    LOAD_SYMBOL_TO_GPR(r30,__end)
 1:
     l.sw       (0)(r28), r0
     l.sfltu    r28, r30
@@ -267,7 +266,7 @@ _reset :
     l.mtspr r0, r0, SPR_TTMR
     
     /* Early Stack initilization */
-    LOAD_SYMBOL_2_GPR(r1 ,_stack)
+    LOAD_SYMBOL_TO_GPR(r1 ,_stack)
     
     /* Jump to start of program */
     l.jal main
@@ -286,7 +285,7 @@ _align:
     l.j      0
     l.nop    NOP_EXIT
 
-#define LOAD_SYMBOL_2_GPR(gpr,symbol)        \
+#define LOAD_SYMBOL_TO_GPR(gpr,symbol)        \
     .global symbol;                          \
     l.movhi gpr,hi(symbol);                  \
     l.ori   gpr,gpr,lo(symbol)
@@ -294,7 +293,7 @@ _align:
 
 .global     start_schedule
 start_schedule:
-    LOAD_SYMBOL_2_GPR(r3, new_task)
+    LOAD_SYMBOL_TO_GPR(r3, new_task)
     l.lwz   r3,0(r3)                /* r3 = &new_task->stack_ptr */
     l.lwz   r1,0(r3)                /* sp = *(&new->stack_ptr) */
 
@@ -309,8 +308,6 @@ start_schedule:
     l.rfe
     l.nop
 
-/*schedule:*/
-
 /* task switch function */
 task_switch:
     /* l.sys exception for now, so we are in supervisor mode */
@@ -324,13 +321,13 @@ task_switch:
     STORE_CONTEXT
     
     /* Store current stack pointer   */
-    LOAD_SYMBOL_2_GPR(r3, old_task)        /* r3= &old_task */
+    LOAD_SYMBOL_TO_GPR(r3, old_task)        /* r3= &old_task */
     l.lwz   r3,0(r3)                       /* r3 = &old_task->stack_ptr */
     l.sw    0(r3),r1                       /* old_task->stack_ptr = SP */
 
 /* task switch in interrupt routine */
 interrupt_switch:
-    LOAD_SYMBOL_2_GPR(r2, new_task)        /* r2 = &new_task */
+    LOAD_SYMBOL_TO_GPR(r2, new_task)        /* r2 = &new_task */
     l.lwz   r2,0(r2)                       /* r2 = &new_task->stack_ptr  */
     l.lwz   r1,0(r2)                       /* sp = *(&new_task->task_stack) */
 
@@ -346,7 +343,7 @@ interrupt_switch:
     l.rfe
     l.nop
 
-TimerISR:
+timer_isr:
     l.mfspr r3,r0,SPR_EPCR_BASE     /* save program counter that was put in exception register */
     l.sw    PT_PC(r1),r3
     l.mfspr r3,r0,SPR_ESR_BASE      /* save status register that was put in exception register */
@@ -356,42 +353,49 @@ TimerISR:
 
     /* Timer interrupt handler */
     l.jal hardware_timer
-    l.nop       
-#if 1
+    l.nop
+
+    l.jal   find_high_ready_task
+    l.nop
+
     l.lwz   r2,PT_PC(r1)            /* load context for task to be resumed */
     l.mtspr r0,r2,SPR_EPCR_BASE
     l.lwz   r2,PT_SR(r1)
     l.mtspr r0,r2,SPR_ESR_BASE
-#endif
 
     RESTORE_CONTEXT
-    
-    l.addi    r1,r1,STK_FRAME_SIZE
-    l.rfe
-    l.nop    
 
-UsrISR:
+    l.addi  r1,r1,STK_FRAME_SIZE
+    l.rfe
+    l.nop
+
+usr_isr:
+    /*r1 = new_task->sp*/
     l.mfspr r3,r0,SPR_EPCR_BASE     /* save program counter that was put in exception register */
     l.sw    PT_PC(r1),r3
     l.mfspr r3,r0,SPR_ESR_BASE      /* save status register that was put in exception register */
     l.sw    PT_SR(r1),r3        
-    
+
     STORE_CONTEXT
 
     /* Timer interrupt handler */
-    l.jal usr_handle
-    l.nop       
-#if 1
-    l.lwz   r2,PT_PC(r1)            /* load context for task to be resumed */
+    l.jal   usr_handle
+    l.nop
+    
+    l.jal   find_high_ready_task
+    l.nop
+
+    LOAD_SYMBOL_TO_GPR(r3, new_task)    /* r3= &new_task*/
+    l.lwz    r3,0(r3)                   /* r3= &new_task->stack_ptr */
+    l.lwz    r1,0(r3)                   /* sp = *(&new_task->stack_ptr) */
+
+    l.lwz   r2,PT_PC(r1)                /* load context for task to be resumed */
     l.mtspr r0,r2,SPR_EPCR_BASE
     l.lwz   r2,PT_SR(r1)
     l.mtspr r0,r2,SPR_ESR_BASE
-#endif
 
     RESTORE_CONTEXT
     
     l.addi    r1,r1,STK_FRAME_SIZE
     l.rfe
     l.nop    
-
-

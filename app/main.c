@@ -35,14 +35,14 @@
  *
  */
 
-#define msg_queue_test 0
-#define sem_test 0
-#define tick_tes 0
-#define mutex_test 0
+#include <var_define.h>
+
+#define msg_queue_test        0
+#define sem_test              0
+#define tick_tes              0
+#define mutex_test            0
 #define task_prio_change_test 0 
 #define SHELL
-
-#include <var_define.h>
 
 U32 stack1[4*100];
 U32 stack2[4*100];
@@ -70,7 +70,7 @@ MSG msg3;
 U8 buffer[10];
 #endif
 
-void fun1(void *arg)
+void task1(void *arg)
 {
     while (1){
 
@@ -100,7 +100,7 @@ void fun1(void *arg)
     }
 }
 
-void fun2(void *arg)
+void task2(void *arg)
 {
     while (1)
     {
@@ -114,13 +114,12 @@ void fun2(void *arg)
         sem_get(&sem);
         os_printf("task2: %d\n", sem.count);
 #endif
-
         os_printf("task2 running\n" );
         os_delay(10);
     };
 }
 
-void fun3(void *arg)
+void task3(void *arg)
 {
     while (1)
     {
@@ -129,7 +128,7 @@ void fun3(void *arg)
     }
 }
 
-void fun4(void *arg)
+void task4(void *arg)
 {
     while (1)
     {
@@ -152,14 +151,19 @@ void system_init()
     sem_block_queue_init();
 
     mut_block_queue_init();
-   
+
     tick_queue_init();
 
     block_queue_init();
 
     old_task = NULL;
 
-    //ethoc_initialize(0, 0x92000000);    
+    /*create idle task*/
+    task_create(&idle_tcb, idle_task, idle_stack, 31, 1);
+
+    hw_timer_init();
+
+    //ethoc_initialize(0, 0x92000000);
 }
 
 int main(void)
@@ -171,12 +175,10 @@ int main(void)
     shell_init();
 #endif
 
-    //task_create(&tcb1, fun1, stack1, 5, 1);
-    //task_create(&tcb2, fun2, stack2, 3, 1);
-    //task_create(&tcb3, fun3, stack3, 3, 1);
-    //task_create(&tcb4, fun4, stack4, 1, 1);
-    task_create(&idle_tcb, idle_task, idle_stack, 31, 1);
-    hw_timer_init();
+    //task_create(&tcb1, task1, stack1, 5, 1);
+    //task_create(&tcb2, task2, stack2, 3, 1);
+    //task_create(&tcb3, task3, stack3, 3, 1);
+    //task_create(&tcb4, task4, stack4, 1, 1);
 
 #if sem_test
     sem_init(&sem, "sem1", 1);
@@ -204,8 +206,12 @@ int main(void)
     /*which task run first*/
     BOOL result = start_which_task(&idle_tcb);
     if ( !result )
+    {
+        os_printf("First task is NLL\n");
+    
         return 0;
- 
+    }
+
     /*Never reach here*/
      while (1)
     {

@@ -182,9 +182,8 @@ void schedule()
     if (schedule_is_lock == TURE)
         return ;
    
-    if (prio_ready_queue_fetch()){
+    if (prio_ready_queue_fetch())
         return ;
-    }
 
     __asm__ ("l.sys 0");
     __asm__ ("l.nop");
@@ -217,4 +216,9 @@ void schedule_lock()
 void schedule_unlock()
 {
     schedule_is_lock = FLASE;
+}
+
+void find_high_ready_task()
+{
+    prio_ready_queue_fetch();
 }
