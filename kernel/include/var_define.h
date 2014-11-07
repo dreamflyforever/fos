@@ -35,7 +35,7 @@
  *
  */
 
-#ifndef __VAR_DEFIEN__
+#ifndef __VAR_DEFINE__
 #define __VAR_DEFINE__
 
 #include <list.h>
@@ -43,6 +43,7 @@
 #include <lib.h>
 #include <printf.h>
 #include <queue.h>
+#include <mem_block.h>
 
 #define SYSTEM_WORD 32
 #define TURE  1

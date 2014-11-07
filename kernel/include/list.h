@@ -40,7 +40,8 @@
 
 #define U32    unsigned int 
 #define S32    signed int 
-#define U16    signed short
+#define U16    unsigned short
+#define S16    signed short
 #define U8     unsigned char
 #define S8     signed char
 #define BOOL   U8
