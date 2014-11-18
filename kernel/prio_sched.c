@@ -178,15 +178,18 @@ U8 prio_ready_queue_fetch()
 
 void schedule()
 {
-
     if (schedule_is_lock == TURE)
         return ;
    
+    U32 cpu_sr = interrupt_disable();
     if (prio_ready_queue_fetch())
+    {
+        interrupt_enable(cpu_sr);
         return ;
-
+    }
     __asm__ ("l.sys 0");
     __asm__ ("l.nop");
+    interrupt_enable(cpu_sr);
 }
 
 BOOL start_which_task(TCB *first_task)

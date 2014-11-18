@@ -89,8 +89,9 @@ void hardware_timer()
                      
                     if ( is_list_last(tmp) ){
 
-                        schedule();
                         interrupt_enable(cpu);
+                        
+                        schedule();
                         return;
                     }
                 }
@@ -107,8 +108,9 @@ void hardware_timer()
                 if ( is_list_last(tmp) ){
 
                     tick_queue_delete(tick_tmp);
-                    schedule();
                     interrupt_enable(cpu);
+                    
+                    schedule();
                     return;
                 }
             }
@@ -119,8 +121,9 @@ void hardware_timer()
         (tick_tmp->timeout)--;
     } 
 
-    schedule();
     interrupt_enable(cpu);
+    
+    schedule();
 }
 
 void timer_req( TICK *timer, FUNC_PTR func, U32 timeout, BOOL period, void *arg )
@@ -151,9 +154,9 @@ void os_delay( U32  timeslice )
     prio_ready_queue_insert_tail(timer_delay->tcb);
 
     tick_queue_insert(timer_delay);
-    schedule();
-    
     interrupt_enable(cpu);
+
+    schedule();
 }
 
 /*

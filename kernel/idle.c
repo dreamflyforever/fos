@@ -38,15 +38,13 @@
 #include <var_define.h>
 
 TCB idle_tcb;
-U32 idle_stack[4*100];
+U32 idle_stack[4 * 1024];
 
 void idle_task(void *arg)
 {
     while (1)
     {
         //os_printf("Enter idle task\n");
-        U32 cpu_sr = interrupt_disable();
         schedule();
-        interrupt_enable(cpu_sr);
     }
 }

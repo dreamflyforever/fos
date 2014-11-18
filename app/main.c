@@ -44,10 +44,10 @@
 #define task_prio_change_test 0 
 #define SHELL
 
-U32 stack1[4*100];
-U32 stack2[4*100];
-U32 stack3[4*100];
-U32 stack4[4*100];
+STACK stack1[4*100];
+STACK stack2[4*100];
+STACK stack3[4*100];
+STACK stack4[4*100];
 TCB tcb1;
 TCB tcb2;
 TCB tcb3;
@@ -163,22 +163,22 @@ void system_init()
 
     hw_timer_init();
 
-    //ethoc_initialize(0, 0x92000000);
+    ethoc_initialize(0, 0x92000000);
 }
 
 int main(void)
 {
     system_init();
 
-#ifdef SHELL
-    extern void shell_init();
-    shell_init();
-#endif
-
     //task_create(&tcb1, task1, stack1, 5, 1);
     //task_create(&tcb2, task2, stack2, 3, 1);
     //task_create(&tcb3, task3, stack3, 3, 1);
     //task_create(&tcb4, task4, stack4, 1, 1);
+
+#ifdef SHELL
+    extern void shell_init();
+    shell_init();
+#endif
 
 #if sem_test
     sem_init(&sem, "sem1", 1);
@@ -207,8 +207,7 @@ int main(void)
     BOOL result = start_which_task(&idle_tcb);
     if ( !result )
     {
-        os_printf("First task is NLL\n");
-    
+        os_printf("First task is NULL\n");
         return 0;
     }
 

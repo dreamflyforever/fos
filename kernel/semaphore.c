@@ -106,9 +106,9 @@ void sem_put(SEM *semaphore)
                 semaphore->tcb->state = CAN_RUNNING_STATE;   
                 sem_block_queue_delete(sem_tmp);
                 prio_ready_queue_insert_head(sem_tmp->tcb);
-                schedule();
-
                 interrupt_enable(cpu_sr);
+                
+                schedule();
                 return ;
             }
         }

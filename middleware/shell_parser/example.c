@@ -59,7 +59,7 @@ void  shell_thread(void *arg)
         memset(buff_cmd, 0, 128); 
 
 restart:  
-        os_delay(5);
+        os_delay(1);
     }
 } 
 
@@ -71,5 +71,5 @@ void shell_init()
     export(version,(U8 *)"version");
     export(fuck, (U8 *)"fuck");
 
-    task_create(&tcb_shell, shell_thread, stack_shell, 20, 1);
+    task_create(&tcb_shell, shell_thread, stack_shell, 30, 1);
 }

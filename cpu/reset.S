@@ -17,7 +17,7 @@
 
     .global task_switch
     .global timer_isr
-    .global usr_isr   
+    .global usr_isr
     .extern old_task
     .extern new_task
     .extern hardware_timer
@@ -138,7 +138,7 @@
     .org 0x800
     EXCEPTION_HANDLER(usr_isr)
  
- /* ---[ 0x900: DTLB miss exception ]------------------------------------ */
+/* ---[ 0x900: DTLB miss exception ]------------------------------------ */
     .org 0x900
 
 /* ---[ 0xa00: ITLB miss exception ]------------------------------------- */
@@ -215,7 +215,7 @@
 _reset :
     l.movhi r0,0x0000     ; #r0 = 0
     l.ori r0,r0,0x0000    ;
-    
+
     /* set up super mode */
     l.addi  r3,r0,SPR_SR_SM
     l.mtspr r0,r3,SPR_SR
@@ -228,7 +228,7 @@ _reset :
     l.sfltu    r28, r30
     l.bf       1b
     l.addi     r28, r28, 4
-          
+
     /* Clear all registers */
     CLEAR_GPR(r1)
     CLEAR_GPR(r2)
@@ -347,7 +347,7 @@ timer_isr:
     l.mfspr r3,r0,SPR_EPCR_BASE     /* save program counter that was put in exception register */
     l.sw    PT_PC(r1),r3
     l.mfspr r3,r0,SPR_ESR_BASE      /* save status register that was put in exception register */
-    l.sw    PT_SR(r1),r3        
+    l.sw    PT_SR(r1),r3
 
     STORE_CONTEXT
 
@@ -374,14 +374,14 @@ usr_isr:
     l.mfspr r3,r0,SPR_EPCR_BASE     /* save program counter that was put in exception register */
     l.sw    PT_PC(r1),r3
     l.mfspr r3,r0,SPR_ESR_BASE      /* save status register that was put in exception register */
-    l.sw    PT_SR(r1),r3        
+    l.sw    PT_SR(r1),r3
 
     STORE_CONTEXT
 
     /* Timer interrupt handler */
     l.jal   usr_handle
     l.nop
-    
+
     l.jal   find_high_ready_task
     l.nop
 
@@ -395,7 +395,7 @@ usr_isr:
     l.mtspr r0,r2,SPR_ESR_BASE
 
     RESTORE_CONTEXT
-    
+
     l.addi    r1,r1,STK_FRAME_SIZE
     l.rfe
-    l.nop    
+    l.nop

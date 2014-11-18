@@ -110,9 +110,11 @@ void mut_put(MUTEX *mutex)
             mutex->tcb->state = 1;   
             mut_block_queue_delete(mut_tmp);
             prio_ready_queue_insert_head(mut_tmp->tcb);
+           
+            interrupt_enable(cpu_sr);
+            
             schedule();
 
-            interrupt_enable(cpu_sr);
             return ;
         }
     }
