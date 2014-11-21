@@ -37,25 +37,23 @@
 
 #include <var_define.h>
 
+/*Search the ready-high-priority task*/
 TCB* bit_first_one_search(U32 num)
 {
     LIST *prio_list_head;
-    TCB *ret;
+    TCB *tcb_ret;
 
-    U8 i = 0; 
+    U8 i; 
 
-    for (; i < SYSTEM_WORD; i++)
+    for (i = 0; i < SYSTEM_WORD; i++)
     { 
-        /* The first task of each priority queue must be representative, if it
-         * can not run, then all task of the queue behind the task can not run
-         */
+        /* The first task of each priority queue must be representative*/
         if ((num >> i) & 0x01)
         {
             prio_list_head = &task_prio_queue[i].list;
-            ret            = list_entry( prio_list_head->next, TCB, list);
+            tcb_ret        = list_entry(prio_list_head->next, TCB, list);
 
-            if (ret->state == TRUE) 
-                return ret;
+            return tcb_ret;
         }
     }
 
@@ -65,13 +63,12 @@ TCB* bit_first_one_search(U32 num)
     return old_task;
 }
 
+/*Build the ready queue*/
 void prio_ready_queue_init()
 {
-    U8 i = 0;
-    while(i < 32){
+    U8 i;
+    for (i = 0; i < SYSTEM_WORD; i++)
         list_init(&task_prio_queue[i].list);
-        i++;
-    }
 }
 
 void prio_ready_queue_insert_tail(TCB *tcb)
@@ -93,7 +90,6 @@ void prio_ready_queue_delete(TCB *tcb)
     /* If the task ready queue have no task, clear the corresponding task_prio_map*/
     if (is_list_last(&task_prio_queue[tcb->prio].list)){
         bit_clear(task_prio_map, tcb->prio);
-
         return ;
     }
 #ifdef mutex_debug
@@ -115,38 +111,15 @@ U8 prio_ready_queue_fetch()
 {
     TCB *tmp =  bit_first_one_search(task_prio_map);
 
-    /* task have two state
-     * state == 0, if the hight priority task equal current task,
-     * switch to old task, else return, not schedule.
-     * state == 1, see the flow.
-     * return value: 0 schedule
-     *               1 not schedule
-     **/
-    if (!tmp->state)
+    if (!is_list_last(&tmp->list))
     {
-        if (new_task->prio == tmp->prio){
-#if DEBUG
-            os_printf("-----------%0x\n", old_task);
-#endif
-            if (old_task == NULL)
-                old_task = &idle_tcb;
-            
-            new_task = old_task;
-            old_task = tmp;
-
-            return FALSE;
-        }
-        return TRUE;
+        prio_ready_queue_delete(tmp);
+        prio_ready_queue_insert_tail(tmp);
     }
 
-    if (new_task->prio == tmp->prio){
-#if DEBUG
-        os_printf("old_task->prio == %d--------\n", tmp->prio);
-#endif
-        /* Why this operate, I forget */
-        if (is_list_last(&task_prio_queue[new_task->prio].list))
-            return TRUE;
-    }
+    /*if the fetch task equel current task*/
+    if (tmp == new_task)
+        return NO_SCHED;
 
     old_task = new_task;
     new_task = tmp;
@@ -155,7 +128,7 @@ U8 prio_ready_queue_fetch()
     os_printf("old_task->prio == %d\n", old_task->prio);
     os_printf("new_task->prio == %d\n", new_task->prio);
 #endif
-    return FLASE;
+    return SCHED;
 }
 
 void schedule()
@@ -164,7 +137,7 @@ void schedule()
         return ;
 
     U32 cpu_sr = interrupt_disable();
-    if (prio_ready_queue_fetch())
+    if (NO_SCHED == prio_ready_queue_fetch())
     {
         interrupt_enable(cpu_sr);
         return ;

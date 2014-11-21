@@ -37,9 +37,10 @@
 
 #include <var_define.h>
 
-void task_create(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
+void task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
 {
     tcb->stack_ptr = stack_init(stack, 4*100, fun);
+    tcb->name      = name;
     tcb->prio      = prio;
     tcb->state     = state;
     prio_ready_queue_insert_tail(tcb);

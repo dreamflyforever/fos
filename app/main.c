@@ -115,7 +115,7 @@ void task2(void *arg)
         os_printf("task2: %d\n", sem.count);
 #endif
         os_printf("task2 running\n" );
-        os_delay(10);
+        os_delay(3);
     };
 }
 
@@ -124,7 +124,7 @@ void task3(void *arg)
     while (1)
     {
         os_printf("task3 runing\n");
-        os_delay(5);
+        os_delay(10);
     }
 }
 
@@ -132,8 +132,8 @@ void task4(void *arg)
 {
     while (1)
     {
-        os_printf("task4 runing\n");
-        os_delay(5);
+        os_printf("task4 running\n");
+        os_delay(10);
     }
 }
 
@@ -159,21 +159,21 @@ void system_init()
     old_task = NULL;
 
     /*create idle task*/
-    task_create(&idle_tcb, idle_task, idle_stack, 31, 1);
+    task_create(&idle_tcb, (U8 *)"idle_task", idle_task, idle_stack, 31, 1);
 
     hw_timer_init();
 
-    ethoc_initialize(0, 0x92000000);
+    //ethoc_initialize(0, 0x92000000);
 }
 
 int main(void)
 {
     system_init();
 
-    //task_create(&tcb1, task1, stack1, 5, 1);
-    //task_create(&tcb2, task2, stack2, 3, 1);
-    //task_create(&tcb3, task3, stack3, 3, 1);
-    //task_create(&tcb4, task4, stack4, 1, 1);
+    task_create(&tcb1, (U8 *)"task1", task1, stack1, 3, 1);
+    task_create(&tcb2, (U8 *)"task2", task2, stack2, 3, 1);
+    task_create(&tcb3, (U8 *)"task3", task3, stack3, 3, 1);
+    task_create(&tcb4, (U8 *)"task4", task4, stack4, 1, 1);
 
 #ifdef SHELL
     extern void shell_init();

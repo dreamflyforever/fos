@@ -45,12 +45,14 @@
 #include <queue.h>
 #include <mem_block.h>
 
-#define SYSTEM_WORD 32
-#define TURE  1
-#define FLASE 0
-#define DEBUG 0
+#define SYSTEM_WORD       32
+#define TURE              1
+#define FLASE             0
+#define DEBUG             0
 #define NON_RUNNING_STATE 0
 #define CAN_RUNNING_STATE 1
+#define SCHED             1
+#define NO_SCHED          0
 
 #define STACK unsigned int 
 
@@ -82,6 +84,7 @@ typedef struct TICK_STR{
 typedef struct TCB_STR{
     STACK   *stack_ptr;
     TICK    delay;
+    U8      *name;
     LIST    list;
     U8      prio;
     BOOL    state; // Only two state, run or forbit run(NON_RUNNING_STATE AND CAN_RUNNING_STATE)
@@ -104,7 +107,7 @@ typedef struct MUTEX_STR{
    TCB      *tcb; 
 }MUTEX;
 
-void task_create(TCB *tcb,  TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
+void task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
 void task_prio_change(TCB *tcb, U32 prio);
 
 void sem_block_queue_init();

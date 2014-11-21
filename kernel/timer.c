@@ -73,7 +73,7 @@ void hardware_timer()
     fos_tick++;
 
     while ( !is_list_last(tmp) ) {
-        
+
         tick_tmp = list_entry(tmp->next, TICK, list);
         tmp = tmp->next;
  
@@ -82,15 +82,15 @@ void hardware_timer()
             if ( tick_tmp->style == SOFTWARE_TIMER ){
   
                 tick_tmp->func(tick_tmp->func_arg);
-                
+
                 if ( tick_tmp->period == CYCLE ){
 
                     tick_tmp->timeout = tick_tmp->timeout_copy;
-                     
+
                     if ( is_list_last(tmp) ){
 
                         interrupt_enable(cpu);
-                        
+
                         schedule();
                         return;
                     }
@@ -99,17 +99,14 @@ void hardware_timer()
 
             if ( tick_tmp->style == DELAY )
             {
-                tick_tmp->tcb->state = CAN_RUNNING_STATE;
-
                 /*Put the delay task to ready queue head*/ 
-                prio_ready_queue_delete(tick_tmp->tcb);
-                prio_ready_queue_insert_head(tick_tmp->tcb);
+                prio_ready_queue_insert_tail(tick_tmp->tcb);
 
                 if ( is_list_last(tmp) ){
 
                     tick_queue_delete(tick_tmp);
                     interrupt_enable(cpu);
-                    
+
                     schedule();
                     return;
                 }
@@ -122,7 +119,7 @@ void hardware_timer()
     } 
 
     interrupt_enable(cpu);
-    
+
     schedule();
 }
 
@@ -144,14 +141,12 @@ void os_delay( U32  timeslice )
     U32 cpu = interrupt_disable();
     TICK *timer_delay               = &new_task->delay;
     timer_delay->tcb                = new_task;
-    timer_delay->tcb->state         = NON_RUNNING_STATE;
     timer_delay->timeout            = timeslice;
     timer_delay->timeout_copy       = timeslice;
     timer_delay->style              = DELAY;
   
     /*Put the delay task to ready queue tail*/ 
     prio_ready_queue_delete(timer_delay->tcb);
-    prio_ready_queue_insert_tail(timer_delay->tcb);
 
     tick_queue_insert(timer_delay);
     interrupt_enable(cpu);

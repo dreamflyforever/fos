@@ -35,7 +35,7 @@ void fuck(void *arg)
     printf("fuck fuck!!!\n");
 }
 
-void  shell_thread(void *arg)
+void shell_thread(void *arg)
 {
     U8 i;
 
@@ -71,5 +71,5 @@ void shell_init()
     export(version,(U8 *)"version");
     export(fuck, (U8 *)"fuck");
 
-    task_create(&tcb_shell, shell_thread, stack_shell, 30, 1);
+    task_create(&tcb_shell, (U8 *)"shell_task", shell_thread, stack_shell, 30, 1);
 }
