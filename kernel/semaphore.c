@@ -54,66 +54,67 @@ void sem_block_queue_delete(SEM *semphore)
     list_delete(&semphore->list);
 }
 
-void sem_init(SEM *semaphore, const U8 *name, U32 num)
+U8 sem_init(SEM *semaphore, const U8 *name, U32 num)
 {
     if (semaphore == NULL)
-        return;
+        return NO_SEMAPHORE;
 
     semaphore->count = num;
     semaphore->name  = name;
+
+    return TRUE;
 }
 
-void sem_get(SEM *semaphore)
+U8 sem_get(SEM *semaphore)
 {
     if (semaphore == NULL)
-        return;
+        return NO_SEMAPHORE;
 
     U32 cpu_sr =  interrupt_disable();
     
-    semaphore->count--;
-
-    if (semaphore->count < 1){
+    /*If not resource, then block and switch the task*/
+    if (semaphore->count == 0){
         semaphore->tcb = new_task;
-        semaphore->tcb->state = NON_RUNNING_STATE;
         prio_ready_queue_delete(semaphore->tcb);
         sem_block_queue_insert(semaphore);
         schedule();
     }
-
+    else
+        semaphore->count--;
+    
     interrupt_enable(cpu_sr);
-    return;
+    return TRUE;
 }
 
-void sem_put(SEM *semaphore)
+U8 sem_put(SEM *semaphore)
 {
     if (semaphore == NULL)
-        return;
+        return NO_SEMAPHORE;
 
     SEM *sem_tmp;
     LIST *tmp = &sem_block_queue.list;
 
     U32 cpu_sr =  interrupt_disable();
-
+            
+    /*Check tasks block on the semaphore list*/
     while ( !is_list_last(tmp) ){
         sem_tmp = list_entry(tmp->next, SEM, list);
         tmp = tmp->next;
 
         if (!(strcmp((const char *)sem_tmp->name, (const char *)semaphore->name)))
         {
-            sem_tmp->count++;
-            if (sem_tmp->count > 0)
-            {
-                semaphore->tcb->state = CAN_RUNNING_STATE;   
-                sem_block_queue_delete(sem_tmp);
-                prio_ready_queue_insert_head(sem_tmp->tcb);
-                interrupt_enable(cpu_sr);
-                
-                schedule();
-                return ;
-            }
+           sem_block_queue_delete(sem_tmp);
+           prio_ready_queue_insert_head(sem_tmp->tcb);
+           interrupt_enable(cpu_sr);
+           
+           schedule();
+           return TRUE;
         }
     }
-    semaphore->count++;
+    
+    if (semaphore->count != 0xffffffff)
+        semaphore->count++;
     
     interrupt_enable(cpu_sr);
+    return TRUE;
 }

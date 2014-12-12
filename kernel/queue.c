@@ -53,7 +53,7 @@ void msg_queue_create(QUEUE *entry, U32 length, U8 *name, U32 id)
     interrupt_enable(cpu_sr);
 }
 
-void msg_put(QUEUE *entry, MSG *msg, U8 mathod)
+void msg_put(QUEUE *entry, MSG *msg, U8 method)
 {
     BLOCK *block;
 
@@ -65,7 +65,7 @@ void msg_put(QUEUE *entry, MSG *msg, U8 mathod)
         block->tcb->state = 1;
         block_queue_delete(block);
     }
-    if (mathod == FIFO)
+    if (method == FIFO)
         list_insert_behind(&entry->head, &msg->list);
     else
         list_insert_spec(&entry->head, &msg->list);

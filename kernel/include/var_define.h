@@ -56,6 +56,12 @@
 
 #define STACK unsigned int 
 
+enum{
+    NO_SEMAPHORE = 10,
+    NO_MUTEX,
+    NO_MSG
+};
+
 /*for timer function*/
 #define SOFTWARE_TIMER 0
 #define CYCLE 1
@@ -111,9 +117,9 @@ void task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL
 void task_prio_change(TCB *tcb, U32 prio);
 
 void sem_block_queue_init();
-void sem_init(SEM *semaphore, const U8 *name, U32 num);
-void sem_put(SEM *semaphore);
-void sem_get(SEM *semaphore);
+U8 sem_init(SEM *semaphore, const U8 *name, U32 num);
+U8 sem_put(SEM *semaphore);
+U8 sem_get(SEM *semaphore);
 
 void mut_block_queue_init();
 void mut_init(MUTEX *mutex, const U8 *name);

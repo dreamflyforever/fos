@@ -22,7 +22,7 @@ typedef struct MSG_STR{
 
 void msg_queue_create(QUEUE *entry, U32 length, U8 *name, U32 id);
 
-void msg_put(QUEUE *entry, MSG *msg, U8 mathod);
+void msg_put(QUEUE *entry, MSG *msg, U8 method);
 
 void msg_get(QUEUE *entry, void *buffer);
 
