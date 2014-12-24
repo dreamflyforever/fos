@@ -59,7 +59,8 @@
 enum{
     NO_SEMAPHORE = 10,
     NO_MUTEX,
-    NO_MSG
+    NO_MSG,
+    NO_TCB
 };
 
 /*for timer function*/
@@ -113,8 +114,8 @@ typedef struct MUTEX_STR{
    TCB      *tcb; 
 }MUTEX;
 
-void task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
-void task_prio_change(TCB *tcb, U32 prio);
+U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
+U8 task_prio_change(TCB *tcb, U32 prio);
 
 void sem_block_queue_init();
 U8 sem_init(SEM *semaphore, const U8 *name, U32 num);

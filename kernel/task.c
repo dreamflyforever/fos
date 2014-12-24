@@ -37,22 +37,30 @@
 
 #include <var_define.h>
 
-void task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
+U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
 {
-    tcb->stack_ptr = stack_init(stack, 4*100, fun);
+    if (tcb == NULL || fun == NULL || stack == NULL)
+        return NO_TCB;
+
+    tcb->stack_ptr = stack_init(stack, 4*1000, fun);
     tcb->name      = name;
     tcb->prio      = prio;
     tcb->state     = state;
     prio_ready_queue_insert_tail(tcb);
+
+    return TRUE;
 }
 
-void task_prio_change(TCB *tcb, U32 prio)
+U8 task_prio_change(TCB *tcb, U32 prio)
 {
+    if (tcb == NULL)
+        return NO_TCB;
+
     prio_ready_queue_delete(tcb);
-    bit_clear(task_prio_map, tcb->prio);
     tcb->prio = prio;
     prio_ready_queue_insert_head(tcb);
-    bit_set(task_prio_map, tcb->prio);
+    
+    return TRUE;
 }
 
 void task_delete();

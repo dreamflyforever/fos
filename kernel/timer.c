@@ -115,7 +115,8 @@ void hardware_timer()
             tick_queue_delete(tick_tmp);
         }
 
-        (tick_tmp->timeout)--;
+        else 
+            (tick_tmp->timeout)--;
     } 
 
     interrupt_enable(cpu);
@@ -144,10 +145,9 @@ void os_delay( U32  timeslice )
     timer_delay->timeout            = timeslice;
     timer_delay->timeout_copy       = timeslice;
     timer_delay->style              = DELAY;
-  
-    /*Put the delay task to ready queue tail*/ 
+ 
+    /*Delete the delay task to ready queue and add to tick-queue*/ 
     prio_ready_queue_delete(timer_delay->tcb);
-
     tick_queue_insert(timer_delay);
     interrupt_enable(cpu);
 

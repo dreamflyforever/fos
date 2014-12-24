@@ -92,17 +92,18 @@ void prio_ready_queue_delete(TCB *tcb)
         bit_clear(task_prio_map, tcb->prio);
         return ;
     }
+
 #ifdef mutex_debug
     LIST *tmp = &task_prio_queue[tcb->prio].list;
     TCB *tcb_tmp = &task_prio_queue[tcb->prio];
     int i = 0;
     while (!is_list_last(tmp)){
-        tmp = task_prio_queue[tcb->prio].list.next;
+        tmp = tmp->next;
         i++;
         os_printf("i = %d\n", i);
         os_printf("prio = %d\n", tcb->prio);
         tcb_tmp = list_entry(tmp->next, TCB, list);
-        os_printf("tmp rio = %d\n", tcb_tmp->prio);
+        os_printf("task-name = %s\n", tcb_tmp->name);
     }
 #endif
 }
@@ -124,10 +125,6 @@ U8 prio_ready_queue_fetch()
     old_task = new_task;
     new_task = tmp;
 
-#if DEBUG
-    os_printf("old_task->prio == %d\n", old_task->prio);
-    os_printf("new_task->prio == %d\n", new_task->prio);
-#endif
     return SCHED;
 }
 
@@ -142,6 +139,9 @@ void schedule()
         interrupt_enable(cpu_sr);
         return ;
     }
+    //os_printf("old_task->name == %s\n", old_task->name);
+    //os_printf("new_task->name == %s\n", new_task->name);
+ //os_printf("%d %s %d\n", __LINE__, __FUNCTION__, __FILE__);
     __asm__ ("l.sys 0");
     __asm__ ("l.nop");
     interrupt_enable(cpu_sr);
