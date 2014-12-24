@@ -72,21 +72,13 @@ int main(void)
 {
     system_init();
 
-extern void app_main();
-    app_main(); 
-
 #ifdef SHELL
     extern void shell_init();
     shell_init();
 #endif
 
-    /*which task run first*/
-    BOOL result = start_which_task(&idle_tcb);
-    if ( !result )
-    {
-        os_printf("First task is NULL\n");
-        return 0;
-    }
+extern void app_main();
+    app_main(); 
 
     /*Never reach here*/
      while (1)

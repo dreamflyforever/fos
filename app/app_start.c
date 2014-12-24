@@ -4,12 +4,12 @@
 #define sem_test              0
 #define tick_tes              0
 #define mutex_test            0
-#define task_prio_change_test 0 
+#define task_prio_change_test 0
 
-STACK stack1[4*100];
-STACK stack2[4*100];
-STACK stack3[4*100];
-STACK stack4[4*100];
+STACK stack1[4*1000];
+STACK stack2[4*1000];
+STACK stack3[4*1000];
+STACK stack4[4*1000];
 TCB tcb1;
 TCB tcb2;
 TCB tcb3;
@@ -44,7 +44,7 @@ void task1(void *arg)
 
 #if sem_test
         sem_put(&sem);
-        os_printf("task1 = %d\n", sem.count );
+        os_printf("task1 sem.count = %d\n", sem.count );
 #endif
 
 #if mutex_test
@@ -54,10 +54,6 @@ void task1(void *arg)
         mut_put(&mutex);
 #endif 
         os_printf("task1 running\n");
-
-#if task_prio_change_test
-        task_prio_change(&tcb1, 5);
-#endif
         os_delay(3);
     }
 }
@@ -74,10 +70,10 @@ void task2(void *arg)
 
 #if sem_test
         sem_get(&sem);
-        os_printf("task2: %d\n", sem.count);
+        os_printf("task2 sem.count = %d\n", sem.count );
 #endif
         os_printf("task2 running\n" );
-        os_delay(3);
+        os_delay(10);
     };
 }
 
@@ -101,11 +97,6 @@ void task4(void *arg)
 
 void app_main()
 {
-    task_create(&tcb1, (U8 *)"task1", task1, stack1, 3, 1);
-    task_create(&tcb2, (U8 *)"task2", task2, stack2, 3, 1);
-    task_create(&tcb3, (U8 *)"task3", task3, stack3, 3, 1);
-    task_create(&tcb4, (U8 *)"task4", task4, stack4, 1, 1);
-
 #if sem_test
     sem_init(&sem, "sem1", 1);
 #endif 
@@ -124,9 +115,22 @@ void app_main()
     msg2.buff = "abce";
     msg3.buff = "abcf";
 #endif
+    
+    task_create(&tcb1, (U8 *)"task1", task1, stack1, 3, 1);
+    task_create(&tcb2, (U8 *)"task2", task2, stack2, 3, 1);
+    task_create(&tcb3, (U8 *)"task3", task3, stack3, 3, 1);
+    task_create(&tcb4, (U8 *)"task4", task4, stack4, 1, 1);
 
-#if task_prio_change_test
-    task_prio_change(&tcb1, 1);
-#endif 
+    /*Only can change running task itself*/
+    #if task_prio_change_test 
+    task_prio_change(&tcb1, 5);
+    #endif
 
+    /*which task run first*/
+    BOOL result = start_which_task(&idle_tcb);
+    if ( !result )
+    {
+        os_printf("First task is NULL\n");
+        return ;
+    }
 }

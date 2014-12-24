@@ -60,6 +60,7 @@ void list_insert_spec(LIST *head, LIST *node)
     if (is_list_last(head))
     {
         list_insert(head, node);
+        return ;
     }
     
     node->next = head->next;
@@ -89,7 +90,5 @@ void list_insert_behind(LIST *head, LIST *node)
         list = list->next;
     }
 
-    node->next = node;
-    node->prev = list;
-    list->next = node;
+    list_insert(list, node);
 }

@@ -321,13 +321,13 @@ task_switch:
     STORE_CONTEXT
     
     /* Store current stack pointer   */
-    LOAD_SYMBOL_TO_GPR(r3, old_task)        /* r3= &old_task */
+    LOAD_SYMBOL_TO_GPR(r3, old_task)       /* r3= &old_task */
     l.lwz   r3,0(r3)                       /* r3 = &old_task->stack_ptr */
     l.sw    0(r3),r1                       /* old_task->stack_ptr = SP */
 
 /* task switch in interrupt routine */
 interrupt_switch:
-    LOAD_SYMBOL_TO_GPR(r2, new_task)        /* r2 = &new_task */
+    LOAD_SYMBOL_TO_GPR(r2, new_task)       /* r2 = &new_task */
     l.lwz   r2,0(r2)                       /* r2 = &new_task->stack_ptr  */
     l.lwz   r1,0(r2)                       /* sp = *(&new_task->task_stack) */
 
