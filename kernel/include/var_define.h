@@ -45,16 +45,19 @@
 #include <queue.h>
 #include <mem_block.h>
 
+#ifndef TRUE
+#define TRUE              1
+#define FALSE             0
+#endif
+
 #define SYSTEM_WORD       32
-#define TURE              1
-#define FLASE             0
 #define DEBUG             0
 #define NON_RUNNING_STATE 0
 #define CAN_RUNNING_STATE 1
 #define SCHED             1
 #define NO_SCHED          0
 
-#define STACK unsigned int 
+#define STACK unsigned int
 
 enum{
     NO_SEMAPHORE = 10,
@@ -65,11 +68,11 @@ enum{
 
 /*for timer function*/
 #define SOFTWARE_TIMER 0
-#define CYCLE 1
-#define TIMEOUT 0
+#define CYCLE          1
+#define TIMEOUT        0
 
 /*for delay*/
-#define DELAY 2
+#define DELAY          2
 void os_delay(U32 timeslice);
 
 typedef  void (*TASK_ENTRY)(void *p_arg);
@@ -107,11 +110,11 @@ typedef struct SEM_STR{
 
 #define PRIO_MUTEX 1
 typedef struct MUTEX_STR{
-   LIST     list;
-   BOOL     flag;
-   const U8 *name;
-   U32      copy_prio;
-   TCB      *tcb; 
+    LIST     list;
+    BOOL     flag;
+    const U8 *name;
+    U32      copy_prio;
+    TCB      *tcb;
 }MUTEX;
 
 U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);

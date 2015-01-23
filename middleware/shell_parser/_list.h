@@ -8,13 +8,6 @@
 #define getchar uart_getc 
 #define printf os_printf
 
-#if 0
-enum BOOL{
-    FALSE = 0,
-    TURE  = 1,
-};
-#endif
-
 typedef struct _LIST{
    struct _LIST *next;
 }_LIST;

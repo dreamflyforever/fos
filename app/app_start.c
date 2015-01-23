@@ -37,8 +37,8 @@ void task1(void *arg)
     while (1){
 
 #if msg_queue_test
-        msg_put(&my_queue, &msg1, FIFO); 
-        msg_put(&my_queue, &msg2, FIFO); 
+        msg_put(&my_queue, &msg1, FIFO);
+        msg_put(&my_queue, &msg2, FIFO);
         msg_put(&my_queue, &msg3, FIFO);
 #endif
 
@@ -52,7 +52,7 @@ void task1(void *arg)
         mutex_resource++;
         os_printf("task1 mutex_resource:%d\n", mutex_resource );
         mut_put(&mutex);
-#endif 
+#endif
         os_printf("task1 running\n");
         os_delay(3);
     }

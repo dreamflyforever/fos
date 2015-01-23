@@ -130,7 +130,7 @@ U8 prio_ready_queue_fetch()
 
 void schedule()
 {
-    if (schedule_is_lock == TURE)
+    if (schedule_is_lock == TRUE)
         return ;
 
     U32 cpu_sr = interrupt_disable();
@@ -164,12 +164,12 @@ BOOL start_which_task(TCB *first_task)
 
 void schedule_lock()
 {
-    schedule_is_lock = TURE;
+    schedule_is_lock = TRUE;
 }
 
 void schedule_unlock()
 {
-    schedule_is_lock = FLASE;
+    schedule_is_lock = FALSE;
 }
 
 void find_high_ready_task()

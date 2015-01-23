@@ -52,7 +52,7 @@ int parser(U8 *cmd)
         if (!strcmp((const char *)cmd, (const char *)sym_tmp->name))
         {
             sym_tmp->func(NULL);
-            return TURE;
+            return TRUE;
         }
     }
     return FALSE;
