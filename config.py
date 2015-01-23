@@ -1,8 +1,9 @@
 BUILD = 'release'
 PLATFORM 	= 'gcc'
-EXEC_PATH 	= '/opt/or32-elf/bin'
+#The position of gcc
+EXEC_PATH 	= '/opt/orx/orxsys/staging_dir/toolchain-or1k/bin'
 # toolchains
-PREFIX = 'or32-elf-'
+PREFIX = 'or1k-elf-'
 CC = PREFIX + 'gcc'
 AS = PREFIX + 'gcc'
 AR = PREFIX + 'ar'
@@ -15,11 +16,13 @@ OBJCPY = PREFIX + 'objcopy'
 DEVICE = ' -mhard-mul -mhard-div -msoft-float'
 # DEVICE = ' -msoft-mul -msoft-div -msoft-float'
 
-CFLAGS = DEVICE + ' -Wall -fno-builtin'
+CFLAGS = DEVICE + ' -Werror -fno-builtin'
 # AFLAGS = ' -c -x assembler-with-cpp' + DEVICE
 AFLAGS = ' -c ' + DEVICE
 # LFLAGS = DEVICE + ' -Bstatic -nostdlib -u _reset --stats -T link.lds'
 LFLAGS = ' -Bstatic -nostdlib --stats -T link.lds -L /opt/or32-new/lib/gcc/or32-elf/4.5.1-or32-1.0rc4/libgcc.a'
+
+#LFLAGS = ' -Bstatic -nostdlib --stats -T link.lds -L /opt/orx/orxsys/staging_dir/toolchain-or1k/lib/gcc/or1k-elf/4.9.0/compat-delay/soft-float/libgcc.a '
 
 CPATH = ''
 LPATH = ''

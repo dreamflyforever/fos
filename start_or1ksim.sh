@@ -1,4 +1,3 @@
-/opt/or1ksim/bin/or32-elf-sim -f or1ksim.cfg hello #-t > trace
+/opt/orx/orxsys/staging_dir/toolchain-or1k/bin/or1k-elf-sim -f or1ksim.cfg fos.exe #-t > trace
 
-#/opt/openrisc/or32-elf-1.0rc1/bin/or32-elf-objdump -S  hello > hello.dis
-
+#or1k-elf-objdump -S  fos.exe > fos.dis
