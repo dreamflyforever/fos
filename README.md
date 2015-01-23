@@ -31,5 +31,5 @@ SOURCE TREE:
 
 Contributions:
 ==============
-This software was written by Shanjin Yang. License: GPL
-Any question please contract me by <sjyangv0@gmail.com>.
+This software was written by Shanjin Yang. License: GPL. 
+Any question please contact me by <sjyangv0@qq.com>.
