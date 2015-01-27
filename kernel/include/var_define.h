@@ -66,6 +66,9 @@ enum{
     NO_TCB
 };
 
+/*system tick*/
+#define TICKS_PER_SECOND 100
+
 /*for timer function*/
 #define SOFTWARE_TIMER 0
 #define CYCLE          1

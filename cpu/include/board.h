@@ -3,7 +3,6 @@
 
 /* SYSTEM CLOCK */
 #define SYS_CLK	40000000 // 40MHz
-#define TICKS_PER_SECOND 100
 
 /* UART */
 #define UART_BAUD_RATE	38400
@@ -23,7 +22,7 @@
 #define I2C_BASE    0x91000000
 #define I2C_IRQ	3
 #define I2C_RATE    100000	/* 100K */
-#define I2C_MASTER_SLAVE_NUM_CORES 	1
+#define I2C_MASTER_SLAVE_NUM_CORES	1
 #define I2C_MASTER_SLAVE_BASE_ADDRESSES_CSV	I2C_BASE
 
 /* Ethernet */

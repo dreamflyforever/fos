@@ -9,6 +9,7 @@
  */
 
 #include <hw_include.h>
+#include <var_define.h>
 
 /*======================[ CPU Tick timer functions ]============================= */
 
