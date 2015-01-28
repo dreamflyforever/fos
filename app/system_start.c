@@ -78,7 +78,7 @@ int main(void)
 #endif
 
 extern void app_main();
-    app_main(); 
+    app_main();
 
     /*Never reach here*/
      while (1)
