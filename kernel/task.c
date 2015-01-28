@@ -37,12 +37,21 @@
 
 #include <var_define.h>
 
+/*When task return, the function wii guarantee the system steady operation, but
+ * it's incomplete. XXX*/
+void task_exit()
+{
+	os_printf("Task return\n");
+	while(1)
+	os_delay(100);
+}
+
 U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state)
 {
     if (tcb == NULL || fun == NULL || stack == NULL)
         return NO_TCB;
 
-    tcb->stack_ptr = stack_init(stack, 4*1000, fun);
+    tcb->stack_ptr = stack_init(stack, 4*1000, fun, task_exit);
     tcb->name      = name;
     tcb->prio      = prio;
     tcb->state     = state;
@@ -59,7 +68,7 @@ U8 task_prio_change(TCB *tcb, U32 prio)
     prio_ready_queue_delete(tcb);
     tcb->prio = prio;
     prio_ready_queue_insert_head(tcb);
-    
+
     return TRUE;
 }
 
