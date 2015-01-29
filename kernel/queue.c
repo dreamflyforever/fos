@@ -44,7 +44,7 @@ void msg_queue_create(QUEUE *entry, U32 length, U8 *name, U32 id)
 {
 
     U32 cpu_sr =  interrupt_disable();
-    
+
     list_init(&entry->head);
     entry->length = length;
     entry->name   = name;
@@ -58,7 +58,7 @@ void msg_put(QUEUE *entry, MSG *msg, U8 method)
     BLOCK *block;
 
     U32 cpu_sr =  interrupt_disable();
-   
+
     if (!is_list_last(&block_queue.list))
     {
         block = list_entry(block_queue.list.next, BLOCK, list);
@@ -72,7 +72,7 @@ void msg_put(QUEUE *entry, MSG *msg, U8 method)
     //schedule();
     interrupt_enable(cpu_sr);
 }
-   
+
 
 void msg_get(QUEUE *entry, void *buffer)
 {
@@ -89,7 +89,7 @@ void msg_get(QUEUE *entry, void *buffer)
         }
         schedule();
     }
-    MSG *msg = list_entry(entry->head.next, MSG, list);  
+    MSG *msg = list_entry(entry->head.next, MSG, list);
     memcpy(buffer, msg->buff, 5);
     list_delete(entry->head.next);
 

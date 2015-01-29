@@ -51,7 +51,7 @@ rand ()
     static unsigned long int lfsr = 0x14b6bc3c;
     static int period = 0;
     /* taps: 32 31 29 1; characteristic polynomial: x^32 + x^31 + x^29 + x + 1 */
-    lfsr = (lfsr >> 1) ^ (unsigned long int)((0 - (lfsr & 1u)) & 0xd0000001u); 
+    lfsr = (lfsr >> 1) ^ (unsigned long int)((0 - (lfsr & 1u)) & 0xd0000001u);
     ++period;
     return lfsr;
 }
@@ -61,10 +61,10 @@ void *memset(void *src, unsigned char byte, unsigned int count)
     char *xs = src;
 
     while (count--) {
-        
+
         *xs++ = byte;
     }
-    
+
     return src;
 }
 
@@ -288,7 +288,7 @@ static U32 vsnprintf(char       *buf,
 
         /* get the conversion qualifier */
         qualifier = 0;
-        
+
         if (*fmt == 'h' || *fmt == 'l')
         {
             qualifier = *fmt;
@@ -417,7 +417,7 @@ static U32 vsnprintf(char       *buf,
             num = va_arg(args, U32);
             if (flags & SIGN) num = (S32)num;
         }
-    
+
         str = print_number(str, end, num, base, field_width, flags);
     }
 
