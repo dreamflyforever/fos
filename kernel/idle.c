@@ -38,7 +38,7 @@
 #include <var_define.h>
 
 TCB idle_tcb;
-U32 idle_stack[4 * 1024];
+U32 idle_stack[IDLE_STACK_SIZE];
 
 void idle_task(void *arg)
 {

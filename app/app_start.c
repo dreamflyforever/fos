@@ -6,10 +6,11 @@
 #define mutex_test            0
 #define task_prio_change_test 0
 
-STACK stack1[4*1000];
-STACK stack2[4*1000];
-STACK stack3[4*1000];
-STACK stack4[4*1000];
+#define STACK_SIZE            4 * 1024
+STACK stack1[STACK_SIZE];
+STACK stack2[STACK_SIZE];
+STACK stack3[STACK_SIZE];
+STACK stack4[STACK_SIZE];
 TCB tcb1;
 TCB tcb2;
 TCB tcb3;
@@ -54,7 +55,7 @@ void task1(void *arg)
         mut_put(&mutex);
 #endif
         os_printf("task1 running\n");
-        os_delay(3);
+        os_delay(300);
     }
 }
 
@@ -73,7 +74,7 @@ void task2(void *arg)
         os_printf("task2 sem.count = %d\n", sem.count );
 #endif
         os_printf("task2 running\n" );
-        os_delay(10);
+        os_delay(100);
     };
 }
 
@@ -99,11 +100,11 @@ void app_main()
 {
 #if sem_test
     sem_init(&sem, "sem1", 1);
-#endif 
+#endif
 
 #if mutex_test
     mut_init(&mutex, (U8 *)"mutex1");
-#endif 
+#endif
 
 #if tick_test
     extern void test_tick();
@@ -115,11 +116,11 @@ void app_main()
     msg2.buff = "abce";
     msg3.buff = "abcf";
 #endif
-    
-    task_create(&tcb1, (U8 *)"task1", task1, stack1, 3, 1);
-    task_create(&tcb2, (U8 *)"task2", task2, stack2, 3, 1);
-    task_create(&tcb3, (U8 *)"task3", task3, stack3, 3, 1);
-    task_create(&tcb4, (U8 *)"task4", task4, stack4, 1, 1);
+
+    task_create(&tcb1, (U8 *)"task1", task1, stack1, STACK_SIZE, 3, 1);
+    task_create(&tcb2, (U8 *)"task2", task2, stack2, STACK_SIZE, 3, 1);
+    //task_create(&tcb3, (U8 *)"task3", task3, stack3, STACK_SIZE, 3, 1);
+    //task_create(&tcb4, (U8 *)"task4", task4, stack4, STACK_SIZE, 1, 1);
 
     /*Only can change running task itself*/
     #if task_prio_change_test 

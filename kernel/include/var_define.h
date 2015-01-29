@@ -65,7 +65,7 @@ enum{
     NO_MSG,
     NO_TCB
 };
-
+#define IDLE_STACK_SIZE 4 *1024
 /*system tick*/
 #define TICKS_PER_SECOND 100
 
@@ -120,7 +120,7 @@ typedef struct MUTEX_STR{
     TCB      *tcb;
 }MUTEX;
 
-U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U8 prio, BOOL state);
+U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U32 stack_size, U8 prio, BOOL state);
 U8 task_prio_change(TCB *tcb, U32 prio);
 
 void sem_block_queue_init();
