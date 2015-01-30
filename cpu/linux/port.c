@@ -16,7 +16,7 @@
 #include <signal.h>
 #include <hw_include.h>
 
-STACK * stack_init(STACK* stack_ptr, U32 stack_size, TASK_ENTRY p_task, void *task_exit)
+STACK * stack_init(STACK* stack_ptr, U32 stack_size, TASK_ENTRY p_task, void * arg, void *task_exit)
 {
 	if ((stack_ptr == NULL) || (stack_size <= 0) || (p_task == NULL) || (task_exit == NULL))
 		assert(0);
@@ -32,10 +32,9 @@ STACK * stack_init(STACK* stack_ptr, U32 stack_size, TASK_ENTRY p_task, void *ta
 	stack->uc_stack.ss_sp = stack_ptr;
 	stack->uc_stack.ss_size = stack_size;
 	stack->uc_stack.ss_flags = 0;
-	makecontext(stack, p_task, 0);
+	makecontext(stack, (void (*)(void))p_task, 1, arg);
 	return (STACK *)stack;
 }
-
 
 void port_schedule()
 {

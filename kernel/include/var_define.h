@@ -86,7 +86,7 @@ enum{
 #define DELAY          2
 void os_delay(U32 timeslice);
 
-typedef  void (*TASK_ENTRY)(void);
+typedef  void (*TASK_ENTRY)(void *);
 typedef  void (*FUNC_PTR)(void *p_arg);
 
 /*time manage*/
@@ -128,7 +128,7 @@ typedef struct MUTEX_STR{
     TCB      *tcb;
 }MUTEX;
 
-U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U32 stack_size, U8 prio, BOOL state);
+U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void * arg, STACK *stack, U32 stack_size, U8 prio, BOOL state);
 U8 task_prio_change(TCB *tcb, U32 prio);
 
 void sem_block_queue_init();
@@ -173,7 +173,7 @@ ULONG tick_get();
 void hardware_timer();
 
 BOOL start_which_task(TCB *tcb);
-void idle_task(void);
+void idle_task(void *);
 void schedule_lock();
 void schedule_unlock();
 

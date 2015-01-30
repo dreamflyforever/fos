@@ -22,9 +22,9 @@
 #define printf_to_uart printf
 #define STACK unsigned int
 
-typedef void (*_TASK_ENTRY)(void);
+typedef void (*_TASK_ENTRY)(void *);
 
-STACK * stack_init(STACK* stack_ptr, U32 stack_size, _TASK_ENTRY p_task, void *task_exit);
+STACK * stack_init(STACK* stack_ptr, U32 stack_size, _TASK_ENTRY p_task, void * arg, void *task_exit);
 
 //void port_schedule();
 //void start_schedule(TCB * tcb);

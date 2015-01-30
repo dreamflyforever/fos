@@ -33,7 +33,7 @@ MSG msg3;
 U8 buffer[10];
 #endif
 
-void task1(void)
+void task1(void * arg)
 {
     while (1){
 
@@ -59,7 +59,7 @@ void task1(void)
     }
 }
 
-void task2(void)
+void task2(void * arg)
 {
     while (1)
     {
@@ -78,7 +78,7 @@ void task2(void)
     };
 }
 
-void task3(void)
+void task3(void * arg)
 {
     while (1)
     {
@@ -87,7 +87,7 @@ void task3(void)
     }
 }
 
-void task4(void)
+void task4(void * arg)
 {
     while (1)
     {
@@ -117,10 +117,10 @@ void app_main()
     msg3.buff = "abcf";
 #endif
 
-    task_create(&tcb1, (U8 *)"task1", task1, stack1, STACK_SIZE, 3, 1);
-    task_create(&tcb2, (U8 *)"task2", task2, stack2, STACK_SIZE, 3, 1);
-    //task_create(&tcb3, (U8 *)"task3", task3, stack3, STACK_SIZE, 3, 1);
-    //task_create(&tcb4, (U8 *)"task4", task4, stack4, STACK_SIZE, 1, 1);
+    task_create(&tcb1, (U8 *)"task1", task1, NULL, stack1, STACK_SIZE, 3, 1);
+    task_create(&tcb2, (U8 *)"task2", task2, NULL, stack2, STACK_SIZE, 3, 1);
+    //task_create(&tcb3, (U8 *)"task3", task3, NULL, stack3, STACK_SIZE, 3, 1);
+    //task_create(&tcb4, (U8 *)"task4", task4, NULL, stack4, STACK_SIZE, 1, 1);
 
     /*Only can change running task itself*/
     #if task_prio_change_test 

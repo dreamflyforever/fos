@@ -46,13 +46,13 @@ void task_exit()
 	os_delay(100);
 }
 
-U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U32 stack_size, U8 prio, BOOL state)
+U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void * arg, STACK *stack, U32 stack_size, U8 prio, BOOL state)
 {
     if (tcb == NULL || fun == NULL || stack == NULL)
         return NO_TCB;
 
     memset(stack, 0, stack_size);
-    tcb->stack_ptr = stack_init(stack, stack_size, fun, task_exit);
+    tcb->stack_ptr = stack_init(stack, stack_size, fun, arg, task_exit);
     tcb->name      = name;
     tcb->prio      = prio;
     tcb->state     = state;
