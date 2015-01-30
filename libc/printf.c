@@ -161,7 +161,7 @@ CYG_MACRO_END
 
 // Function which prints back to the buffer, ptr, len bytes
 // returns 1 if it should finish up, otherwise 0 to continue
-int 
+int
 print_back_to_string(char * ptr, int len, size_t * n, int * ret, char ** stream)
 {
 #ifndef MIN
@@ -176,7 +176,7 @@ print_back_to_string(char * ptr, int len, size_t * n, int * ret, char ** stream)
     }
 
   } while(0);
-    
+
     return 0;
 }
 
@@ -190,16 +190,16 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
   int x, y;      /* handy integers (short term usage) */
   char *cp;      /* handy char pointer (short term usage) */
   int flags;     /* flags as above */
-  
+
   int ret;                /* return value accumulator */
   int width;              /* width from format (%8d), or 0 */
   int prec;               /* precision from format (%.3d), or -1 */
   char sign;              /* sign prefix (' ', '+', '-', or \0) */
   wchar_t wc;
-  
+
 #define quad_t    long long
 #define u_quad_t  unsigned long //unsigned long long
-  
+
   u_quad_t _uquad;        /* integer arguments %[diouxX] */
   enum { OCT, DEC, HEX } base;/* base for [diouxX] conversion */
   int dprec;              /* a copy of prec if [diouxX], 0 otherwise */
@@ -210,7 +210,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
 #define NIOV 8
   char buf[BUF];          /* space for %c, %[diouxX], %[eEfgG] */
   char ox[2];             /* space for 0x hex-prefix */
-  
+
   /*
    * Choose PADSIZE to trade efficiency vs. size.  If larger printf
    * fields occur frequently, increase PADSIZE and make the initialisers
@@ -221,11 +221,11 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
     {' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
   static char zeroes[PADSIZE] =
     {'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};
-  
+
   /*
    * BEWARE, these `goto error' on error, and PAD uses `n'.
    */
-  
+
   // We'll copy len bytes from (char*) ptr, into the output stream
   // making sure we don't go over the end, so calculate length to be
   // either the whole length we've been passed, or the whole length
@@ -248,7 +248,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
   
 	PRINT(with, PADSIZE);						\
     PRINT(with, x);							\
- */ 
+ */
 #define PAD(howmany, with)						\
   CYG_MACRO_START							\
     if ((x = (howmany)) > 0) {						\
@@ -259,12 +259,12 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
       if (print_back_to_string(with, x, &n, &ret, &stream))goto done;	\
     }									\
   CYG_MACRO_END
-  
+
   /*
    * To extend shorts properly, we need both signed and unsigned
    * argument extraction methods.
    */
-  
+
 #define SARG()					  \
   (flags&QUADINT ? va_arg(arg, long long) :	  \
    flags&LONGINT ? va_arg(arg, long) :			     \
@@ -278,11 +278,11 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
    flags&SIZET ? va_arg(arg, size_t) :					\
    (unsigned long)va_arg(arg, unsigned int))
 
-  
+
   xdigs = (char *) NULL;  // stop compiler whinging
   fmt = (char *)format;
   ret = 0;
-  
+
   /*
    * Scan the format for conversions (`%' character).
    */
@@ -303,13 +303,13 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
     if ((x <= 0) || (ret >= (int)n))  // @@@ this check with n isn't good enough
       goto done;
     fmt++;          /* skip over '%' */
-    
+
     flags = 0;
     dprec = 0;
     width = 0;
     prec = -1;
     sign = '\0';
-    
+
   rflag:          ch = *fmt++;
   reswitch:       switch (ch) {
     case ' ':
@@ -402,13 +402,13 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
 	if ((long) _uquad < 0)
 #endif
 	  {
-	    
+
 	    _uquad = -_uquad;
 	    sign = '-';
 	  }
       base = DEC;
       goto number;
-      
+
     case 'e':
     case 'E':
     case 'f':
@@ -420,12 +420,12 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
       size = 0;
       sign = '\0';
       break;
-      
+
     case 'n':
 #ifndef _NO_LONGLONG
       if (flags & QUADINT)
 	*va_arg(arg, quad_t *) = ret;
-      else 
+      else
 #endif
 	if (flags & LONGINT)
 	  *va_arg(arg, long *) = ret;
@@ -468,7 +468,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
 	 * strlen() will go further.
 	 */
 	char *p = (char *)memchr(cp, 0, prec);
-	
+
 	if (p != NULL) {
 	  size = p - cp;
 	  if (size > prec)
@@ -496,7 +496,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
       /* leading 0x/X only if non-zero */
       if (flags & ALT && _uquad != 0)
 	flags |= HEXPREFIX;
-      
+
       /* unsigned conversions */
     nosign:                 sign = '\0';
       /*
@@ -506,7 +506,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
        */
     number:                 if ((dprec = prec) >= 0)
 	flags &= ~ZEROPAD;
-      
+
       /*
        * ``The result of converting a zero value with an
        * explicit precision of zero is no characters.''
@@ -529,7 +529,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
 	  if (flags & ALT && *cp != '0')
 	    *--cp = '0';
 	  break;
-	  
+
 	case DEC:
 	  if (!(flags & QUADINT)) {
 	    /* many numbers are 1 digit */
@@ -552,14 +552,14 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
 	    *--cp = to_char(_uquad);
 	  }
 	  break;
-	  
+
 	case HEX:
 	  do {
 	    *--cp = xdigs[_uquad & 15];
 	    _uquad >>= 4;
 	  } while (_uquad);
 	  break;
-	  
+
 	default:
 	  cp = (char *)"bug in vfprintf: bad base";
 	  size = strlen(cp);
@@ -582,7 +582,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
       sign = '\0';
       break;
     }
-    
+
     /*
      * All reasonable formats wind up here.  At this point, `cp'
      * points to a string which (if not flags&LADJUST) should be
@@ -607,7 +607,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
     else if (flags & HEXPREFIX)
       fieldsz+= 2;
     realsz = dprec > fieldsz ? dprec : fieldsz;
-    
+
     /* right-adjusting blank padding */
     if ((flags & (LADJUST|ZEROPAD)) == 0) {
       if (width - realsz > 0) {
@@ -615,7 +615,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
 	ret += width - realsz;
       }
     }
-    
+
     /* prefix */
     if (sign) {
       //PRINT(&sign, 1);
@@ -628,7 +628,7 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
       if(print_back_to_string(ox, 2, &n, &ret, &stream))goto done;
       ret += 2;
     }
-    
+
     /* right-adjusting zero padding */
     if ((flags & (LADJUST|ZEROPAD)) == ZEROPAD) {
       if (width - realsz > 0) {
@@ -636,24 +636,24 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
 	ret += width - realsz;
       }
     }
-    
+
     if (dprec - fieldsz > 0) {
       /* leading zeroes from decimal precision */
       PAD(dprec - fieldsz, zeroes);
       ret += dprec - fieldsz;
     }
-    
+
     /* the string or number proper */
     //PRINT(cp, size);
     if(print_back_to_string(cp,size, &n, &ret, &stream))goto done;
     ret += size;
-    
+
 #ifdef CYGSEM_LIBC_STDIO_PRINTF_FLOATING_POINT
     /* trailing f.p. zeroes */
     PAD(fpprec, zeroes);
     ret += fpprec;
 #endif
-    
+
     /* left-adjusting padding (always blank) */
     if (flags & LADJUST) {
       if (width - realsz > 0) {
@@ -661,9 +661,9 @@ vfnprintf ( char *stream, size_t n, const char *format, va_list arg)
 	ret += width - realsz;
       }
     }
-    
+
   }
-  
+
  done:
   return ret;// remove this error stuff (((Cyg_OutputStream *) stream)->get_error() ? EOF : ret);
   /* NOTREACHED */
@@ -673,15 +673,15 @@ int
 sprintf(char* str, const char *fmt, ...)
 {
 	va_list args;
-	
+
 	va_start(args, fmt);
 
 	return vfnprintf(str, 1024, fmt, args);
-	
+
 }
 
-#include "include/printf.h"
-#include "../cpu/include/hw_include.h"
+#include <printf.h>
+#include <hw_include.h>
 // Actual printf function we call, with static buffer of 512 bytes
 char PRINTFBUFFER[PRINTFBUFFER_SIZE]; // Declare a global printf buffer
 
@@ -724,9 +724,9 @@ printf_to_uart(const char *fmt, ...)
 
   va_list args;
   va_start(args, fmt);
-  
+
   int str_l = vfnprintf(PRINTFBUFFER, PRINTFBUFFER_SIZE, fmt, args);
-  
+
   if (!str_l) return -1; // no length string - just return
 
   // Assumes uart is initialised
@@ -735,22 +735,21 @@ printf_to_uart(const char *fmt, ...)
   va_end(args);
 
   return str_l;
-  
+
 }
 
-int 
+int
 putchar_to_uart(int c)
 {
   printf_to_uart("%c",c);
- 
+
   return c;
 }
 
-int 
+int
 puts_to_uart(const char *str)
 {
   return printf_to_uart("%s\n", str);
 }
-
 
 // EOF printf.c
