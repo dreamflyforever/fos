@@ -1,11 +1,12 @@
 #ifndef __LIST_H_A_
-#define __LIST_h_A_
+#define __LIST_H_A_
 
 #include <var_define.h>
 
+#ifndef NULL
 #define NULL (void *)0
+#endif
 
-#define getchar uart_getc 
 #define printf os_printf
 
 typedef struct _LIST{

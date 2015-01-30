@@ -16,7 +16,7 @@
 #define token(abc) func_##abc
 
 extern U8 buff_cmd[128];
-typedef  void (*FUNC_PTR)(void *p_arg);
+//typedef  void (*FUNC_PTR)(void);
 
 typedef struct SYMBOL{
     _LIST list;

@@ -40,10 +40,18 @@
 
 #include <list.h>
 #include <hw_include.h>
-#include <lib.h>
+
 #include <printf.h>
 #include <queue.h>
 #include <mem_block.h>
+
+#define LINUX 1
+#if LINUX
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#define os_printf printf
+#endif
 
 #ifndef TRUE
 #define TRUE              1
@@ -78,7 +86,7 @@ enum{
 #define DELAY          2
 void os_delay(U32 timeslice);
 
-typedef  void (*TASK_ENTRY)(void *p_arg);
+typedef  void (*TASK_ENTRY)(void);
 typedef  void (*FUNC_PTR)(void *p_arg);
 
 /*time manage*/
@@ -100,7 +108,7 @@ typedef struct TCB_STR{
     U8      *name;
     LIST    list;
     U8      prio;
-    BOOL    state; // Only two state, run or forbit run(NON_RUNNING_STATE AND CAN_RUNNING_STATE)
+    BOOL    state;
 }TCB;
 
 /*for semaphore*/
@@ -145,9 +153,9 @@ extern U32 task_prio_map;
 extern ULONG fos_tick;
 
 extern TCB idle_tcb;
-extern U32 idle_stack[4 * 1024];
+extern U32 idle_stack[IDLE_STACK_SIZE];
 extern U32 task_prio_map;
-extern void start_schedule();
+//extern void start_schedule();
 
 #define bit_clear(num, i) num = num & (~(1<<i))
 #define bit_set(num, i)   num = num | (1<<i)
@@ -161,10 +169,16 @@ void prio_ready_queue_insert_head(TCB *tcb);
 
 void tick_queue_init();
 ULONG tick_get();
+/*For prot function*/
+void hardware_timer();
 
 BOOL start_which_task(TCB *tcb);
-void idle_task(void *arg);
+void idle_task(void);
 void schedule_lock();
 void schedule_unlock();
+
+/*For port function*/
+void port_schedule();
+void start_schedule(TCB * tcb);
 
 #endif

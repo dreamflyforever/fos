@@ -64,7 +64,7 @@ U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, STACK *stack, U32 stack_size,
 
 U8 task_prio_change(TCB *tcb, U32 prio)
 {
-    if (tcb == NULL)
+    if ((tcb == NULL) || (prio < 1) || (prio > SYSTEM_WORD))
         return NO_TCB;
 
     prio_ready_queue_delete(tcb);

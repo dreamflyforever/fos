@@ -41,12 +41,11 @@
 TCB* bit_first_one_search(U32 num)
 {
     LIST *prio_list_head;
-    TCB *tcb_ret;
+    TCB  *tcb_ret;
 
-    U8 i; 
-
+    U8 i;
     for (i = 0; i < SYSTEM_WORD; i++)
-    { 
+    {
         /* The first task of each priority queue must be representative*/
         if ((num >> i) & 0x01)
         {
@@ -141,9 +140,8 @@ void schedule()
     }
     //os_printf("old_task->name == %s\n", old_task->name);
     //os_printf("new_task->name == %s\n", new_task->name);
- //os_printf("%d %s %d\n", __LINE__, __FUNCTION__, __FILE__);
-    __asm__ ("l.sys 0");
-    __asm__ ("l.nop");
+    //os_printf("%d %s %d\n", __LINE__, __FUNCTION__, __FILE__);
+    port_schedule();
     interrupt_enable(cpu_sr);
 }
 
@@ -157,7 +155,7 @@ BOOL start_which_task(TCB *first_task)
 
     new_task = first_task;
 
-    start_schedule();
+    start_schedule(new_task);
 
     return TRUE;
 }

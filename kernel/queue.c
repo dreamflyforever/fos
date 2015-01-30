@@ -37,6 +37,7 @@
 
 #include <queue.h>
 #include <block.h>
+#include <var_define.h>
 
 BLOCK block_queue;
 

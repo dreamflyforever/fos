@@ -35,7 +35,7 @@ void fuck(void *arg)
     printf("fuck fuck!!!\n");
 }
 
-void shell_thread(void *arg)
+void shell_thread(void)
 {
     U8 i;
 

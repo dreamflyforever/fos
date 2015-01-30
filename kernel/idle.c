@@ -40,7 +40,7 @@
 TCB idle_tcb;
 U32 idle_stack[IDLE_STACK_SIZE];
 
-void idle_task(void *arg)
+void idle_task(void)
 {
     while (1)
     {

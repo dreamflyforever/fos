@@ -1,38 +1,26 @@
-#include <ucontext.h>
-#include <stdio.h>
-#include <stdlib.h>
+/*
+ * Copyright (c) 2015 Shanjin Yang.  All rights reserved.
+ *
+ *  Shanjin Yang
+ *  Shanghai, China
+ *  <sjyangv0@qq.com>
+ *
+ * The license and distribution terms for this file may be
+ * found in the file LICENSE in this distribution or at 
+ * https://github.com/yangshanjin/fos/blob/master/LICENSE.
+ */
+
 #include <assert.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <signal.h>
-
-#define handle_error(msg) \
-	do { perror(msg); exit(EXIT_FAILURE); } while (0)
-
-#define U8    unsigned char
-#define U32   unsigned int
-#define STACK unsigned char
-
-typedef void (* TASK_ENTRY)(void);
-
-typedef struct tcb_str{
-	STACK        * stack_ptr;
-	char         * name;
-	TASK_ENTRY     entry;
-}TCB;
-
-TCB new_tcb;
-TCB old_tcb;
-
-void task_exit()
-{
-	printf("Task return\n");
-	while(1);
-}
+#include <hw_include.h>
 
 STACK * stack_init(STACK* stack_ptr, U32 stack_size, TASK_ENTRY p_task, void *task_exit)
 {
+	if ((stack_ptr == NULL) || (stack_size <= 0) || (p_task == NULL) || (task_exit == NULL))
+		assert(0);
+
 	ucontext_t *stack = (ucontext_t *)malloc(sizeof(ucontext_t));
 	assert(stack);
 	memset(stack, 0, sizeof(ucontext_t));
@@ -41,93 +29,60 @@ STACK * stack_init(STACK* stack_ptr, U32 stack_size, TASK_ENTRY p_task, void *ta
 		handle_error("getcontext");
 
 	stack->uc_link = NULL;
-
 	stack->uc_stack.ss_sp = stack_ptr;
-
 	stack->uc_stack.ss_size = stack_size;
-
 	stack->uc_stack.ss_flags = 0;
-
 	makecontext(stack, p_task, 0);
-
 	return (STACK *)stack;
 }
 
-U8 task_create(TCB *tcb, U32 stack_size, U8 *name, TASK_ENTRY task, STACK *stack)
-{
-	if (tcb == NULL || task == NULL || stack == NULL)
-		assert(0);
-	tcb->stack_ptr = stack_init(stack, stack_size, task, task_exit);
-	tcb->name      = name;
-	return 0;
-}
 
-void schedule()
+void port_schedule()
 {
-	if (swapcontext( (ucontext_t *)old_tcb.stack_ptr, (ucontext_t *)new_tcb.stack_ptr) == -1){
+	if (swapcontext( (ucontext_t *)old_task->stack_ptr, (ucontext_t *)new_task->stack_ptr) == -1){
 		handle_error("swapcontext");
 	}
 }
 
-void start_task(TCB * tcb)
+void start_schedule(TCB * tcb)
 {
-	if (setcontext( (ucontext_t *)new_tcb.stack_ptr) == -1)
+	if (setcontext( (ucontext_t *)tcb->stack_ptr) == -1){
 		handle_error("swapcontext");
+	}
 
 }
 
-/*-----------------------------------------------------------------------------------*/
-
-#define STACK_SIZE 4 * 1024
-STACK stack1[STACK_SIZE];
-STACK stack2[STACK_SIZE];
-TCB   tcb1;
-TCB   tcb2;
-ucontext_t uctx_main;
-void task1(void)
+void hw_timer_init()
 {
-	printf("%s running\n", new_tcb.name);
-	old_tcb = new_tcb;
-	new_tcb = tcb2;
-	schedule();
-	printf("task 1 exiting\n");
-}
-
-void task2(void)
-{
-	assert(new_tcb.name);
-	printf("%s running\n", new_tcb.name);
-	old_tcb = new_tcb;
-	new_tcb = tcb1;
-	schedule();
-	printf("task 2 exiting\n");
-}
-
-void func()
-{
-	printf("timeout\n");
-}
-
-void timer_init()
-{	struct itimerval t;
-	t.it_interval.tv_usec = 0;
-	t.it_interval.tv_sec = 1;
+	struct itimerval t;
+	t.it_interval.tv_usec = TICKS_PER_SECOND * 100;
+	t.it_interval.tv_sec = 0;
 	t.it_value.tv_usec = 0;
 	t.it_value.tv_sec = 1;
 
 	if( setitimer( ITIMER_REAL, &t, NULL) < 0 ){
 		printf("error\n");
 	}
-	signal( SIGALRM, func);
+	signal( SIGALRM, hardware_timer);
 }
 
-int main()
+void hw_interrupt_init()
 {
-	timer_init();
-	task_create(&tcb1, STACK_SIZE, "task1", task1, stack1);
-	task_create(&tcb2, STACK_SIZE, "task2", task2, stack2);
-	new_tcb = tcb1;
-	start_task(&new_tcb);
+}
 
+void uart_init()
+{
+}
+
+void interrupt_enable(int sr_cpu)
+{
+}
+
+int interrupt_disable()
+{
 	return 0;
+}
+
+void hw_timer_clear_interrupt()
+{
 }
