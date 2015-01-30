@@ -72,5 +72,5 @@ void shell_init()
     export(version,(U8 *)"version");
     export(fuck, (U8 *)"fuck");
 
-    task_create(&tcb_shell, (U8 *)"shell_task", shell_thread, stack_shell, STACK_SHELL_SIZE, 30, 1);
+    task_create(&tcb_shell, (U8 *)"shell_task", shell_thread, NULL, stack_shell, STACK_SHELL_SIZE, 30, 1);
 }

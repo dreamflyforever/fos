@@ -15,6 +15,6 @@ typedef void (*TASK_ENTRY)(void *p_arg);
 typedef void (*TASK_EXIT)(void *p_arg);
 #define STACK_COPY unsigned int
 #define U32 unsigned int
-void *stack_init( STACK_COPY *p_stk_base, U32 stk_size, TASK_ENTRY p_task, TASK_EXIT task_exit);
+void *stack_init( STACK_COPY *p_stk_base, U32 stk_size, TASK_ENTRY p_task, void * arg, TASK_EXIT task_exit);
 
 #endif

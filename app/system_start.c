@@ -61,7 +61,7 @@ void system_init()
     old_task = NULL;
 
     /*create idle task*/
-    task_create(&idle_tcb, (U8 *)"idle_task", idle_task, idle_stack,
+    task_create(&idle_tcb, (U8 *)"idle_task", idle_task, NULL, idle_stack,
 		IDLE_STACK_SIZE, 31, 1);
 
     hw_timer_init();

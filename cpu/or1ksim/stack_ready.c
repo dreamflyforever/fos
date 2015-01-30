@@ -10,8 +10,8 @@
 
 #include <hw_include.h>
 
-void *stack_init( STACK_COPY *p_stk_base, U32 stk_size, TASK_ENTRY p_task,
-		  TASK_EXIT task_exit)
+void *stack_init( STACK_COPY *p_stk_base, U32 stk_size, TASK_ENTRY p_task, void
+		  * arg, TASK_EXIT task_exit)
 {
     U32 *stk;
     U32 temp = (U32)(p_stk_base + stk_size - 128);
@@ -45,12 +45,10 @@ void *stack_init( STACK_COPY *p_stk_base, U32 stk_size, TASK_ENTRY p_task,
     *stk-- = (U32)6;                      /* r06 = 0 */
     *stk-- = (U32)5;                      /* r05 = 0 */
     *stk-- = (U32)4;                      /* r04 = 0 */
-    *stk-- = (U32)3;                      /* r03 = arg0 */
+    *stk-- = (U32)arg;                      /* r03 = arg0 */
     *stk-- = (U32)2;                      /* r02 = frame pointer */
     *stk-- = (U32)(SPR_SR_IEE | SPR_SR_TEE | SPR_SR_SM); /* status word */
     *stk   = (U32)(p_task);                /* program counter */
 
     return ((U32 *)stk);
 }
-
-
