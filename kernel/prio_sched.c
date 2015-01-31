@@ -43,10 +43,9 @@ TCB* bit_first_one_search(U32 num)
     LIST *prio_list_head;
     TCB *tcb_ret;
 
-    U8 i; 
-
+    U8 i;
     for (i = 0; i < SYSTEM_WORD; i++)
-    { 
+    {
         /* The first task of each priority queue must be representative*/
         if ((num >> i) & 0x01)
         {

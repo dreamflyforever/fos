@@ -51,6 +51,7 @@ U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void * arg, STACK *stack, U32
     if (tcb == NULL || fun == NULL || stack == NULL)
         return NO_TCB;
 
+    U32 cpu_sr =  interrupt_disable();
     memset(stack, 0, stack_size);
     tcb->stack_ptr = stack_init(stack, stack_size, fun, arg, task_exit);
     tcb->name      = name;
@@ -58,7 +59,7 @@ U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void * arg, STACK *stack, U32
     tcb->state     = state;
 
     prio_ready_queue_insert_tail(tcb);
-
+    interrupt_enable(cpu_sr);
     return TRUE;
 }
 

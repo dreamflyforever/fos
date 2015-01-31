@@ -71,7 +71,7 @@ U8 sem_get(SEM *semaphore)
         return NO_SEMAPHORE;
 
     U32 cpu_sr =  interrupt_disable();
-    
+
     /*If not resource, then block and switch the task*/
     if (semaphore->count == 0){
         semaphore->tcb = new_task;
@@ -81,7 +81,7 @@ U8 sem_get(SEM *semaphore)
     }
     else
         semaphore->count--;
-    
+
     interrupt_enable(cpu_sr);
     return TRUE;
 }
@@ -95,7 +95,7 @@ U8 sem_put(SEM *semaphore)
     LIST *tmp = &sem_block_queue.list;
 
     U32 cpu_sr =  interrupt_disable();
-            
+
     /*Check tasks block on the semaphore list*/
     while ( !is_list_last(tmp) ){
         sem_tmp = list_entry(tmp->next, SEM, list);
@@ -106,15 +106,15 @@ U8 sem_put(SEM *semaphore)
            sem_block_queue_delete(sem_tmp);
            prio_ready_queue_insert_head(sem_tmp->tcb);
            interrupt_enable(cpu_sr);
-           
+
            schedule();
            return TRUE;
         }
     }
-    
+
     if (semaphore->count != 0xffffffff)
         semaphore->count++;
-    
+
     interrupt_enable(cpu_sr);
     return TRUE;
 }
