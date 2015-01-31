@@ -65,6 +65,7 @@ enum{
     NO_MSG,
     NO_TCB
 };
+
 #define IDLE_STACK_SIZE 4 *1024
 /*system tick*/
 #define TICKS_PER_SECOND 100
@@ -76,6 +77,21 @@ enum{
 
 /*for delay*/
 #define DELAY          2
+
+#define OS_ASSERT(X)                                                   \
+if (!(X))                                                              \
+{                                                                      \
+    os_printf("(%s) is wrong at %s: %d\n", #X, __FUNCTION__, __LINE__);\
+    while(1);                                                          \
+}
+
+#define OS_LOG(X)                                                      \
+if (!(X))                                                              \
+{                                                                      \
+    os_printf("log: (%s) is wrong at %s: %d\n", #X, __FUNCTION__,      \
+    __LINE__);                                                         \
+}
+
 void os_delay(U32 timeslice);
 
 typedef  void (*TASK_ENTRY)(void *p_arg);
