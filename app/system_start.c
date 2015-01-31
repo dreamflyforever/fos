@@ -64,7 +64,6 @@ void system_init()
     task_create(&idle_tcb, (U8 *)"idle_task", idle_task, NULL, idle_stack,
 		IDLE_STACK_SIZE, 31, 1);
 
-    hw_timer_init();
 
     //ethoc_initialize(0, 0x92000000);
 }
@@ -80,6 +79,16 @@ int main(void)
 
 extern void app_main();
     app_main();
+
+    hw_timer_init();
+
+    /*which task run first*/
+    BOOL result = start_which_task(&idle_tcb);
+    if ( !result )
+    {
+        os_printf("First task is NULL\n");
+        return 0;
+    }
 
     /*Never reach here*/
      while (1)

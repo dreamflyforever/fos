@@ -126,12 +126,4 @@ void app_main()
     #if task_prio_change_test 
     task_prio_change(&tcb1, 5);
     #endif
-
-    /*which task run first*/
-    BOOL result = start_which_task(&idle_tcb);
-    if ( !result )
-    {
-        os_printf("First task is NULL\n");
-        return ;
-    }
 }
