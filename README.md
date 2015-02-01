@@ -1,21 +1,21 @@
 FOS( Fast Operating System )
 ==========
 
-It's a open soruce project about code RTOS(Real Time Operating Systems), named FOS, alias Chinese Operating System, not COPY OTHER SYSTEM, based on OpenRISC.
+It's an open soruce project about code RTOS(Real Time Operating Systems), named FOS, alias Chinese Operating System, not COPY OTHER SYSTEM, based on OpenRISC, and now it port to linux.
 
-Now it will be complete step by step, I hope more and more people will be to make it perfecter.
+Now it's function will be complete step by step, I hope more and more people will be to make it better.
 
 ---------------------------------------------------------------------------
 
-To build the FOS, tools need: scons and or1ksim.
+To build the FOS, tools need: scons and system gcc.  
 
-CD to the RTOS directory and run:
+CD to the RTOS directory and run:  
 'scons'
 
-This will produce two execution files, one is for or1ksim, the other is for real openrisc chip.
+This will produce execution files named 'fos'.  
 
-To run the FOS for or1ksim, run the shell script:
-'./start_or1ksim.sh'
+To run the FOS for linux, run the shell script:  
+'./start.sh'
 
 ---------------------------------------------------------------------------
 
