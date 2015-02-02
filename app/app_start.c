@@ -33,7 +33,7 @@ MSG msg3;
 U8 buffer[10];
 #endif
 
-void task1(void * arg)
+void task1(void *arg)
 {
     while (1){
 
@@ -59,7 +59,7 @@ void task1(void * arg)
     }
 }
 
-void task2(void * arg)
+void task2(void *arg)
 {
     while (1)
     {
@@ -78,7 +78,7 @@ void task2(void * arg)
     };
 }
 
-void task3(void * arg)
+void task3(void *arg)
 {
     while (1)
     {
@@ -87,7 +87,7 @@ void task3(void * arg)
     }
 }
 
-void task4(void * arg)
+void task4(void *arg)
 {
     while (1)
     {
@@ -126,12 +126,4 @@ void app_main()
     #if task_prio_change_test 
     task_prio_change(&tcb1, 5);
     #endif
-
-    /*which task run first*/
-    BOOL result = start_which_task(&idle_tcb);
-    if ( !result )
-    {
-        os_printf("First task is NULL\n");
-        return ;
-    }
 }
