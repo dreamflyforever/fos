@@ -183,4 +183,8 @@ void idle_task(void *arg);
 void schedule_lock();
 void schedule_unlock();
 
+/*For port function*/
+void port_schedule();
+void star_schedule(TCB *tcb);
+
 #endif

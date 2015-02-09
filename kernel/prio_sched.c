@@ -138,11 +138,8 @@ void schedule()
         interrupt_enable(cpu_sr);
         return ;
     }
-    //os_printf("old_task->name == %s\n", old_task->name);
-    //os_printf("new_task->name == %s\n", new_task->name);
- //os_printf("%d %s %d\n", __LINE__, __FUNCTION__, __FILE__);
-    __asm__ ("l.sys 0");
-    __asm__ ("l.nop");
+
+    port_schedule();
     interrupt_enable(cpu_sr);
 }
 

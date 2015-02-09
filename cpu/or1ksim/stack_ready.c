@@ -52,3 +52,9 @@ void *stack_init( STACK_COPY *p_stk_base, U32 stk_size, TASK_ENTRY p_task, void
 
     return ((U32 *)stk);
 }
+
+void port_schedule()
+{
+    __asm__ ("l.sys 0");
+    __asm__ ("l.nop");
+}
