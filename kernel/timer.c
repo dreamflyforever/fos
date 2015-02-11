@@ -72,50 +72,43 @@ void hardware_timer()
 
     fos_tick++;
 
-    while ( !is_list_last(tmp) ) {
+    while (!is_list_last(tmp)) {
 
         tick_tmp = list_entry(tmp->next, TICK, list);
         tmp = tmp->next;
 
-        if ( tick_tmp->timeout == TIMEOUT )
-        {
-            if ( tick_tmp->style == SOFTWARE_TIMER ){
+        if (tick_tmp->timeout == TIMEOUT) {
 
+            switch (tick_tmp->style) {
+            /*Callback timeout*/
+            case SOFTWARE_TIMER:
                 tick_tmp->func(tick_tmp->func_arg);
 
-                if ( tick_tmp->period == CYCLE ){
+                if (tick_tmp->period == CYCLE) {
 
                     tick_tmp->timeout = tick_tmp->timeout_copy;
 
-                    if ( is_list_last(tmp) ){
-
-                        interrupt_enable(cpu);
-
-                        schedule();
-                        return;
+                    if (is_list_last(tmp)) {
+                        break;
                     }
-                }
-            }
+                }else
+                    tick_queue_delete(tick_tmp);
+		break;
 
-            if ( tick_tmp->style == DELAY )
-            {
+            /*Sleep timeout*/
+            case DELAY:
                 /*Put the delay task to ready queue head*/
                 prio_ready_queue_insert_tail(tick_tmp->tcb);
+                tick_queue_delete(tick_tmp);
 
                 if ( is_list_last(tmp) ){
-
-                    tick_queue_delete(tick_tmp);
-                    interrupt_enable(cpu);
-
-                    schedule();
-                    return;
+                    break;
                 }
+            default:
+                OS_LOG("Timeout status error\n");
             }
 
-            tick_queue_delete(tick_tmp);
-        }
-
-        else
+        } else
             (tick_tmp->timeout)--;
     }
 
@@ -167,7 +160,7 @@ void my_timer(void  *arg)
 TICK my_timer_str;
 
 void test_tick(void *arg)
-{ 
-    timer_req(&my_timer_str, my_timer, 100, 1); 
+{
+    timer_req(&my_timer_str, my_timer, 1, CYCLE, arg);
 }
 #endif
