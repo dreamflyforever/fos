@@ -40,38 +40,39 @@
 TICK tick_queue;
 ULONG fos_tick;
 
-void tick_queue_init()
+void tick_queue_init(void)
 {
     list_init(&tick_queue.list);
 }
 
-void tick_queue_insert( TICK *tick )
+void tick_queue_insert(TICK *tick)
 {
     list_insert_behind(&tick_queue.list, &tick->list);
 }
 
-void tick_queue_delete( TICK *tick )
+void tick_queue_delete(TICK *tick)
 {
     list_delete(&tick->list);
 }
 
-ULONG tick_get()
+ULONG tick_get(void)
 {
     return fos_tick;
 }
 
-void hardware_timer()
+void hardware_timer(void)
 {
     hw_timer_clear_interrupt();
 
     U32 cpu = interrupt_disable();
 
     TICK *tick_tmp;
-
     LIST *tmp = &tick_queue.list;
 
+    /*System tick plus one*/
     fos_tick++;
 
+    /*Traversing the tick list to search which one that is timeout*/
     while (!is_list_last(tmp)) {
 
         tick_tmp = list_entry(tmp->next, TICK, list);
@@ -85,25 +86,18 @@ void hardware_timer()
                 tick_tmp->func(tick_tmp->func_arg);
 
                 if (tick_tmp->period == CYCLE) {
-
                     tick_tmp->timeout = tick_tmp->timeout_copy;
-
-                    if (is_list_last(tmp)) {
-                        break;
-                    }
                 }else
                     tick_queue_delete(tick_tmp);
-		break;
+                break;
 
             /*Sleep timeout*/
             case DELAY:
                 /*Put the delay task to ready queue head*/
-                prio_ready_queue_insert_tail(tick_tmp->tcb);
                 tick_queue_delete(tick_tmp);
+                prio_ready_queue_insert_tail(tick_tmp->tcb);
 
-                if ( is_list_last(tmp) ){
-                    break;
-                }
+                break;
             default:
                 OS_LOG("Timeout status error\n");
             }
@@ -130,7 +124,7 @@ void timer_req( TICK *timer, FUNC_PTR func, U32 timeout, BOOL period, void *arg 
     interrupt_enable(cpu);
 }
 
-void os_delay( U32  timeslice )
+void os_delay(U32  timeslice)
 {
     U32 cpu = interrupt_disable();
     TICK *timer_delay               = &new_task->delay;
