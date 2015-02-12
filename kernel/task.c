@@ -41,17 +41,18 @@
  * it's incomplete. XXX*/
 void task_exit()
 {
-	os_printf("Task return\n");
-	while(1)
-	os_delay(100);
+    os_printf("Task return\n");
+    while(1)
+        os_delay(100);
 }
 
 U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void * arg, STACK *stack, U32 stack_size, U8 prio, BOOL state)
 {
-    if (tcb == NULL || fun == NULL || stack == NULL)
+    if (tcb == NULL || fun == NULL || stack == NULL) {
+        OS_LOG("Task error")
         return NO_TCB;
+    }
 
-    U32 cpu_sr =  interrupt_disable();
     memset(stack, 0, stack_size);
     tcb->stack_ptr = stack_init(stack, stack_size, fun, arg, task_exit);
     tcb->name      = name;
@@ -59,14 +60,19 @@ U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void * arg, STACK *stack, U32
     tcb->state     = state;
 
     prio_ready_queue_insert_tail(tcb);
-    interrupt_enable(cpu_sr);
+
     return TRUE;
 }
 
+/*Task only change it's priority by itself XXX*/
 U8 task_prio_change(TCB *tcb, U32 prio)
 {
-    if (tcb == NULL)
+    if ((tcb == NULL) || (prio < 1) || (prio > SYSTEM_WORD)) {
+        OS_LOG("Task error")
         return NO_TCB;
+    }
+
+    OS_ASSERT(new_task == tcb);
 
     prio_ready_queue_delete(tcb);
     tcb->prio = prio;

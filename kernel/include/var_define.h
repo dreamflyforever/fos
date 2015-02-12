@@ -139,7 +139,6 @@ typedef struct MUTEX_STR{
 U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void * arg, STACK *stack, U32 stack_size, U8 prio, BOOL state);
 U8 task_prio_change(TCB *tcb, U32 prio);
 
-void sem_block_queue_init();
 U8 sem_init(SEM *semaphore, const U8 *name, U32 num);
 U8 sem_put(SEM *semaphore);
 U8 sem_get(SEM *semaphore);

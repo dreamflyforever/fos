@@ -40,7 +40,7 @@
 void list_init(LIST *head)
 {
     head->next = head;
-    head->prev = head;   
+    head->prev = head;
 }
 
 BOOL is_list_last(LIST *head)
@@ -57,12 +57,11 @@ void list_insert(LIST *head, LIST *node)
 
 void list_insert_spec(LIST *head, LIST *node)
 {
-    if (is_list_last(head))
-    {
+    if (is_list_last(head)) {
         list_insert(head, node);
         return ;
     }
-    
+
     node->next = head->next;
     node->prev = head;
 
@@ -72,8 +71,7 @@ void list_insert_spec(LIST *head, LIST *node)
 
 void list_delete(LIST *node)
 {
-    if (is_list_last(node))
-    {
+    if (is_list_last(node)) {
         node->prev->next = node->prev;
         return ;
     }
@@ -85,8 +83,7 @@ void list_delete(LIST *node)
 void list_insert_behind(LIST *head, LIST *node)
 {
     LIST *list = head;
-    while(!is_list_last(list))
-    {
+    while(!is_list_last(list)) {
         list = list->next;
     }
 
