@@ -37,30 +37,30 @@
 
 #include <var_define.h>
 
-SEM sem_block_queue;
-
-void sem_block_queue_init()
+void sem_block_queue_init(SEM *sem_block_queue_head)
 {
-    list_init(&sem_block_queue.list);
+    list_init(&sem_block_queue_head->list);
 }
 
 void sem_block_queue_insert(SEM *semphore)
 {
-    list_insert_behind(&sem_block_queue.list, &semphore->list);
+    list_insert_behind(&semphore->list, &semphore->tcb->list);
 }
 
-void sem_block_queue_delete(SEM *semphore)
+void sem_block_queue_delete(TCB *tcb)
 {
-    list_delete(&semphore->list);
+    list_delete(&tcb->list);
 }
 
 U8 sem_init(SEM *semaphore, const U8 *name, U32 num)
 {
-    if (semaphore == NULL)
+    if (semaphore == NULL) {
+        OS_LOG("Semaphore null\n");
         return NO_SEMAPHORE;
-
+    }
     semaphore->count = num;
     semaphore->name  = name;
+    sem_block_queue_init(semaphore);
 
     return TRUE;
 }
@@ -71,17 +71,17 @@ U8 sem_get(SEM *semaphore)
         return NO_SEMAPHORE;
 
     U32 cpu_sr =  interrupt_disable();
-    
-    /*If not resource, then block and switch the task*/
-    if (semaphore->count == 0){
+
+    /*If not semaphore count, then block current task and switch new task*/
+    if (semaphore->count == 0) {
         semaphore->tcb = new_task;
         prio_ready_queue_delete(semaphore->tcb);
         sem_block_queue_insert(semaphore);
+
         schedule();
-    }
-    else
+    } else
         semaphore->count--;
-    
+
     interrupt_enable(cpu_sr);
     return TRUE;
 }
@@ -91,30 +91,26 @@ U8 sem_put(SEM *semaphore)
     if (semaphore == NULL)
         return NO_SEMAPHORE;
 
-    SEM *sem_tmp;
-    LIST *tmp = &sem_block_queue.list;
+    TCB *tcb_tmp;
+    LIST *tmp = &semaphore->list;
 
     U32 cpu_sr =  interrupt_disable();
-            
-    /*Check tasks block on the semaphore list*/
-    while ( !is_list_last(tmp) ){
-        sem_tmp = list_entry(tmp->next, SEM, list);
-        tmp = tmp->next;
 
-        if (!(strcmp((const char *)sem_tmp->name, (const char *)semaphore->name)))
-        {
-           sem_block_queue_delete(sem_tmp);
-           prio_ready_queue_insert_head(sem_tmp->tcb);
-           interrupt_enable(cpu_sr);
-           
-           schedule();
-           return TRUE;
-        }
+    /*Check tasks block on the semaphore list*/
+    while (!is_list_last(tmp)) {
+        tcb_tmp = list_entry(tmp->next, TCB, list);
+        tmp = tmp->next;
+        sem_block_queue_delete(tcb_tmp);
+        prio_ready_queue_insert_head(tcb_tmp);
+
+        interrupt_enable(cpu_sr);
+        schedule();
+        return TRUE;
     }
-    
+
     if (semaphore->count != 0xffffffff)
         semaphore->count++;
-    
+
     interrupt_enable(cpu_sr);
     return TRUE;
 }
