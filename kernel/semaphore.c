@@ -92,25 +92,23 @@ U8 sem_put(SEM *semaphore)
         return NO_SEMAPHORE;
 
     TCB *tcb_tmp;
-    LIST *tmp = &semaphore->list;
 
     U32 cpu_sr =  interrupt_disable();
 
     /*Check tasks block on the semaphore list*/
-    while (!is_list_last(tmp)) {
-        tcb_tmp = list_entry(tmp->next, TCB, list);
-        tmp = tmp->next;
+    if (!is_list_last(&semaphore->list)) {
+        tcb_tmp = list_entry(semaphore->list.next, TCB, list);
         sem_block_queue_delete(tcb_tmp);
         prio_ready_queue_insert_head(tcb_tmp);
 
-        interrupt_enable(cpu_sr);
-        schedule();
-        return TRUE;
+    } else if (semaphore->count != 0xffffffff)
+        semaphore->count++;
+    else {
+        OS_LOG("Semaphore overflow\n");
     }
 
-    if (semaphore->count != 0xffffffff)
-        semaphore->count++;
-
     interrupt_enable(cpu_sr);
+    /*Maybe don't schedule?*/
+    schedule();
     return TRUE;
 }
