@@ -41,60 +41,100 @@
 
 BLOCK block_queue;
 
-void msg_queue_create(QUEUE *entry, U32 length, U8 *name, U32 id)
+void msg_block_queue_init(QUEUE *msg_block_queue_msg_head)
 {
+    list_init(&msg_block_queue_msg_head->list);
+}
+
+void msg_block_queue_insert(QUEUE *msg_queue)
+{
+    list_insert_behind(&msg_queue->list, &new_task->list);
+}
+
+void msg_block_queue_delete(TCB *tcb)
+{
+    list_delete(&tcb->list);
+}
+
+void msg_queue_create(QUEUE *entry, U32 length, U8 *name)
+{
+    if ((entry == NULL) || (length <= 0))
+        OS_LOG("Message create error\n");
 
     U32 cpu_sr =  interrupt_disable();
 
-    list_init(&entry->head);
+    /*Init message block queue*/
+    msg_block_queue_init(entry);
+
+    /*Build message queue*/
+    list_init(&entry->msg_head);
     entry->length = length;
+    entry->count  = 0;
     entry->name   = name;
-    entry->id     = id;
 
     interrupt_enable(cpu_sr);
 }
 
+/*
+ * method: FIFO or LIFO;
+ */
 void msg_put(QUEUE *entry, MSG *msg, U8 method)
 {
-    BLOCK *block;
+    if ((entry == NULL) || (msg == NULL) || (entry->count > entry->length))
+        OS_LOG("Message put in queue error\n");
+
+    TCB *tcb_tmp;
 
     U32 cpu_sr =  interrupt_disable();
 
-    if (!is_list_last(&block_queue.list))
-    {
-        block = list_entry(block_queue.list.next, BLOCK, list);
-        block->tcb->state = 1;
-        block_queue_delete(block);
+    /*Check tasks block on the message queue list*/
+    if (!is_list_last(&entry->list)) {
+        tcb_tmp = list_entry(entry->list.next, TCB, list);
+        msg_block_queue_delete(tcb_tmp);
+        prio_ready_queue_insert_head(tcb_tmp);
     }
-    if (method == FIFO)
-        list_insert_behind(&entry->head, &msg->list);
-    else
-        list_insert_spec(&entry->head, &msg->list);
-    //schedule();
-    interrupt_enable(cpu_sr);
-}
 
+    if (entry->count == entry->length) {
+        /*XXX Todo: if queue is full, block the task*/
+        // block_queue(new_task);
+        OS_LOG("Message queue overflow\n");
+    }else
+        entry->count++;
+
+    if (method == FIFO)
+        list_insert_behind(&entry->msg_head, &msg->list);
+    else
+        /*Last come first server.*/
+        list_insert_spec(&entry->msg_head, &msg->list);
+
+    interrupt_enable(cpu_sr);
+    /*Maybe don't schedule?*/
+    schedule();
+}
 
 void msg_get(QUEUE *entry, void *buffer)
 {
-    BLOCK block_tmp;
-
     U32 cpu_sr =  interrupt_disable();
 
-    if (is_list_last(&entry->head)){
-
-        block_tmp.tcb = new_task;
-        if ( block_tmp.tcb->state == 1){
-            block_tmp.tcb->state = 0;
-            block_queue_insert(&block_tmp);
-        }
-        schedule();
+    /*If no message in the queue, then blcok the task*/
+    if (is_list_last(&entry->msg_head)) {
+        prio_ready_queue_delete(new_task);
+        msg_block_queue_insert(entry);
+    } else {
+        /*Fetch message*/
+        MSG *msg = list_entry(entry->msg_head.next, MSG, list);
+        memcpy(buffer, msg->buff, 5);
+        /*
+         * Delete message XXX: but the message do not be included more than two
+         * queue list, because system is not ready to select the queue list to
+         * delete message.
+         */
+        list_delete((&(entry->msg_head))->next);
     }
-    MSG *msg = list_entry(entry->head.next, MSG, list);
-    memcpy(buffer, msg->buff, 5);
-    list_delete(entry->head.next);
 
     interrupt_enable(cpu_sr);
+    /*Maybe don't schedule?*/
+    schedule();
 }
 
 /*
