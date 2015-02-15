@@ -54,8 +54,6 @@ void system_init()
 
     tick_queue_init();
 
-    block_queue_init();
-
     old_task = NULL;
 
     /*create idle task*/
