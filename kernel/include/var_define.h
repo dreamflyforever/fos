@@ -136,7 +136,7 @@ typedef struct SEM_STR{
 #define PRIO_MUTEX 1
 typedef struct MUTEX_STR{
     LIST     list;
-    BOOL     flag;
+    BOOL     enable;
     const U8 *name;
     U32      copy_prio;
     TCB      *tcb;
@@ -149,14 +149,12 @@ U8 sem_init(SEM *semaphore, const U8 *name, U32 num);
 U8 sem_put(SEM *semaphore);
 U8 sem_get(SEM *semaphore);
 
-void mut_block_queue_init();
-void mut_init(MUTEX *mutex, const U8 *name);
-void mut_put(MUTEX *mutex);
-void mut_get(MUTEX *mutex);
+U8 mutex_init(MUTEX *mutex, const U8 *name);
+U8 mutex_put(MUTEX *mutex);
+U8 mutex_get(MUTEX *mutex);
 
 void block_queue_init();
 
-extern MUTEX mut_block_queue;
 extern SEM sem_block_queue;
 extern BOOL schedule_is_lock;
 extern TCB task_prio_queue[SYSTEM_WORD];

@@ -38,59 +38,108 @@
 /*The priority ceiling algorithm*/
 #include <var_define.h>
 
-MUTEX mut_block_queue;
-
-void mut_block_queue_init()
+void mutex_block_queue_init(MUTEX *mutex_block_queue_head)
 {
-    list_init(&mut_block_queue.list);
+    list_init(&mutex_block_queue_head->list);
 }
 
-void mut_block_queue_insert(MUTEX *mutex)
+void mutex_block_queue_insert(MUTEX *mutex)
 {
-    list_insert_behind(&mut_block_queue.list, &mutex->list);
+    list_insert_behind(&mutex->list, &mutex->tcb->list);
 }
 
-void mut_block_queue_delete(MUTEX *mutex)
+void mutex_block_queue_delete(TCB *tcb)
 {
-    list_delete(&mutex->list);
+    list_delete(&tcb->list);
 }
 
-void mut_init(MUTEX *mutex, const U8 *name)
+/*
+ * Mutex init default is enable got.
+ */
+U8 mutex_init(MUTEX *mutex, const U8 *name)
 {
-    if (mutex == NULL)
-        return ; 
-   
-    mutex->name = name;
+    if (mutex == NULL) {
+        OS_LOG("Mutex null\n");
+        return NO_MUTEX;
+    }
+
+    /*Init mutex block queue*/
+    mutex_block_queue_init(mutex);
+
+    mutex->name   = name;
+    mutex->enable = 1;
+    return TRUE;
 }
 
-void mut_get(MUTEX *mutex)
+/*
+ * If mutex is enable got, change the task priority as default set, else block
+ * the task.
+ */
+U8 mutex_get(MUTEX *mutex)
 {
-    if (mutex == NULL)
-        return ;
-    
-    U32 cpu_sr =  interrupt_disable();
+    if (mutex == NULL) {
+        OS_LOG("Mutex null\n");
+        return NO_MUTEX;
+    }
 
-    mutex->copy_prio = new_task->prio;
+    U32 cpu_sr = interrupt_disable();
 
-    /*Change the task priority, so other task preempt to get the mutex will fail */
-    prio_ready_queue_delete(new_task);
-    new_task->prio = PRIO_MUTEX;
-    prio_ready_queue_insert_head(new_task);
+    /*If mutex disable, then block the task and switch task.*/
+    if (!mutex->enable) {
+            mutex->tcb = new_task;
+            prio_ready_queue_delete(new_task);
+            mutex_block_queue_insert(mutex);
+            schedule();
+    } else {
+        /*For recover task priority*/
+        mutex->copy_prio = new_task->prio;
+
+        /*Changing the task priority, so the other task preempt to get the mutex will fail */
+        prio_ready_queue_delete(new_task);
+        /*Priority ceiling*/
+        new_task->prio = PRIO_MUTEX;
+        prio_ready_queue_insert_head(new_task);
+        mutex->enable  = 0;
+    }
 
     interrupt_enable(cpu_sr);
+    return TRUE;
 }
 
-void mut_put(MUTEX *mutex)
+/*
+ * Release the mutex, recover the task priority, the first task that block on the mutex
+ * queue will be remove from the queue.
+ */
+U8 mutex_put(MUTEX *mutex)
 {
-    if (mutex == NULL)
-        return ;
-    
-    U32 cpu_sr =  interrupt_disable();
+    if (mutex == NULL) {
+        OS_LOG("Mutex null\n");
+        return NO_MUTEX;
+    }
+
+    U32 cpu_sr = interrupt_disable();
 
     /*Change the task priority, recover the copy-priority*/
     prio_ready_queue_delete(new_task);
     new_task->prio = mutex->copy_prio;
     prio_ready_queue_insert_head(new_task);
+    mutex->enable = 1;
+
+    TCB *tcb_tmp;
+    /*Check tasks block on the mutex queue*/
+    if (!is_list_last(&mutex->list)) {
+        tcb_tmp = list_entry(mutex->list.next, TCB, list);
+        mutex_block_queue_delete(tcb_tmp);
+        prio_ready_queue_insert_head(tcb_tmp);
+    }
 
     interrupt_enable(cpu_sr);
+    schedule();
+    return TRUE;
+}
+
+/*Todo: Judge the mutex belong to which mutex-block-queue, and delete it.XXX*/
+U8 mutex_delete(MUTEX *mutex)
+{
+    return TRUE;
 }
