@@ -50,8 +50,6 @@ void system_init()
 
     prio_ready_queue_init();
 
-    mut_block_queue_init();
-
     tick_queue_init();
 
     old_task = NULL;
