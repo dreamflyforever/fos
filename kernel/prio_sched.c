@@ -153,7 +153,7 @@ BOOL start_which_task(TCB *first_task)
 
     new_task = first_task;
 
-    start_schedule();
+    start_schedule(new_task);
 
     return TRUE;
 }

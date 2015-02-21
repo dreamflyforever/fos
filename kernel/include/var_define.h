@@ -116,7 +116,7 @@ typedef struct TCB_STR{
     U8      *name;
     LIST    list;
     U8      prio;
-    BOOL    state; // Only two state, run or forbit run(NON_RUNNING_STATE AND CAN_RUNNING_STATE)
+    BOOL    state;
 }TCB;
 
 /*for semaphore*/
@@ -130,7 +130,7 @@ typedef struct SEM_STR{
 #define PRIO_MUTEX 1
 typedef struct MUTEX_STR{
     LIST     list;
-    BOOL     flag;
+    BOOL     enable;
     const U8 *name;
     U32      copy_prio;
     TCB      *tcb;
@@ -143,10 +143,9 @@ U8 sem_init(SEM *semaphore, const U8 *name, U32 num);
 U8 sem_put(SEM *semaphore);
 U8 sem_get(SEM *semaphore);
 
-void mut_block_queue_init();
-void mut_init(MUTEX *mutex, const U8 *name);
-void mut_put(MUTEX *mutex);
-void mut_get(MUTEX *mutex);
+U8 mutex_init(MUTEX *mutex, const U8 *name);
+U8 mutex_put(MUTEX *mutex);
+U8 mutex_get(MUTEX *mutex);
 
 void block_queue_init();
 
@@ -160,9 +159,8 @@ extern U32 task_prio_map;
 extern ULONG fos_tick;
 
 extern TCB idle_tcb;
-extern U32 idle_stack[4 * 1024];
+extern U32 idle_stack[IDLE_STACK_SIZE];
 extern U32 task_prio_map;
-extern void start_schedule();
 
 #define bit_clear(num, i) num = num & (~(1<<i))
 #define bit_set(num, i)   num = num | (1<<i)
@@ -184,6 +182,6 @@ void schedule_unlock();
 
 /*For port function*/
 void port_schedule();
-void star_schedule(TCB *tcb);
+void start_schedule(TCB *tcb);
 
 #endif
