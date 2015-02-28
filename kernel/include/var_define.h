@@ -73,9 +73,6 @@ enum {
 #define CYCLE            1
 #define TIMEOUT          0
 
-/*for delay*/
-#define DELAY            2
-
 #define OS_ASSERT(X)                                                   \
 if (!(X))                                                              \
 {                                                                      \
@@ -90,6 +87,8 @@ if (!(X))                                                              \
     __LINE__);                                                         \
 }
 
+/*for delay*/
+#define DELAY          2
 void os_delay(U32 timeslice);
 
 typedef  void (*TASK_ENTRY)(void *p_arg);
@@ -148,7 +147,6 @@ U8 mutex_get(MUTEX *mutex);
 
 void block_queue_init();
 
-extern MUTEX mut_block_queue;
 extern SEM sem_block_queue;
 extern BOOL schedule_is_lock;
 extern TCB task_prio_queue[SYSTEM_WORD];
