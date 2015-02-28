@@ -41,25 +41,22 @@
 TCB* bit_first_one_search(U32 num)
 {
     LIST *prio_list_head;
-    TCB  *tcb_ret;
+    TCB *tcb_ret;
 
     U8 i;
-    for (i = 0; i < SYSTEM_WORD; i++)
-    {
+    for (i = 0; i < SYSTEM_WORD; i++) {
         /* The first task of each priority queue must be representative*/
-        if ((num >> i) & 0x01)
-        {
+        if ((num >> i) & 0x01) {
             prio_list_head = &task_prio_queue[i].list;
             tcb_ret        = list_entry(prio_list_head->next, TCB, list);
-
+            /*return the first found task*/
             return tcb_ret;
         }
     }
 
-    if (old_task->state == NON_RUNNING_STATE)
-        return &idle_tcb;
-
-    return old_task;
+    /*If not ready task, then return NULL*/
+    tcb_ret = NULL;
+    return tcb_ret;
 }
 
 /*Build the ready queue*/
@@ -87,42 +84,30 @@ void prio_ready_queue_delete(TCB *tcb)
     list_delete(&tcb->list);
 
     /* If the task ready queue have no task, clear the corresponding task_prio_map*/
-    if (is_list_last(&task_prio_queue[tcb->prio].list)){
+    if (is_list_last(&task_prio_queue[tcb->prio].list))
         bit_clear(task_prio_map, tcb->prio);
-        return ;
-    }
-
-#ifdef mutex_debug
-    LIST *tmp = &task_prio_queue[tcb->prio].list;
-    TCB *tcb_tmp = &task_prio_queue[tcb->prio];
-    int i = 0;
-    while (!is_list_last(tmp)){
-        tmp = tmp->next;
-        i++;
-        os_printf("i = %d\n", i);
-        os_printf("prio = %d\n", tcb->prio);
-        tcb_tmp = list_entry(tmp->next, TCB, list);
-        os_printf("task-name = %s\n", tcb_tmp->name);
-    }
-#endif
 }
 
 U8 prio_ready_queue_fetch()
 {
     TCB *tmp =  bit_first_one_search(task_prio_map);
 
-    if (!is_list_last(&tmp->list))
-    {
+    /*If not ready task, then assert*/
+    OS_ASSERT(tmp);
+
+    if (!is_list_last(&tmp->list)) {
         prio_ready_queue_delete(tmp);
         prio_ready_queue_insert_tail(tmp);
     }
 
-    /*if the fetch task equel current task*/
+    /*if the fetch task is equal to current task, no sched*/
     if (tmp == new_task)
         return NO_SCHED;
-
-    old_task = new_task;
-    new_task = tmp;
+    else {
+        /*Switch the task*/
+        old_task = new_task;
+        new_task = tmp;
+    }
 
     return SCHED;
 }
@@ -133,28 +118,24 @@ void schedule()
         return ;
 
     U32 cpu_sr = interrupt_disable();
-    if (NO_SCHED == prio_ready_queue_fetch())
-    {
+    if (NO_SCHED == prio_ready_queue_fetch()) {
         interrupt_enable(cpu_sr);
         return ;
     }
-    //os_printf("old_task->name == %s\n", old_task->name);
-    //os_printf("new_task->name == %s\n", new_task->name);
-    //os_printf("%d %s %d\n", __LINE__, __FUNCTION__, __FILE__);
+
     port_schedule();
     interrupt_enable(cpu_sr);
 }
 
+/*Start the first task*/
 BOOL start_which_task(TCB *first_task)
 {
-    if (first_task == NULL)
-    {
-        os_printf("error: First task is NULL\n");
+    if (first_task == NULL) {
+        OS_LOG("First task is NULL\n");
         return FALSE;
     }
 
     new_task = first_task;
-
     start_schedule(new_task);
 
     return TRUE;

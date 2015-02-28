@@ -39,7 +39,7 @@
 
 #define SHELL
 
-/*init hardware and system resource*/
+/*Init hardware and system resource*/
 void system_init()
 {
     hw_interrupt_init();
@@ -54,9 +54,9 @@ void system_init()
 
     old_task = NULL;
 
-    /*create idle task*/
+    /*Create idle task*/
     task_create(&idle_tcb, (U8 *)"idle_task", idle_task, NULL, idle_stack,
-		IDLE_STACK_SIZE, 31, 1);
+                IDLE_STACK_SIZE, 31, 1);
 
     //ethoc_initialize(0, 0x92000000);
 }
@@ -75,17 +75,12 @@ extern void app_main();
 
     hw_timer_init();
 
-    /*which task run first*/
+    /*Which task run first*/
     BOOL result = start_which_task(&idle_tcb);
-    if (!result)
-    {
-        os_printf("First task is NULL\n");
-        return 0;
-    }
+    OS_ASSERT(result);
 
     /*Never reach here*/
-     while (1)
-    {
+     for (;;) {
         os_printf("hello");
     };
 

@@ -35,11 +35,7 @@
  *
  */
 
-#include <queue.h>
-#include <block.h>
 #include <var_define.h>
-
-BLOCK block_queue;
 
 void msg_block_queue_init(QUEUE *msg_block_queue_msg_head)
 {

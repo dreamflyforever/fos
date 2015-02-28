@@ -60,27 +60,26 @@
 
 #define SYSTEM_WORD       32
 #define DEBUG             0
-#define NON_RUNNING_STATE 0
-#define CAN_RUNNING_STATE 1
-#define SCHED             1
-#define NO_SCHED          0
 
 #define STACK unsigned int
 
-enum{
+enum {
     NO_SEMAPHORE = 10,
     NO_MUTEX,
     NO_MSG,
-    NO_TCB
+    NO_TCB,
+    NO_SCHED,
+    SCHED
 };
-#define IDLE_STACK_SIZE 4 *1024
+
+#define IDLE_STACK_SIZE  4 *1024
 /*system tick*/
 #define TICKS_PER_SECOND 100
 
 /*for timer function*/
-#define SOFTWARE_TIMER 0
-#define CYCLE          1
-#define TIMEOUT        0
+#define SOFTWARE_TIMER   0
+#define CYCLE            1
+#define TIMEOUT          0
 
 #define OS_ASSERT(X)                                                   \
 if (!(X))                                                              \
@@ -100,7 +99,7 @@ if (!(X))                                                              \
 #define DELAY          2
 void os_delay(U32 timeslice);
 
-typedef  void (*TASK_ENTRY)(void *);
+typedef  void (*TASK_ENTRY)(void *p_arg);
 typedef  void (*FUNC_PTR)(void *p_arg);
 
 /*time manage*/
@@ -142,7 +141,8 @@ typedef struct MUTEX_STR{
     TCB      *tcb;
 }MUTEX;
 
-U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void * arg, STACK *stack, U32 stack_size, U8 prio, BOOL state);
+U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void *arg, STACK *stack,
+               U32 stack_size, U8 prio, BOOL state);
 U8 task_prio_change(TCB *tcb, U32 prio);
 
 U8 sem_init(SEM *semaphore, const U8 *name, U32 num);
@@ -166,12 +166,11 @@ extern ULONG fos_tick;
 extern TCB idle_tcb;
 extern U32 idle_stack[IDLE_STACK_SIZE];
 extern U32 task_prio_map;
-//extern void start_schedule();
 
 #define bit_clear(num, i) num = num & (~(1<<i))
 #define bit_set(num, i)   num = num | (1<<i)
 
-TCB* bit_first_one_search(U32 num);
+TCB *bit_first_one_search(U32 num);
 void prio_ready_queue_init();
 void prio_ready_queue_insert_tail(TCB *tcb);
 void schedule();
@@ -184,12 +183,12 @@ ULONG tick_get();
 void hardware_timer();
 
 BOOL start_which_task(TCB *tcb);
-void idle_task(void *);
+void idle_task(void *arg);
 void schedule_lock();
 void schedule_unlock();
 
 /*For port function*/
 void port_schedule();
-void start_schedule(TCB * tcb);
+void start_schedule(TCB *tcb);
 
 #endif

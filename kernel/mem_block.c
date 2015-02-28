@@ -38,7 +38,6 @@
 /*     2012-4  Created by jorya_txj
   *    xxxxxx   please added here
   */
-  
 
 #include <var_define.h>
 

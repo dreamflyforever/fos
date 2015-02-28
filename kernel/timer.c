@@ -55,11 +55,13 @@ void tick_queue_delete(TICK *tick)
     list_delete(&tick->list);
 }
 
+/*Get system tick*/
 ULONG tick_get(void)
 {
     return fos_tick;
 }
 
+/*System timer*/
 void hardware_timer(void)
 {
     hw_timer_clear_interrupt();
@@ -87,7 +89,7 @@ void hardware_timer(void)
 
                 if (tick_tmp->period == CYCLE) {
                     tick_tmp->timeout = tick_tmp->timeout_copy;
-                }else
+                } else
                     tick_queue_delete(tick_tmp);
                 break;
 

@@ -40,10 +40,10 @@
 TCB idle_tcb;
 U32 idle_stack[IDLE_STACK_SIZE];
 
-void idle_task(void * arg)
+/*Idle task*/
+void idle_task(void *arg)
 {
-    while (1)
-    {
+    for (;;) {
         //os_printf("Enter idle task\n");
         schedule();
     }
