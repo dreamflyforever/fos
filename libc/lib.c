@@ -8,10 +8,10 @@
  *
  */
 
+/* Based C function lib */
 #include <lib.h>
 #include <var_define.h>
 #include <lib-utils.h>
-/* Based C function lib */
 
 void* memcpy( void* s1, void* s2, size_t n)
 {

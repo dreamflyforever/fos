@@ -11,13 +11,13 @@
 #include <spr-defs.h>
 #include <ptrace.h>
 
-/* parameter defines */
+/* Parameter defines */
 #define REDZONE 128
 #define STK_FRAME_SIZE (128 + REDZONE)
 
     .global task_switch
     .global timer_isr
-    .global usr_isr
+    .global user_isr
     .extern old_task
     .extern new_task
     .extern hardware_timer
@@ -41,69 +41,69 @@
     l.nop
 
 /* Store the cpu context on the stack */
-#define STORE_CONTEXT         ;\
-    l.sw PT_GPR2(r1)  ,r2     ;\
-    l.sw PT_GPR4(r1)  ,r4     ;\
-    l.sw PT_GPR5(r1)  ,r5     ;\
-    l.sw PT_GPR6(r1)  ,r6     ;\
-    l.sw PT_GPR7(r1)  ,r7     ;\
-    l.sw PT_GPR8(r1)  ,r8     ;\
-    l.sw PT_GPR9(r1)  ,r9     ;\
-    l.sw PT_GPR10(r1) ,r10    ;\
-    l.sw PT_GPR11(r1) ,r11    ;\
-    l.sw PT_GPR12(r1) ,r12    ;\
-    l.sw PT_GPR13(r1) ,r13    ;\
-    l.sw PT_GPR14(r1) ,r14    ;\
-    l.sw PT_GPR15(r1) ,r15    ;\
-    l.sw PT_GPR16(r1) ,r16    ;\
-    l.sw PT_GPR17(r1) ,r17    ;\
-    l.sw PT_GPR18(r1) ,r18    ;\
-    l.sw PT_GPR19(r1) ,r19    ;\
-    l.sw PT_GPR20(r1) ,r20    ;\
-    l.sw PT_GPR21(r1) ,r21    ;\
-    l.sw PT_GPR22(r1) ,r22    ;\
-    l.sw PT_GPR23(r1) ,r23    ;\
-    l.sw PT_GPR24(r1) ,r24    ;\
-    l.sw PT_GPR25(r1) ,r25    ;\
-    l.sw PT_GPR26(r1) ,r26    ;\
-    l.sw PT_GPR27(r1) ,r27    ;\
-    l.sw PT_GPR28(r1) ,r28    ;\
-    l.sw PT_GPR29(r1) ,r29    ;\
-    l.sw PT_GPR30(r1) ,r30    ;\
-    l.sw PT_GPR31(r1) ,r31    ;
+#define STORE_CONTEXT        ;\
+    l.sw PT_GPR2(r1), r2     ;\
+    l.sw PT_GPR4(r1), r4     ;\
+    l.sw PT_GPR5(r1), r5     ;\
+    l.sw PT_GPR6(r1), r6     ;\
+    l.sw PT_GPR7(r1), r7     ;\
+    l.sw PT_GPR8(r1), r8     ;\
+    l.sw PT_GPR9(r1), r9     ;\
+    l.sw PT_GPR10(r1),r10    ;\
+    l.sw PT_GPR11(r1),r11    ;\
+    l.sw PT_GPR12(r1),r12    ;\
+    l.sw PT_GPR13(r1),r13    ;\
+    l.sw PT_GPR14(r1),r14    ;\
+    l.sw PT_GPR15(r1),r15    ;\
+    l.sw PT_GPR16(r1),r16    ;\
+    l.sw PT_GPR17(r1),r17    ;\
+    l.sw PT_GPR18(r1),r18    ;\
+    l.sw PT_GPR19(r1),r19    ;\
+    l.sw PT_GPR20(r1),r20    ;\
+    l.sw PT_GPR21(r1),r21    ;\
+    l.sw PT_GPR22(r1),r22    ;\
+    l.sw PT_GPR23(r1),r23    ;\
+    l.sw PT_GPR24(r1),r24    ;\
+    l.sw PT_GPR25(r1),r25    ;\
+    l.sw PT_GPR26(r1),r26    ;\
+    l.sw PT_GPR27(r1),r27    ;\
+    l.sw PT_GPR28(r1),r28    ;\
+    l.sw PT_GPR29(r1),r29    ;\
+    l.sw PT_GPR30(r1),r30    ;\
+    l.sw PT_GPR31(r1),r31    ;
 
 /* Restore the cpu context from the stack */
-#define RESTORE_CONTEXT       ;\
-    l.lwz r2  ,PT_GPR2(r1)    ;\
-    l.lwz r3  ,PT_GPR3(r1)    ;\
-    l.lwz r4  ,PT_GPR4(r1)    ;\
-    l.lwz r5  ,PT_GPR5(r1)    ;\
-    l.lwz r6  ,PT_GPR6(r1)    ;\
-    l.lwz r7  ,PT_GPR7(r1)    ;\
-    l.lwz r8  ,PT_GPR8(r1)    ;\
-    l.lwz r9  ,PT_GPR9(r1)    ;\
-    l.lwz r10 ,PT_GPR10(r1)   ;\
-    l.lwz r11 ,PT_GPR11(r1)   ;\
-    l.lwz r12 ,PT_GPR12(r1)   ;\
-    l.lwz r13 ,PT_GPR13(r1)   ;\
-    l.lwz r14 ,PT_GPR14(r1)   ;\
-    l.lwz r15 ,PT_GPR15(r1)   ;\
-    l.lwz r16 ,PT_GPR16(r1)   ;\
-    l.lwz r17 ,PT_GPR17(r1)   ;\
-    l.lwz r18 ,PT_GPR18(r1)   ;\
-    l.lwz r19 ,PT_GPR19(r1)   ;\
-    l.lwz r20 ,PT_GPR20(r1)   ;\
-    l.lwz r21 ,PT_GPR21(r1)   ;\
-    l.lwz r22 ,PT_GPR22(r1)   ;\
-    l.lwz r23 ,PT_GPR23(r1)   ;\
-    l.lwz r24 ,PT_GPR24(r1)   ;\
-    l.lwz r25 ,PT_GPR25(r1)   ;\
-    l.lwz r26 ,PT_GPR26(r1)   ;\
-    l.lwz r27 ,PT_GPR27(r1)   ;\
-    l.lwz r28 ,PT_GPR28(r1)   ;\
-    l.lwz r29 ,PT_GPR29(r1)   ;\
-    l.lwz r30 ,PT_GPR30(r1)   ;\
-    l.lwz r31 ,PT_GPR31(r1)   ;
+#define RESTORE_CONTEXT      ;\
+    l.lwz r2, PT_GPR2(r1)    ;\
+    l.lwz r3, PT_GPR3(r1)    ;\
+    l.lwz r4, PT_GPR4(r1)    ;\
+    l.lwz r5, PT_GPR5(r1)    ;\
+    l.lwz r6, PT_GPR6(r1)    ;\
+    l.lwz r7, PT_GPR7(r1)    ;\
+    l.lwz r8, PT_GPR8(r1)    ;\
+    l.lwz r9, PT_GPR9(r1)    ;\
+    l.lwz r10,PT_GPR10(r1)   ;\
+    l.lwz r11,PT_GPR11(r1)   ;\
+    l.lwz r12,PT_GPR12(r1)   ;\
+    l.lwz r13,PT_GPR13(r1)   ;\
+    l.lwz r14,PT_GPR14(r1)   ;\
+    l.lwz r15,PT_GPR15(r1)   ;\
+    l.lwz r16,PT_GPR16(r1)   ;\
+    l.lwz r17,PT_GPR17(r1)   ;\
+    l.lwz r18,PT_GPR18(r1)   ;\
+    l.lwz r19,PT_GPR19(r1)   ;\
+    l.lwz r20,PT_GPR20(r1)   ;\
+    l.lwz r21,PT_GPR21(r1)   ;\
+    l.lwz r22,PT_GPR22(r1)   ;\
+    l.lwz r23,PT_GPR23(r1)   ;\
+    l.lwz r24,PT_GPR24(r1)   ;\
+    l.lwz r25,PT_GPR25(r1)   ;\
+    l.lwz r26,PT_GPR26(r1)   ;\
+    l.lwz r27,PT_GPR27(r1)   ;\
+    l.lwz r28,PT_GPR28(r1)   ;\
+    l.lwz r29,PT_GPR29(r1)   ;\
+    l.lwz r30,PT_GPR30(r1)   ;\
+    l.lwz r31,PT_GPR31(r1)   ;
 
 /* Linked from 0x0 */
 .section .vectors, "ax"
@@ -136,7 +136,7 @@
  
 /* ---[ 0x800: External interrupt exception ]---------------------------- */
     .org 0x800
-    EXCEPTION_HANDLER(usr_isr)
+    EXCEPTION_HANDLER(user_isr)
  
 /* ---[ 0x900: DTLB miss exception ]------------------------------------ */
     .org 0x900
@@ -216,7 +216,7 @@ _reset :
     l.movhi r0,0x0000     ; #r0 = 0
     l.ori r0,r0,0x0000    ;
 
-    /* set up super mode */
+    /* Set up super mode */
     l.addi  r3,r0,SPR_SR_SM
     l.mtspr r0,r3,SPR_SR
 
@@ -285,11 +285,10 @@ _align:
     l.j      0
     l.nop    NOP_EXIT
 
-#define LOAD_SYMBOL_TO_GPR(gpr,symbol)        \
+#define LOAD_SYMBOL_TO_GPR(gpr,symbol)       \
     .global symbol;                          \
     l.movhi gpr,hi(symbol);                  \
     l.ori   gpr,gpr,lo(symbol)
-
 
 .global     start_schedule
 start_schedule:
@@ -312,7 +311,6 @@ start_schedule:
 task_switch:
     /* l.sys exception for now, so we are in supervisor mode */
     /* exception  - recover pc from epcr */
-
     l.mfspr r3,r0,SPR_EPCR_BASE     /* save program counter that was put in exception register */
     l.sw    PT_PC(r1),r3
     l.mfspr r3,r0,SPR_ESR_BASE      /* save status register that was put in exception register */
@@ -369,7 +367,7 @@ timer_isr:
     l.rfe
     l.nop
 
-usr_isr:
+user_isr:
     /*r1 = new_task->sp*/
     l.mfspr r3,r0,SPR_EPCR_BASE     /* save program counter that was put in exception register */
     l.sw    PT_PC(r1),r3
