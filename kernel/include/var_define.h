@@ -44,6 +44,7 @@
 #include <printf.h>
 #include <queue.h>
 #include <mem_block.h>
+#include <device.h>
 
 #ifndef TRUE
 #define TRUE              1
@@ -61,7 +62,8 @@ enum {
     NO_MSG,
     NO_TCB,
     NO_SCHED,
-    SCHED
+    SCHED,
+    NO_DEVICE
 };
 
 #define IDLE_STACK_SIZE  4 *1024

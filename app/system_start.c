@@ -52,6 +52,8 @@ void system_init()
 
     tick_queue_init();
 
+    device_queue_init();
+
     old_task = NULL;
 
     /*Create idle task*/
