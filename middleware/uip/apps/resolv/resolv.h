@@ -1,5 +1,15 @@
+/**
+ * \addtogroup resolv
+ * @{
+ */
+/**
+ * \file
+ * DNS resolver code header file.
+ * \author Adam Dunkels <adam@dunkels.com>
+ */
+
 /*
- * Copyright (c) 2013, Shanjin Yang.<sjyangv0@gmail.com>
+ * Copyright (c) 2002-2003, Adam Dunkels.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,10 +20,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Shanjin Yang.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.
  *
@@ -29,65 +36,40 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the FOS.
+ * This file is part of the uIP TCP/IP stack.
  *
- * The latest version of FOS download by <https://github.com/yangshanjin/YSJ_OS>
+ * $Id: resolv.h,v 1.4 2006/06/11 21:46:37 adam Exp $
  *
  */
+#ifndef __RESOLV_H__
+#define __RESOLV_H__
 
-#include <var_define.h>
+typedef int uip_udp_appstate_t;
+void resolv_appcall(void);
+#define UIP_UDP_APPCALL resolv_appcall
 
-#define SHELL
+#include "uipopt.h"
 
-/*Init hardware and system resource*/
-void system_init()
-{
-    hw_interrupt_init();
+/**
+ * Callback function which is called when a hostname is found.
+ *
+ * This function must be implemented by the module that uses the DNS
+ * resolver. It is called when a hostname is found, or when a hostname
+ * was not found.
+ *
+ * \param name A pointer to the name that was looked up.  \param
+ * ipaddr A pointer to a 4-byte array containing the IP address of the
+ * hostname, or NULL if the hostname could not be found.
+ */
+void resolv_found(char *name, u16_t *ipaddr);
 
-    uart_init();
+/* Functions. */
+void resolv_conf(u16_t *dnsserver);
+u16_t *resolv_getserver(void);
+void resolv_init(void);
+u16_t *resolv_lookup(char *name);
+void resolv_query(char *name);
 
-    os_printf("FOS Copyright by Shanjin Yang\n\n");
+#endif /* __RESOLV_H__ */
 
-    prio_ready_queue_init();
-
-    tick_queue_init();
-
-    device_queue_init();
-
-    old_task = NULL;
-
-    /*Create idle task*/
-    task_create(&idle_tcb, (U8 *)"idle_task", idle_task, NULL, idle_stack,
-                IDLE_STACK_SIZE, 31, 1);
-
-    //ethoc_initialize(0, 0x92000000);
-}
-
-int main(void)
-{
-    system_init();
-
-#ifdef SHELL
-    extern void shell_init();
-    shell_init();
-#endif
-
-    extern void uip_thread_init();
-    uip_thread_init();
-
-extern void app_main();
-    app_main();
-
-    hw_timer_init();
-
-    /*Which task run first*/
-    BOOL result = start_which_task(&idle_tcb);
-    OS_ASSERT(result);
-
-    /*Never reach here*/
-     for (;;) {
-        os_printf("hello");
-    };
-
-    return 0;
-}
+/** @} */

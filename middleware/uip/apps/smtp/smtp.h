@@ -1,5 +1,18 @@
+
+/**
+ * \addtogroup smtp
+ * @{
+ */
+
+
+/**
+ * \file
+ * SMTP header file
+ * \author Adam Dunkels <adam@dunkels.com>
+ */
+
 /*
- * Copyright (c) 2013, Shanjin Yang.<sjyangv0@gmail.com>
+ * Copyright (c) 2002, Adam Dunkels.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,10 +23,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Shanjin Yang.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.
  *
@@ -29,65 +39,65 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the FOS.
+ * This file is part of the uIP TCP/IP stack.
  *
- * The latest version of FOS download by <https://github.com/yangshanjin/YSJ_OS>
+ * $Id: smtp.h,v 1.4 2006/06/11 21:46:37 adam Exp $
  *
  */
+#ifndef __SMTP_H__
+#define __SMTP_H__
 
-#include <var_define.h>
+#include "uipopt.h"
 
-#define SHELL
+/**
+ * Error number that signifies a non-error condition.
+ */
+#define SMTP_ERR_OK 0
 
-/*Init hardware and system resource*/
-void system_init()
-{
-    hw_interrupt_init();
+/**
+ * Callback function that is called when an e-mail transmission is
+ * done.
+ *
+ * This function must be implemented by the module that uses the SMTP
+ * module.
+ *
+ * \param error The number of the error if an error occured, or
+ * SMTP_ERR_OK.
+ */
+void smtp_done(unsigned char error);
 
-    uart_init();
+void smtp_init(void);
 
-    os_printf("FOS Copyright by Shanjin Yang\n\n");
+/* Functions. */
+void smtp_configure(char *localhostname, u16_t *smtpserver);
+unsigned char smtp_send(char *to, char *from,
+			char *subject, char *msg,
+			u16_t msglen);
+#define SMTP_SEND(to, cc, from, subject, msg) \
+        smtp_send(to, cc, from, subject, msg, strlen(msg))
 
-    prio_ready_queue_init();
+void smtp_appcall(void);
 
-    tick_queue_init();
+struct smtp_state {
+  u8_t state;
+  char *to;
+  char *from;
+  char *subject;
+  char *msg;
+  u16_t msglen;
+  
+  u16_t sentlen, textlen;
+  u16_t sendptr;
 
-    device_queue_init();
+};
 
-    old_task = NULL;
 
-    /*Create idle task*/
-    task_create(&idle_tcb, (U8 *)"idle_task", idle_task, NULL, idle_stack,
-                IDLE_STACK_SIZE, 31, 1);
-
-    //ethoc_initialize(0, 0x92000000);
-}
-
-int main(void)
-{
-    system_init();
-
-#ifdef SHELL
-    extern void shell_init();
-    shell_init();
+#ifndef UIP_APPCALL
+#define UIP_APPCALL     smtp_appcall
 #endif
+typedef struct smtp_state uip_tcp_appstate_t;
 
-    extern void uip_thread_init();
-    uip_thread_init();
 
-extern void app_main();
-    app_main();
+#endif /* __SMTP_H__ */
 
-    hw_timer_init();
-
-    /*Which task run first*/
-    BOOL result = start_which_task(&idle_tcb);
-    OS_ASSERT(result);
-
-    /*Never reach here*/
-     for (;;) {
-        os_printf("hello");
-    };
-
-    return 0;
-}
+/** @} */
