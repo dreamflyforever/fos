@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2013, Shanjin Yang.<sjyangv0@gmail.com>
+ * Copyright (c) 2004, Adam Dunkels and the Swedish Institute of
+ * Computer Science.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,10 +11,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Shanjin Yang.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.
  *
@@ -29,65 +27,48 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the FOS.
+ * This file is part of the uIP TCP/IP stack
  *
- * The latest version of FOS download by <https://github.com/yangshanjin/YSJ_OS>
+ * $Id: uiplib.c,v 1.2 2006/06/12 08:00:31 adam Exp $
  *
  */
 
-#include <var_define.h>
 
-#define SHELL
+#include "uip.h"
+#include "uiplib.h"
 
-/*Init hardware and system resource*/
-void system_init()
+
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+uiplib_ipaddrconv(char *addrstr, unsigned char *ipaddr)
 {
-    hw_interrupt_init();
+  unsigned char tmp;
+  char c;
+  unsigned char i, j;
 
-    uart_init();
-
-    os_printf("FOS Copyright by Shanjin Yang\n\n");
-
-    prio_ready_queue_init();
-
-    tick_queue_init();
-
-    device_queue_init();
-
-    old_task = NULL;
-
-    /*Create idle task*/
-    task_create(&idle_tcb, (U8 *)"idle_task", idle_task, NULL, idle_stack,
-                IDLE_STACK_SIZE, 31, 1);
-
-    //ethoc_initialize(0, 0x92000000);
+  tmp = 0;
+  
+  for(i = 0; i < 4; ++i) {
+    j = 0;
+    do {
+      c = *addrstr;
+      ++j;
+      if(j > 4) {
+	return 0;
+      }
+      if(c == '.' || c == 0) {
+	*ipaddr = tmp;
+	++ipaddr;
+	tmp = 0;
+      } else if(c >= '0' && c <= '9') {
+	tmp = (tmp * 10) + (c - '0');
+      } else {
+	return 0;
+      }
+      ++addrstr;
+    } while(c != '.' && c != 0);
+  }
+  return 1;
 }
 
-int main(void)
-{
-    system_init();
-
-#ifdef SHELL
-    extern void shell_init();
-    shell_init();
-#endif
-
-    extern void uip_thread_init();
-    uip_thread_init();
-
-extern void app_main();
-    app_main();
-
-    hw_timer_init();
-
-    /*Which task run first*/
-    BOOL result = start_which_task(&idle_tcb);
-    OS_ASSERT(result);
-
-    /*Never reach here*/
-     for (;;) {
-        os_printf("hello");
-    };
-
-    return 0;
-}
+/*-----------------------------------------------------------------------------------*/

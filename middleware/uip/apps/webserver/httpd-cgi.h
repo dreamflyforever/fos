@@ -1,5 +1,20 @@
+/**
+ * \addtogroup httpd
+ * @{
+ */
+
+/**
+ * \file
+ *         Web server script interface header file
+ * \author
+ *         Adam Dunkels <adam@sics.se>
+ *
+ */
+
+
+
 /*
- * Copyright (c) 2013, Shanjin Yang.<sjyangv0@gmail.com>
+ * Copyright (c) 2001, Adam Dunkels.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,10 +25,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Shanjin Yang.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.
  *
@@ -29,65 +41,44 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * This file is part of the FOS.
+ * This file is part of the uIP TCP/IP stack.
  *
- * The latest version of FOS download by <https://github.com/yangshanjin/YSJ_OS>
+ * $Id: httpd-cgi.h,v 1.2 2006/06/11 21:46:38 adam Exp $
  *
  */
 
-#include <var_define.h>
+#ifndef __HTTPD_CGI_H__
+#define __HTTPD_CGI_H__
 
-#define SHELL
+#include "psock.h"
+#include "httpd.h"
 
-/*Init hardware and system resource*/
-void system_init()
-{
-    hw_interrupt_init();
+typedef PT_THREAD((* httpd_cgifunction)(struct httpd_state *, char *));
 
-    uart_init();
+httpd_cgifunction httpd_cgi(char *name);
 
-    os_printf("FOS Copyright by Shanjin Yang\n\n");
+struct httpd_cgi_call {
+  const char *name;
+  const httpd_cgifunction function;
+};
 
-    prio_ready_queue_init();
+/**
+ * \brief      HTTPD CGI function declaration
+ * \param name The C variable name of the function
+ * \param str  The string name of the function, used in the script file
+ * \param function A pointer to the function that implements it
+ *
+ *             This macro is used for declaring a HTTPD CGI
+ *             function. This function is then added to the list of
+ *             HTTPD CGI functions with the httpd_cgi_add() function.
+ *
+ * \hideinitializer
+ */
+#define HTTPD_CGI_CALL(name, str, function) \
+static PT_THREAD(function(struct httpd_state *, char *)); \
+static const struct httpd_cgi_call name = {str, function}
 
-    tick_queue_init();
+void httpd_cgi_init(void);
+#endif /* __HTTPD_CGI_H__ */
 
-    device_queue_init();
-
-    old_task = NULL;
-
-    /*Create idle task*/
-    task_create(&idle_tcb, (U8 *)"idle_task", idle_task, NULL, idle_stack,
-                IDLE_STACK_SIZE, 31, 1);
-
-    //ethoc_initialize(0, 0x92000000);
-}
-
-int main(void)
-{
-    system_init();
-
-#ifdef SHELL
-    extern void shell_init();
-    shell_init();
-#endif
-
-    extern void uip_thread_init();
-    uip_thread_init();
-
-extern void app_main();
-    app_main();
-
-    hw_timer_init();
-
-    /*Which task run first*/
-    BOOL result = start_which_task(&idle_tcb);
-    OS_ASSERT(result);
-
-    /*Never reach here*/
-     for (;;) {
-        os_printf("hello");
-    };
-
-    return 0;
-}
+/** @} */
