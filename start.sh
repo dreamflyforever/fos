@@ -1,1 +1,1 @@
-./fos
+sudo ./fos
