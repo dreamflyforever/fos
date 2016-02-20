@@ -37,78 +37,78 @@
 
 #include <var_define.h>
 
-void sem_block_queue_init(SEM *sem_block_queue_head)
+void sem_block_queue_init(SEM * sem_block_queue_head)
 {
-    list_init(&sem_block_queue_head->list);
+	list_init(&sem_block_queue_head->list);
 }
 
-void sem_block_queue_insert(SEM *semphore)
+void sem_block_queue_insert(SEM * semphore)
 {
-    list_insert_behind(&semphore->list, &semphore->tcb->list);
+	list_insert_behind(&semphore->list, &semphore->tcb->list);
 }
 
-void sem_block_queue_delete(TCB *tcb)
+void sem_block_queue_delete(TCB * tcb)
 {
-    list_delete(&tcb->list);
+	list_delete(&tcb->list);
 }
 
-U8 sem_init(SEM *semaphore, const U8 *name, U32 num)
+U8 sem_init(SEM * semaphore, const U8 * name, U32 num)
 {
-    if (semaphore == NULL) {
-        OS_LOG("Semaphore null\n");
-        return NO_SEMAPHORE;
-    }
-    semaphore->count = num;
-    semaphore->name  = name;
-    sem_block_queue_init(semaphore);
+	if (semaphore == NULL) {
+		OS_LOG("Semaphore null\n");
+		return NO_SEMAPHORE;
+	}
+	semaphore->count = num;
+	semaphore->name = name;
+	sem_block_queue_init(semaphore);
 
-    return TRUE;
+	return TRUE;
 }
 
-U8 sem_get(SEM *semaphore)
+U8 sem_get(SEM * semaphore)
 {
-    if (semaphore == NULL)
-        return NO_SEMAPHORE;
+	if (semaphore == NULL)
+		return NO_SEMAPHORE;
 
-    U32 cpu_sr =  interrupt_disable();
+	U32 cpu_sr = interrupt_disable();
 
-    /*If not semaphore count, then block current task and switch new task*/
-    if (semaphore->count == 0) {
-        semaphore->tcb = new_task;
-        prio_ready_queue_delete(semaphore->tcb);
-        sem_block_queue_insert(semaphore);
+	/*If not semaphore count, then block current task and switch new task */
+	if (semaphore->count == 0) {
+		semaphore->tcb = new_task;
+		prio_ready_queue_delete(semaphore->tcb);
+		sem_block_queue_insert(semaphore);
 
-        schedule();
-    } else
-        semaphore->count--;
+		schedule();
+	} else
+		semaphore->count--;
 
-    interrupt_enable(cpu_sr);
-    return TRUE;
+	interrupt_enable(cpu_sr);
+	return TRUE;
 }
 
-U8 sem_put(SEM *semaphore)
+U8 sem_put(SEM * semaphore)
 {
-    if (semaphore == NULL)
-        return NO_SEMAPHORE;
+	if (semaphore == NULL)
+		return NO_SEMAPHORE;
 
-    TCB *tcb_tmp;
+	TCB *tcb_tmp;
 
-    U32 cpu_sr =  interrupt_disable();
+	U32 cpu_sr = interrupt_disable();
 
-    /*Check tasks block on the semaphore list*/
-    if (!is_list_last(&semaphore->list)) {
-        tcb_tmp = list_entry(semaphore->list.next, TCB, list);
-        sem_block_queue_delete(tcb_tmp);
-        prio_ready_queue_insert_head(tcb_tmp);
+	/*Check tasks block on the semaphore list */
+	if (!is_list_last(&semaphore->list)) {
+		tcb_tmp = list_entry(semaphore->list.next, TCB, list);
+		sem_block_queue_delete(tcb_tmp);
+		prio_ready_queue_insert_head(tcb_tmp);
 
-    } else if (semaphore->count != 0xffffffff)
-        semaphore->count++;
-    else {
-        OS_LOG("Semaphore overflow\n");
-    }
+	} else if (semaphore->count != 0xffffffff)
+		semaphore->count++;
+	else {
+		OS_LOG("Semaphore overflow\n");
+	}
 
-    interrupt_enable(cpu_sr);
-    /*Maybe don't schedule?*/
-    schedule();
-    return TRUE;
+	interrupt_enable(cpu_sr);
+	/*Maybe don't schedule? */
+	schedule();
+	return TRUE;
 }

@@ -42,52 +42,52 @@
 /*Init hardware and system resource*/
 void system_init()
 {
-    hw_interrupt_init();
+	hw_interrupt_init();
 
-    uart_init();
+	uart_init();
 
-    os_printf("FOS Copyright by Shanjin Yang\n\n");
+	os_printf("FOS Copyright by Shanjin Yang\n\n");
 
-    prio_ready_queue_init();
+	prio_ready_queue_init();
 
-    tick_queue_init();
+	tick_queue_init();
 
-    device_queue_init();
+	device_queue_init();
 
-    old_task = NULL;
+	old_task = NULL;
 
-    /*Create idle task*/
-    task_create(&idle_tcb, (U8 *)"idle_task", idle_task, NULL, idle_stack,
-                IDLE_STACK_SIZE, 31, 1);
+	/*Create idle task */
+	task_create(&idle_tcb, (U8 *) "idle_task", idle_task, NULL, idle_stack,
+		    IDLE_STACK_SIZE, 31, 1);
 
-    //ethoc_initialize(0, 0x92000000);
+	//ethoc_initialize(0, 0x92000000);
 }
 
 int main(void)
 {
-    system_init();
+	system_init();
 
 #ifdef SHELL
-    extern void shell_init();
-    shell_init();
+	extern void shell_init();
+	shell_init();
 #endif
 
-    extern void uip_thread_init();
-    uip_thread_init();
+	extern void uip_thread_init();
+	uip_thread_init();
 
-extern void app_main();
-    app_main();
+	extern void app_main();
+	app_main();
 
-    hw_timer_init();
+	hw_timer_init();
 
-    /*Which task run first*/
-    BOOL result = start_which_task(&idle_tcb);
-    OS_ASSERT(result);
+	/*Which task run first */
+	BOOL result = start_which_task(&idle_tcb);
+	OS_ASSERT(result);
 
-    /*Never reach here*/
-     for (;;) {
-        os_printf("hello");
-    };
+	/*Never reach here */
+	for (;;) {
+		os_printf("hello");
+	};
 
-    return 0;
+	return 0;
 }

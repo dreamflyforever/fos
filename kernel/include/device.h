@@ -14,14 +14,14 @@
 #ifndef __DEVICE_H__
 #define __DEVICE_H__
 
-typedef int (*FUNC)(U8 *buff, U8 size);
+typedef int (*FUNC) (U8 * buff, U8 size);
 
 typedef struct OPERATIONS_STR {
-	int (*open)(void *arg);
-	int (*read)(U8 *buff, U8 size);
-	int (*write)(U8 *buff, U8 size);
-	int (*ioctrl)(U8 cmd, void *arg);
-	int (*close)(void *arg);
+	int (*open) (void *arg);
+	int (*read) (U8 * buff, U8 size);
+	int (*write) (U8 * buff, U8 size);
+	int (*ioctrl) (U8 cmd, void *arg);
+	int (*close) (void *arg);
 } OPERATIONS;
 
 typedef struct DEVICE_STR {
@@ -36,20 +36,18 @@ typedef struct DEVICE_STR {
 extern DEVICE device_queue_head;
 
 void device_queue_init(void);
-int device_register(DEVICE *device, const U8 *name, OPERATIONS *ops);
-int device_unregister(DEVICE *device);
-int ops_init(
-		OPERATIONS *ops,
-		int (*open)(void *arg),
-		FUNC write,
-		FUNC read,
-		int (*ioctrl)(U8 cmd, void *arg),
-		int (*close)(void *arg)
-	    );
-int device_open(U8 *name, U8 flag);
-int device_read(DEVICE *device, U8 *buff, U8 size);
-int device_write(DEVICE *device, U8 *buff, U8 size);
-int device_ioctrl(DEVICE *device, U8 cmd, void *arg);
-int device_close(U8 *name);
+int device_register(DEVICE * device, const U8 * name, OPERATIONS * ops);
+int device_unregister(DEVICE * device);
+int ops_init(OPERATIONS * ops,
+	     int (*open) (void *arg),
+	     FUNC write,
+	     FUNC read,
+	     int (*ioctrl) (U8 cmd, void *arg), int (*close) (void *arg)
+    );
+int device_open(U8 * name, U8 flag);
+int device_read(DEVICE * device, U8 * buff, U8 size);
+int device_write(DEVICE * device, U8 * buff, U8 size);
+int device_ioctrl(DEVICE * device, U8 cmd, void *arg);
+int device_close(U8 * name);
 
 #endif

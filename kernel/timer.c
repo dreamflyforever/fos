@@ -42,105 +42,106 @@ ULONG fos_tick;
 
 void tick_queue_init(void)
 {
-    list_init(&tick_queue.list);
+	list_init(&tick_queue.list);
 }
 
-void tick_queue_insert(TICK *tick)
+void tick_queue_insert(TICK * tick)
 {
-    list_insert_behind(&tick_queue.list, &tick->list);
+	list_insert_behind(&tick_queue.list, &tick->list);
 }
 
-void tick_queue_delete(TICK *tick)
+void tick_queue_delete(TICK * tick)
 {
-    list_delete(&tick->list);
+	list_delete(&tick->list);
 }
 
 /*Get system tick*/
 ULONG tick_get(void)
 {
-    return fos_tick;
+	return fos_tick;
 }
 
 /*System timer*/
 void hardware_timer(void)
 {
-    hw_timer_clear_interrupt();
+	hw_timer_clear_interrupt();
 
-    U32 cpu = interrupt_disable();
+	U32 cpu = interrupt_disable();
 
-    TICK *tick_tmp;
-    LIST *tmp = &tick_queue.list;
+	TICK *tick_tmp;
+	LIST *tmp = &tick_queue.list;
 
-    /*System tick plus one*/
-    fos_tick++;
+	/*System tick plus one */
+	fos_tick++;
 
-    /*Traversing the tick list to search which one that is timeout*/
-    while (!is_list_last(tmp)) {
+	/*Traversing the tick list to search which one that is timeout */
+	while (!is_list_last(tmp)) {
 
-        tick_tmp = list_entry(tmp->next, TICK, list);
-        tmp = tmp->next;
+		tick_tmp = list_entry(tmp->next, TICK, list);
+		tmp = tmp->next;
 
-        if (tick_tmp->timeout == TIMEOUT) {
+		if (tick_tmp->timeout == TIMEOUT) {
 
-            switch (tick_tmp->style) {
-            /*Callback timeout*/
-            case SOFTWARE_TIMER:
-                tick_tmp->func(tick_tmp->func_arg);
+			switch (tick_tmp->style) {
+				/*Callback timeout */
+			case SOFTWARE_TIMER:
+				tick_tmp->func(tick_tmp->func_arg);
 
-                if (tick_tmp->period == CYCLE) {
-                    tick_tmp->timeout = tick_tmp->timeout_copy;
-                } else
-                    tick_queue_delete(tick_tmp);
-                break;
+				if (tick_tmp->period == CYCLE) {
+					tick_tmp->timeout =
+					    tick_tmp->timeout_copy;
+				} else
+					tick_queue_delete(tick_tmp);
+				break;
 
-            /*Sleep timeout*/
-            case DELAY:
-                /*Put the delay task to ready queue head*/
-                tick_queue_delete(tick_tmp);
-                prio_ready_queue_insert_tail(tick_tmp->tcb);
+				/*Sleep timeout */
+			case DELAY:
+				/*Put the delay task to ready queue head */
+				tick_queue_delete(tick_tmp);
+				prio_ready_queue_insert_tail(tick_tmp->tcb);
 
-                break;
-            default:
-                OS_LOG("Timeout status error\n");
-            }
+				break;
+			default:
+				OS_LOG("Timeout status error\n");
+			}
 
-        } else
-            (tick_tmp->timeout)--;
-    }
+		} else
+			(tick_tmp->timeout)--;
+	}
 
-    interrupt_enable(cpu);
+	interrupt_enable(cpu);
 
-    schedule();
+	schedule();
 }
 
-void timer_req( TICK *timer, FUNC_PTR func, U32 timeout, BOOL period, void *arg )
+void timer_req(TICK * timer, FUNC_PTR func, U32 timeout, BOOL period, void *arg)
 {
-    U32 cpu = interrupt_disable();
-    timer->func         = func;
-    timer->timeout      = timeout;
-    timer->period       = period;
-    timer->timeout_copy = timeout;
-    timer->style        = SOFTWARE_TIMER;
-    timer->func_arg = arg;
-    tick_queue_insert(timer);
-    interrupt_enable(cpu);
+	U32 cpu = interrupt_disable();
+	timer->func = func;
+	timer->timeout = timeout;
+	timer->period = period;
+	timer->timeout_copy = timeout;
+	timer->style = SOFTWARE_TIMER;
+	timer->func_arg = arg;
+	tick_queue_insert(timer);
+	interrupt_enable(cpu);
 }
 
-void os_delay(U32  timeslice)
+void os_delay(U32 timeslice)
 {
-    U32 cpu = interrupt_disable();
-    TICK *timer_delay               = &new_task->delay;
-    timer_delay->tcb                = new_task;
-    timer_delay->timeout            = timeslice;
-    timer_delay->timeout_copy       = timeslice;
-    timer_delay->style              = DELAY;
+	U32 cpu = interrupt_disable();
+	TICK *timer_delay = &new_task->delay;
+	timer_delay->tcb = new_task;
+	timer_delay->timeout = timeslice;
+	timer_delay->timeout_copy = timeslice;
+	timer_delay->style = DELAY;
 
-    /*Delete the delay task to ready queue and add to tick-queue*/
-    prio_ready_queue_delete(timer_delay->tcb);
-    tick_queue_insert(timer_delay);
-    interrupt_enable(cpu);
+	/*Delete the delay task to ready queue and add to tick-queue */
+	prio_ready_queue_delete(timer_delay->tcb);
+	tick_queue_insert(timer_delay);
+	interrupt_enable(cpu);
 
-    schedule();
+	schedule();
 }
 
 /*
@@ -148,15 +149,15 @@ void os_delay(U32  timeslice)
  *
  * */
 #if 0
-void my_timer(void  *arg)
+void my_timer(void *arg)
 {
-    os_printf("my_timer runing\n");
+	os_printf("my_timer runing\n");
 }
 
 TICK my_timer_str;
 
 void test_tick(void *arg)
 {
-    timer_req(&my_timer_str, my_timer, 1, CYCLE, arg);
+	timer_req(&my_timer_str, my_timer, 1, CYCLE, arg);
 }
 #endif

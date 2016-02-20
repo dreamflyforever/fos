@@ -18,42 +18,40 @@ U8 buff_cmd[128];
 
 SYMBOL sym_head;
 
-void symbol__list_init(SYMBOL *sym)
+void symbol__list_init(SYMBOL * sym)
 {
-    _list_init(&sym->list);
+	_list_init(&sym->list);
 }
 
-void symbol__list_insert(SYMBOL *sym)
+void symbol__list_insert(SYMBOL * sym)
 {
-    _list_insert(&sym_head.list, &sym->list);
+	_list_insert(&sym_head.list, &sym->list);
 }
 
 SYMBOL _malloc[10];
-void export(FUNC_PTR func, U8 *name)
+void export(FUNC_PTR func, U8 * name)
 {
-    /*the destination of token is just to malloc different memory object*/
-    //SYMBOL * token(func) = malloc(sizeof(SYMBOL));  
-    static int temp = 0;
-    SYMBOL * token(func) = &_malloc[temp];
-    temp++;
-    token(func)->func = func;
-    token(func)->name = name;
-    symbol__list_insert(token(func));
+	/*the destination of token is just to malloc different memory object */
+	//SYMBOL * token(func) = malloc(sizeof(SYMBOL));  
+	static int temp = 0;
+	SYMBOL *token(func) = &_malloc[temp];
+	temp++;
+	token(func)->func = func;
+	token(func)->name = name;
+	symbol__list_insert(token(func));
 }
 
-int parser(U8 *cmd)
+int parser(U8 * cmd)
 {
-    SYMBOL *sym_tmp;
-    _LIST *tmp = &sym_head.list;
+	SYMBOL *sym_tmp;
+	_LIST *tmp = &sym_head.list;
 
-    for (; !_is_list_empty(tmp); tmp = tmp->next)
-    {
-        sym_tmp = _list_entry(tmp->next, SYMBOL, list);
-        if (!strcmp((const char *)cmd, (const char *)sym_tmp->name))
-        {
-            sym_tmp->func(NULL);
-            return TRUE;
-        }
-    }
-    return FALSE;
+	for (; !_is_list_empty(tmp); tmp = tmp->next) {
+		sym_tmp = _list_entry(tmp->next, SYMBOL, list);
+		if (!strcmp((const char *)cmd, (const char *)sym_tmp->name)) {
+			sym_tmp->func(NULL);
+			return TRUE;
+		}
+	}
+	return FALSE;
 }

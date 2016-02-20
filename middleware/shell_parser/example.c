@@ -34,29 +34,30 @@ void fuck(void *arg)
 	printf("bla bla!!!\n");
 }
 
-void shell_thread(void * arg)
+void shell_thread(void *arg)
 {
 	U8 i;
 
 	while (TRUE) {
 		printf("tmd-> ");
-		/*catch input string*/
-		for (i = 0, buff_cmd[i] = getchar(); buff_cmd[i] != '\n'; i++, buff_cmd[i] = getchar());
+		/*catch input string */
+		for (i = 0, buff_cmd[i] = getchar(); buff_cmd[i] != '\n';
+		     i++, buff_cmd[i] = getchar()) ;
 
-		/*input enter key will go to restart*/
-		if(buff_cmd[0] == '\n')
+		/*input enter key will go to restart */
+		if (buff_cmd[0] == '\n')
 			goto restart;
 
-		/*end of input string*/
+		/*end of input string */
 		buff_cmd[i] = '\0';
 
-		/*parser input string*/
-		if ( !parser(buff_cmd) )
+		/*parser input string */
+		if (!parser(buff_cmd))
 			printf("%s: command not found\n", buff_cmd);
 
 		memset(buff_cmd, 0, 128);
 
-restart:
+ restart:
 		os_delay(1);
 	}
 }
@@ -66,9 +67,10 @@ TCB tcb_shell;
 U32 stack_shell[STACK_SHELL_SIZE];
 void shell_init()
 {
-	export(help, (U8 *)"help");
-	export(version,(U8 *)"version");
-	export(fuck, (U8 *)"show");
+	export(help, (U8 *) "help");
+	export(version, (U8 *) "version");
+	export(fuck, (U8 *) "show");
 
-	task_create(&tcb_shell, (U8 *)"shell_task", shell_thread, NULL, stack_shell, STACK_SHELL_SIZE, 30, 1);
+	task_create(&tcb_shell, (U8 *) "shell_task", shell_thread, NULL,
+		    stack_shell, STACK_SHELL_SIZE, 30, 1);
 }

@@ -16,12 +16,14 @@
 #include <signal.h>
 #include <hw_include.h>
 
-STACK * stack_init(STACK* stack_ptr, U32 stack_size, TASK_ENTRY p_task, void * arg, void *task_exit)
+STACK *stack_init(STACK * stack_ptr, U32 stack_size, TASK_ENTRY p_task,
+		  void *arg, void *task_exit)
 {
-	if ((stack_ptr == NULL) || (stack_size <= 0) || (p_task == NULL) || (task_exit == NULL))
+	if ((stack_ptr == NULL) || (stack_size <= 0) || (p_task == NULL)
+	    || (task_exit == NULL))
 		assert(0);
 
-	ucontext_t *stack = (ucontext_t *)malloc(sizeof(ucontext_t));
+	ucontext_t *stack = (ucontext_t *) malloc(sizeof(ucontext_t));
 	assert(stack);
 	memset(stack, 0, sizeof(ucontext_t));
 
@@ -33,19 +35,21 @@ STACK * stack_init(STACK* stack_ptr, U32 stack_size, TASK_ENTRY p_task, void * a
 	stack->uc_stack.ss_size = stack_size;
 	stack->uc_stack.ss_flags = 0;
 	makecontext(stack, (void (*)(void))p_task, 1, arg);
-	return (STACK *)stack;
+	return (STACK *) stack;
 }
 
 void port_schedule()
 {
-	if (swapcontext( (ucontext_t *)old_task->stack_ptr, (ucontext_t *)new_task->stack_ptr) == -1){
+	if (swapcontext
+	    ((ucontext_t *) old_task->stack_ptr,
+	     (ucontext_t *) new_task->stack_ptr) == -1) {
 		handle_error("swapcontext");
 	}
 }
 
 void start_schedule(TCB * tcb)
 {
-	if (setcontext( (ucontext_t *)tcb->stack_ptr) == -1){
+	if (setcontext((ucontext_t *) tcb->stack_ptr) == -1) {
 		handle_error("swapcontext");
 	}
 
@@ -59,10 +63,10 @@ void hw_timer_init()
 	t.it_value.tv_usec = 0;
 	t.it_value.tv_sec = 1;
 
-	if( setitimer( ITIMER_REAL, &t, NULL) < 0 ){
+	if (setitimer(ITIMER_REAL, &t, NULL) < 0) {
 		printf("error\n");
 	}
-	signal( SIGALRM, hardware_timer);
+	signal(SIGALRM, hardware_timer);
 }
 
 void hw_interrupt_init()

@@ -22,18 +22,19 @@
 #define printf_to_uart printf
 #define STACK unsigned int
 
-typedef void (*_TASK_ENTRY)(void *);
+typedef void (*_TASK_ENTRY) (void *);
 
-STACK * stack_init(STACK* stack_ptr, U32 stack_size, _TASK_ENTRY p_task, void * arg, void *task_exit);
+STACK *stack_init(STACK * stack_ptr, U32 stack_size, _TASK_ENTRY p_task,
+		  void *arg, void *task_exit);
 
 //void port_schedule();
 //void start_schedule(TCB * tcb);
 
-void	hw_timer_init();
-void	hw_interrupt_init();
-void	uart_init();
-void	interrupt_enable(int sr_cpu);
-int	interrupt_disable();
-void	hw_timer_clear_interrupt();
+void hw_timer_init();
+void hw_interrupt_init();
+void uart_init();
+void interrupt_enable(int sr_cpu);
+int interrupt_disable();
+void hw_timer_clear_interrupt();
 
 #endif

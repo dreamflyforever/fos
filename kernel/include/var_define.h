@@ -65,13 +65,13 @@
 #define STACK unsigned int
 
 enum {
-    NO_SEMAPHORE = 10,
-    NO_MUTEX,
-    NO_MSG,
-    NO_TCB,
-    NO_SCHED,
-    SCHED,
-    NO_DEVICE
+	NO_SEMAPHORE = 10,
+	NO_MUTEX,
+	NO_MSG,
+	NO_TCB,
+	NO_SCHED,
+	SCHED,
+	NO_DEVICE
 };
 
 #define IDLE_STACK_SIZE  4 *1024
@@ -101,59 +101,59 @@ if (!(X))                                                              \
 #define DELAY          2
 void os_delay(U32 timeslice);
 
-typedef  void (*TASK_ENTRY)(void *p_arg);
-typedef  void (*FUNC_PTR)(void *p_arg);
+typedef void (*TASK_ENTRY) (void *p_arg);
+typedef void (*FUNC_PTR) (void *p_arg);
 
 /*time manage*/
-typedef struct TICK_STR{
-    LIST list;
-    U8   style; // timer,delay,wait signer
-    U32  timeout;
-    struct TCB_STR  *tcb;
-    FUNC_PTR func; // for software timer
-    void *func_arg;
-    BOOL  period;
-    U32  timeout_copy;
-}TICK;
+typedef struct TICK_STR {
+	LIST list;
+	U8 style;		// timer,delay,wait signer
+	U32 timeout;
+	struct TCB_STR *tcb;
+	FUNC_PTR func;		// for software timer
+	void *func_arg;
+	BOOL period;
+	U32 timeout_copy;
+} TICK;
 
 /*for task control block*/
-typedef struct TCB_STR{
-    STACK   *stack_ptr;
-    TICK    delay;
-    U8      *name;
-    LIST    list;
-    U8      prio;
-    BOOL    state;
-}TCB;
+typedef struct TCB_STR {
+	STACK *stack_ptr;
+	TICK delay;
+	U8 *name;
+	LIST list;
+	U8 prio;
+	BOOL state;
+} TCB;
 
 /*for semaphore*/
-typedef struct SEM_STR{
-    LIST       list;
-    U32        count;
-    const U8   *name;
-    TCB        *tcb;
-}SEM;
+typedef struct SEM_STR {
+	LIST list;
+	U32 count;
+	const U8 *name;
+	TCB *tcb;
+} SEM;
 
 #define PRIO_MUTEX 1
-typedef struct MUTEX_STR{
-    LIST     list;
-    BOOL     enable;
-    const U8 *name;
-    U32      copy_prio;
-    TCB      *tcb;
-}MUTEX;
+typedef struct MUTEX_STR {
+	LIST list;
+	BOOL enable;
+	const U8 *name;
+	U32 copy_prio;
+	TCB *tcb;
+} MUTEX;
 
-U8 task_create(TCB *tcb, U8 *name, TASK_ENTRY fun, void *arg, STACK *stack,
-               U32 stack_size, U8 prio, BOOL state);
-U8 task_prio_change(TCB *tcb, U32 prio);
+U8 task_create(TCB * tcb, U8 * name, TASK_ENTRY fun, void *arg, STACK * stack,
+	       U32 stack_size, U8 prio, BOOL state);
+U8 task_prio_change(TCB * tcb, U32 prio);
 
-U8 sem_init(SEM *semaphore, const U8 *name, U32 num);
-U8 sem_put(SEM *semaphore);
-U8 sem_get(SEM *semaphore);
+U8 sem_init(SEM * semaphore, const U8 * name, U32 num);
+U8 sem_put(SEM * semaphore);
+U8 sem_get(SEM * semaphore);
 
-U8 mutex_init(MUTEX *mutex, const U8 *name);
-U8 mutex_put(MUTEX *mutex);
-U8 mutex_get(MUTEX *mutex);
+U8 mutex_init(MUTEX * mutex, const U8 * name);
+U8 mutex_put(MUTEX * mutex);
+U8 mutex_get(MUTEX * mutex);
 
 void block_queue_init();
 
@@ -174,23 +174,23 @@ extern U32 task_prio_map;
 
 TCB *bit_first_one_search(U32 num);
 void prio_ready_queue_init();
-void prio_ready_queue_insert_tail(TCB *tcb);
+void prio_ready_queue_insert_tail(TCB * tcb);
 void schedule();
-void prio_ready_queue_delete(TCB *tcb);
-void prio_ready_queue_insert_head(TCB *tcb);
+void prio_ready_queue_delete(TCB * tcb);
+void prio_ready_queue_insert_head(TCB * tcb);
 
 void tick_queue_init();
 ULONG tick_get();
 /*For prot function*/
 void hardware_timer();
 
-BOOL start_which_task(TCB *tcb);
+BOOL start_which_task(TCB * tcb);
 void idle_task(void *arg);
 void schedule_lock();
 void schedule_unlock();
 
 /*For port function*/
 void port_schedule();
-void start_schedule(TCB *tcb);
+void start_schedule(TCB * tcb);
 
 #endif

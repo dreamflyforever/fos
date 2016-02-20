@@ -43,8 +43,8 @@ U32 idle_stack[IDLE_STACK_SIZE];
 /*Idle task*/
 void idle_task(void *arg)
 {
-    for (;;) {
-        //os_printf("Enter idle task\n");
-        schedule();
-    }
+	for (;;) {
+		//os_printf("Enter idle task\n");
+		schedule();
+	}
 }

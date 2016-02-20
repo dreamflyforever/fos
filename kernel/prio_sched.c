@@ -38,122 +38,122 @@
 #include <var_define.h>
 
 /*Search the ready-high-priority task*/
-TCB* bit_first_one_search(U32 num)
+TCB *bit_first_one_search(U32 num)
 {
-    LIST *prio_list_head;
-    TCB *tcb_ret;
+	LIST *prio_list_head;
+	TCB *tcb_ret;
 
-    U8 i;
-    for (i = 0; i < SYSTEM_WORD; i++) {
-        /* The first task of each priority queue must be representative*/
-        if ((num >> i) & 0x01) {
-            prio_list_head = &task_prio_queue[i].list;
-            tcb_ret        = list_entry(prio_list_head->next, TCB, list);
-            /*return the first found task*/
-            return tcb_ret;
-        }
-    }
+	U8 i;
+	for (i = 0; i < SYSTEM_WORD; i++) {
+		/* The first task of each priority queue must be representative */
+		if ((num >> i) & 0x01) {
+			prio_list_head = &task_prio_queue[i].list;
+			tcb_ret = list_entry(prio_list_head->next, TCB, list);
+			/*return the first found task */
+			return tcb_ret;
+		}
+	}
 
-    /*If not ready task, then return NULL*/
-    tcb_ret = NULL;
-    return tcb_ret;
+	/*If not ready task, then return NULL */
+	tcb_ret = NULL;
+	return tcb_ret;
 }
 
 /*Build the ready queue*/
 void prio_ready_queue_init()
 {
-    U8 i;
-    for (i = 0; i < SYSTEM_WORD; i++)
-        list_init(&task_prio_queue[i].list);
+	U8 i;
+	for (i = 0; i < SYSTEM_WORD; i++)
+		list_init(&task_prio_queue[i].list);
 }
 
-void prio_ready_queue_insert_tail(TCB *tcb)
+void prio_ready_queue_insert_tail(TCB * tcb)
 {
-    bit_set(task_prio_map, tcb->prio);
-    list_insert_behind(&task_prio_queue[tcb->prio].list, &tcb->list);
+	bit_set(task_prio_map, tcb->prio);
+	list_insert_behind(&task_prio_queue[tcb->prio].list, &tcb->list);
 }
 
-void prio_ready_queue_insert_head(TCB *tcb)
+void prio_ready_queue_insert_head(TCB * tcb)
 {
-    bit_set(task_prio_map, tcb->prio);
-    list_insert_spec(&task_prio_queue[tcb->prio].list, &tcb->list);
+	bit_set(task_prio_map, tcb->prio);
+	list_insert_spec(&task_prio_queue[tcb->prio].list, &tcb->list);
 }
 
-void prio_ready_queue_delete(TCB *tcb)
+void prio_ready_queue_delete(TCB * tcb)
 {
-    list_delete(&tcb->list);
+	list_delete(&tcb->list);
 
-    /* If the task ready queue have no task, clear the corresponding task_prio_map*/
-    if (is_list_last(&task_prio_queue[tcb->prio].list))
-        bit_clear(task_prio_map, tcb->prio);
+	/* If the task ready queue have no task, clear the corresponding task_prio_map */
+	if (is_list_last(&task_prio_queue[tcb->prio].list))
+		bit_clear(task_prio_map, tcb->prio);
 }
 
 U8 prio_ready_queue_fetch()
 {
-    TCB *tmp =  bit_first_one_search(task_prio_map);
+	TCB *tmp = bit_first_one_search(task_prio_map);
 
-    /*If not ready task, then assert*/
-    OS_ASSERT(tmp);
+	/*If not ready task, then assert */
+	OS_ASSERT(tmp);
 
-    if (!is_list_last(&tmp->list)) {
-        prio_ready_queue_delete(tmp);
-        prio_ready_queue_insert_tail(tmp);
-    }
+	if (!is_list_last(&tmp->list)) {
+		prio_ready_queue_delete(tmp);
+		prio_ready_queue_insert_tail(tmp);
+	}
 
-    /*if the fetch task is equal to current task, no sched*/
-    if (tmp == new_task)
-        return NO_SCHED;
-    else {
-        /*Switch the task*/
-        old_task = new_task;
-        new_task = tmp;
-    }
+	/*if the fetch task is equal to current task, no sched */
+	if (tmp == new_task)
+		return NO_SCHED;
+	else {
+		/*Switch the task */
+		old_task = new_task;
+		new_task = tmp;
+	}
 
-    return SCHED;
+	return SCHED;
 }
 
 void schedule()
 {
-    if (schedule_is_lock == TRUE)
-        return ;
+	if (schedule_is_lock == TRUE)
+		return;
 
-    U32 cpu_sr = interrupt_disable();
-    if (NO_SCHED == prio_ready_queue_fetch()) {
-        interrupt_enable(cpu_sr);
-        return ;
-    }
+	U32 cpu_sr = interrupt_disable();
+	if (NO_SCHED == prio_ready_queue_fetch()) {
+		interrupt_enable(cpu_sr);
+		return;
+	}
 
-    port_schedule();
-    interrupt_enable(cpu_sr);
+	port_schedule();
+	interrupt_enable(cpu_sr);
 }
 
 /*Start the first task*/
-BOOL start_which_task(TCB *first_task)
+BOOL start_which_task(TCB * first_task)
 {
-    if (first_task == NULL) {
-        OS_LOG("First task is NULL\n");
-        return FALSE;
-    }
+	if (first_task == NULL) {
+		OS_LOG("First task is NULL\n");
+		return FALSE;
+	}
 
-    new_task = first_task;
-    start_schedule(new_task);
+	new_task = first_task;
+	start_schedule(new_task);
 
-    return TRUE;
+	return TRUE;
 }
 
 void schedule_lock()
 {
-    schedule_is_lock = TRUE;
+	schedule_is_lock = TRUE;
 }
 
 void schedule_unlock()
 {
-    schedule_is_lock = FALSE;
+	schedule_is_lock = FALSE;
 }
 
 void find_high_ready_task()
 {
-    U32 cpu_sr = interrupt_disable();
-    prio_ready_queue_fetch();
-    interrupt_enable(cpu_sr);
+	U32 cpu_sr = interrupt_disable();
+	prio_ready_queue_fetch();
+	interrupt_enable(cpu_sr);
 }
