@@ -1,0 +1,9 @@
+language: c
+compiler:
+  - gcc
+script:
+  - make
+  - sudo ./fos
+notifications:
+  email:
+    - sjyangv0@gmail.com
