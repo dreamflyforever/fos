@@ -1,5 +1,6 @@
 FOS( Fast Operating System )
 ==========
+[![Build Status](https://secure.travis-ci.org/php/php-src.png?branch=master)](https://travis-ci.org/dreamflyforever/test)
 
 It's an open soruce project about code RTOS(Real Time Operating Systems), named FOS, alias Chinese Operating System, not COPY OTHER SYSTEM, based on OpenRISC, and now it port to linux.
 
@@ -10,12 +11,12 @@ Now it's function will be complete step by step, I hope more and more people wil
 To build the FOS, tools need: scons and system gcc.  
 
 CD to the RTOS directory and run:  
-'scons'
+`scons`
 
 This will produce execution files named 'fos'.  
 
 To run the FOS for linux, run the shell script:  
-'./start.sh'
+`./start.sh`
 
 ---------------------------------------------------------------------------
 
@@ -31,5 +32,8 @@ SOURCE TREE:
 
 Contributions:
 ==============
-This software was written by Shanjin Yang. License: GPL.  
-Any question please contact me by <sjyangv0@qq.com>.
+This software was written by Shanjin Yang. 
+
+License: GPL. 
+
+Any question please contact <sjyangv0@qq.com>.
