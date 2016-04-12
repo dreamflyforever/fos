@@ -86,7 +86,7 @@ end:
 }
 
 
-int test_audioenc(int argc, char **argv)
+int test_audioenc(int argc, char *argv)
 {
     char line[1024];
     FILE *file = NULL;
@@ -94,13 +94,13 @@ int test_audioenc(int argc, char **argv)
 
 
     if (argc < 2) {
-        printf("usage: %s wav.scp\n", argv[0]);
+        printf("usage: %s wav.scp\n", argv);
         goto end;
     }
  
-    file = fopen(argv[1], "r");
+    file = fopen(argv, "r");
     if (!file) {
-        printf("can not open file : %s\n", argv[1]);
+        printf("can not open file : %s\n", argv);
         goto end;
     }
     
@@ -136,9 +136,11 @@ end:
     return 0;
 }
 
+#if 0
 int main(int argc, char** argv)
 {
 	test_audioenc(argc, argv);
 	
 	return 0;		
 }
+#endif

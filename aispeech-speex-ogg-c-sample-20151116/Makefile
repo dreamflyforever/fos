@@ -20,12 +20,12 @@ target=wav2ogg
 
 %.o:%.c
 		echo "compile ...";$(CC) $(CFLAGS) -c -o $@ $<; 
-	
+
 all: target
 
 target: $(objs)
 	$(CC) $(CFLAGS) ${WFLAGS} -c -o test/test_audioenc.o test/test_audioenc.c 
-	${CXX} $(CFLAGS) ${WFLAGS} -o $(target) test/test_audioenc.o $(objs) $(LFLAGS)
-	
+	ar cr libwav2ogg.a test/test_audioenc.o $(objs)
+
 clean:
 	-rm test/test_audioenc.o $(objs) $(target)
