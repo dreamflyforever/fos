@@ -24,6 +24,7 @@ target=wav2ogg
 all: target
 
 target: $(objs)
+	$(CC) $(objs) -fPIC --share -o libspeex.so
 	$(CC) $(CFLAGS) ${WFLAGS} -c -o main/main.o main/main.c 
 	${CXX} $(CFLAGS) ${WFLAGS} -o $(target) main/main.o $(objs) $(LFLAGS) -lm -lnopoll
 
