@@ -2,6 +2,6 @@
 
 int main()
 {
-	test_audioenc(2, "wav.scp");
+	audioenc_output("1.wav");
 	return 0;
 }
