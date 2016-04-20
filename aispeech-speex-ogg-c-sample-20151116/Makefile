@@ -24,8 +24,8 @@ target=wav2ogg
 all: target
 
 target: $(objs)
-	$(CC) $(CFLAGS) ${WFLAGS} -c -o test/test_audioenc.o test/test_audioenc.c 
-	${CXX} $(CFLAGS) ${WFLAGS} -o $(target) test/test_audioenc.o $(objs) $(LFLAGS) -lm -lnopoll
+	$(CC) $(CFLAGS) ${WFLAGS} -c -o main/main.o main/main.c 
+	${CXX} $(CFLAGS) ${WFLAGS} -o $(target) main/main.o $(objs) $(LFLAGS) -lm -lnopoll
 
 clean:
 	-rm test/test_audioenc.o $(objs) $(target)
