@@ -45,7 +45,6 @@ static int audioenc_notify(void *user_data,
 
 	nopoll_conn_send_binary(conn, (const char *)body, body_len);
 	nopoll_sleep(10000);
-	printf("send data\n");
 	return 0;
 }
 
