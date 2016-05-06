@@ -66,7 +66,8 @@ MY_CFLAGS = -g -I . -I include/ -I src/ -I third/ -I third/ogg -I third/speex
 
 # The linker options.
 # MY_LIBS   = -lGLEW -lglut -lGLU -lGL -lX11 -lXmu -lXi -lm -L/usr/X11R6/lib -lgomp -lOpenThreads -lpthread
-MY_LIBS   = -L/home/jim/test/linux_asr/aispeech-webapi/aispeech-speex-ogg-c-sample-20151116/lib -lm -lssl -lcrypto -ldl
+#MY_LIBS   = -L/home/jim/test/linux_asr/aispeech-webapi/aispeech-speex-ogg-c-sample-20151116/lib -lm -lssl -lcrypto -ldl
+MY_LIBS   =  -lm -lssl -lcrypto -ldl
 
 # The pre-processor options used by the cpp (man cpp for more).
 CPPFLAGS  = 
@@ -97,10 +98,10 @@ CFLAGS+=-Os -std=c99 -D _POSIX_C_SOURCE=200112L -D _BSD_SOURCE -fPIC  -Wall -Wno
 # CXXFLAGS= -std=c++0x
 CXXFLAGS= 
 # The C program compiler.
-CC     = mipsel-linux-gcc
+CC     = gcc
 
 # The C++ program compiler.
-CXX    = mipsel-linux-g++
+CXX    = g++
 
 # Un-comment the following line to compile C programs as C++ ones.
 #CC     = $(CXX)

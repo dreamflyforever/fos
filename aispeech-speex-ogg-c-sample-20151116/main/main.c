@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 	char text[1024];
 
 	if (argc < 2) {
-		printf("usage: hello song.song\n");
+		printf("usage: ./fos file_wav\n");
 		return 0;
 	}
 	memset(timestamp, 0, 1024);
