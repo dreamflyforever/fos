@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
 	char path[2048];
 	char buf[1024 * 1024];
-
+#if 0
 	char *audiotype = "ogg";
 	char *coretype = "cn.dlg.ita";
 	char *res = "xm_aihome";
@@ -132,6 +132,17 @@ int main(int argc, char *argv[])
 	char *port = "1028";
 	char *authId = "1234567890993";
 	char *sig = "c6c5bec781ef95acf49443074359bb61f7a1463e";
+#endif
+	char *appkey = "1458977484859577";
+	char *secretkey = "d19c742b65bfe89857130819297ace0f";
+	char *audiotype = "ogg";
+	char *coretype = "cn.dlg.ita";
+	char *res = "xm_aihome";
+	char *host = "s-test.api.aispeech.com";
+	char *port = "10000";
+	char *authId = "1234567890993";
+	char *sig = "0503a3cf308c75abc46cac445ada3521b98346a2";
+
 	char text[1024];
 
 	if (argc < 2) {
