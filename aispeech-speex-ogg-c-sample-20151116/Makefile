@@ -62,12 +62,12 @@
 # The pre-processor and compiler options.
 # MY_CFLAGS = -ggdb3 -pipe -O2 -Wall -Wextra -fopenmp -march=native -mfpmath=sse -DLINUX -m64 -std=c++0x
 #MY_CFLAGS = -g -DLINUX 
-MY_CFLAGS = -g -I . -I include/ -I src/ -I third/ -I third/ogg -I third/speex
+MY_CFLAGS = -g -I . -I include/ -I src/ -I third/ -I third/ogg -I third/speex -I auth/ -I interface/ -I cJSON/
 
 # The linker options.
 # MY_LIBS   = -lGLEW -lglut -lGLU -lGL -lX11 -lXmu -lXi -lm -L/usr/X11R6/lib -lgomp -lOpenThreads -lpthread
 #MY_LIBS   = -L/home/jim/test/linux_asr/aispeech-webapi/aispeech-speex-ogg-c-sample-20151116/lib -lm -lssl -lcrypto -ldl
-MY_LIBS   =  -lm -lssl -lcrypto -ldl
+MY_LIBS   =  -lm -lssl -lcrypto -ldl -Lauth/ -lprovison
 
 # The pre-processor options used by the cpp (man cpp for more).
 CPPFLAGS  = 
@@ -76,7 +76,7 @@ LDFLAGS   =
 
 # The directories in which source files reside.
 # If not specified, only the current directory will be serached.
-SRCDIRS   = ./nopoll ./src ./third/ogg ./third/speex ./main
+SRCDIRS   = ./nopoll ./src ./third/ogg ./third/speex ./main ./auth ./interface cJSON
 
 # The executable file name.
 # If not specified, current directory name or `a.out' will be used.

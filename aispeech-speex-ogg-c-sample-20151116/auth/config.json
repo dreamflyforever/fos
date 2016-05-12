@@ -1,0 +1,7 @@
+{
+    "appKey":"1452224985859518",
+    "secretKey":"c9a0de26049afad04f94d3c483b132fd",
+    "provision":"./auth/aiengine-2.7.4-1452224985859518.provision",
+    "serialNumber":"./auth/aiengine.serialNumber",
+    "version":"aiengine-2.7.4"
+}

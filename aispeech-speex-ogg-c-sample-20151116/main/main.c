@@ -16,10 +16,11 @@
 #include <stddef.h>
 #include "agn_audioenc.h"
 #include <nopoll.h>
+#include "aiengine.h"
 
 static FILE *ogg;
 static FILE *wav;
-noPollConn *conn;
+struct aiengine *agn;
 
 #define print(format, ...) \
 	{printf("[%s : %s : %d] ", __FILE__, __func__, __LINE__);\
@@ -35,15 +36,15 @@ static int audioenc_notify(void *user_data,
 	fwrite(head, 1, head_len, ogg);
 	fwrite(body, 1, body_len, ogg);
 #endif
-	if (conn == NULL) {
+	if (agn->conn == NULL) {
 		print("conn == NULL\n");
 		return 0;
 	}
 
-	nopoll_conn_send_binary(conn, (const char *)head, head_len);
+	nopoll_conn_send_binary(agn->conn, (const char *)head, head_len);
 	nopoll_sleep(10000);
 
-	nopoll_conn_send_binary(conn, (const char *)body, body_len);
+	nopoll_conn_send_binary(agn->conn, (const char *)body, body_len);
 	nopoll_sleep(10000);
 	return 0;
 }
@@ -115,119 +116,60 @@ int audioenc_output(char *file)
 	return 0;
 }
 
+static char *cloud_syn_param = "{\
+	\"coreProvideType\": \"cloud\",\
+        \"audio\": {\
+            \"audioType\": \"ogg\",\
+            \"sampleRate\": 16000,\
+            \"channel\": 1,\
+	    \"compress\":\"raw\",\
+            \"sampleBytes\": 2\
+        },\
+        \"request\": {\
+		\"coreType\": \"cn.dlg.ita\",\
+		\"speechRate\":1.0,\
+		\"res\": \"xm_aihome\"\
+        }\
+}";
+
 int main(int argc, char *argv[])
 {
-	int cx;
-	noPollCtx  *ctx;
-	noPollMsg  *msg;
-	char timestamp[1024];
-
-	char path[2048];
-	char buf[1024 * 1024];
-#if 0
-	char *audiotype = "ogg";
-	char *coretype = "cn.dlg.ita";
-	char *res = "xm_aihome";
-	char *host = "s.api.aispeech.com";
-	char *port = "1028";
-	char *authId = "1234567890993";
-	char *sig = "c6c5bec781ef95acf49443074359bb61f7a1463e";
-#endif
-	char *appkey = "1458977484859577";
-	char *secretkey = "d19c742b65bfe89857130819297ace0f";
-	char *audiotype = "ogg";
-	char *coretype = "cn.dlg.ita";
-	char *res = "xm_aihome";
-	char *host = "s-test.api.aispeech.com";
-	char *port = "10000";
-	char *authId = "1234567890993";
-	char *sig = "0503a3cf308c75abc46cac445ada3521b98346a2";
-
-	char text[1024];
-
-	if (argc < 2) {
-		printf("usage: ./fos file_wav\n");
-		return 0;
-	}
-	memset(timestamp, 0, 1024);
-	memcpy(timestamp, "1460631415", 10);
-	memset(buf, 0, 1024 * 1024);
-	memset(path, 0, 2048);
-	sprintf(path,
-		"/%s/%s?applicationId=14476531938594b9&timestamp=%s&authId=%s&sig=%s&userId=test_yuyintianxia",
-		coretype,
-		res,
-		timestamp,
-		authId,
-		sig);
-
-	/*init context*/
-	ctx = nopoll_ctx_new();
-	if (!ctx) {
-		printf("error nopoll new ctx failed!");
-		exit(1);
+	agn = aiengine_new(NULL);
+	if (agn == NULL) {
+		printf("%s %s %d: error\n", __FILE__, __func__, __LINE__);
 	}
 
-	/*create connection*/
-	conn = nopoll_conn_new(ctx,
-				host,
-				port,
-				NULL,
-				path,
-				NULL,
-				NULL);
-
-	if (!nopoll_conn_is_ok (conn)) {
-		printf("[%s %s %d]: connect error\n",
-		__FILE__, __func__, __LINE__);
-		return nopoll_false;
-	}
-
-	if (!nopoll_conn_wait_until_connection_ready (conn, 5)) {
-		printf("[%s %s %d]: connect not ready\n",
-		__FILE__, __func__, __LINE__);
+	int ret = check_provision(agn);;
+	if (ret != 0) {
+		printf("Authorization fail\n");
 		return 0;
 	} else {
-		printf("[%s %s %d]: connect success\n",
-		__FILE__, __func__, __LINE__);
+		printf("Authorization success\n");
 	}
-
-	memset(text, 0, 1024);
-	sprintf(text, "{\"coreProvideType\": \"cloud\",\
-		\"audio\": {\"audioType\": \"%s\", \"sampleBytes\": 2,\
-		\"sampleRate\": 16000, \"channel\": 1, \"compress\":\"raw\"},\
-		\"request\": {\"coreType\": \"%s\", \"res\": \"%s\"}}",
-		audiotype, coretype, res);
-	printf("%s\n", text);
-	cx = nopoll_conn_send_text(conn, text, strlen(text));
-	printf("[%s %s %d]: text len: %d\n",
-		__FILE__, __func__, __LINE__, (int)strlen(text));
-	if (cx < 0)
-		printf("\n[%s %s %d]: send text error\n",
-			__FILE__, __func__, __LINE__);
-
-	audioenc_output(argv[1]);
+	aiengine_start(agn, cloud_syn_param, NULL, NULL, NULL);
+	audioenc_output("1.wav");
 	/*raw send data API*/
-	nopoll_conn_send_frame(conn, 1, 1, 2, 0, "", 0);
+	nopoll_conn_send_frame(agn->conn, 1, 1, 2, 0, "", 0);
 
-	while ((msg = nopoll_conn_get_msg (conn)) == NULL) {
-		if (! nopoll_conn_is_ok (conn)) {
+	while ((agn->msg = nopoll_conn_get_msg(agn->conn)) == NULL) {
+		if (! nopoll_conn_is_ok (agn->conn)) {
 			printf ("ERROR: received websocket connection close during wait reply..\n");
 			return nopoll_false;
 		}
 		nopoll_sleep(10000);
 	}
 	printf("msg received \n");
-	memcpy(buf, (char *)nopoll_msg_get_payload (msg), nopoll_msg_get_payload_size (msg));
+	char buf[1024 * 1024];
+	memcpy(buf, (char *)nopoll_msg_get_payload (agn->msg), nopoll_msg_get_payload_size(agn->msg));
 	printf("%s", buf);
 	/*unref message*/
-	nopoll_msg_unref(msg);
+	nopoll_msg_unref(agn->msg);
 
 	/*finish connection*/
-	nopoll_conn_close(conn);
+	nopoll_conn_close(agn->conn);
 	
 	/*finish*/
-	nopoll_ctx_unref(ctx);
+	nopoll_ctx_unref(agn->ctx);
 
 	return 0;
 }
