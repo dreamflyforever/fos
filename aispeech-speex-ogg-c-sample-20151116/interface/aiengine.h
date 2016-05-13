@@ -1,10 +1,13 @@
 #include <nopoll.h>
+#include <agn_audioenc.h>
 
 struct aiengine {
 	noPollCtx *ctx;
 	noPollMsg *msg;
 	char *provision_path;
 	noPollConn *conn;
+	agn_audioenc_s *audioenc;
+	agn_audioenc_cfg_t *cfg;
 };
 
 typedef int (*aiengine_callback)(const void *usrdata, const char *id, int type, const void *message, int size);

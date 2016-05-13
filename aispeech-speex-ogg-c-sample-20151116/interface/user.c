@@ -1,6 +1,5 @@
 #include <aiengine.h>
 #include <cJSON.h>
-
 extern int auth_do(char *path);
 
 char *server_cfg = "{\
@@ -61,10 +60,12 @@ struct aiengine *aiengine_new(const char *cfg)
 	tmp = cJSON_GetObjectItem(root, "cloud");
 	tmp = cJSON_GetObjectItem(tmp, "server");
 	host = tmp->valuestring;
+	pf("host:%s", host);
 	
 	tmp = cJSON_GetObjectItem(root, "cloud");
 	tmp = cJSON_GetObjectItem(tmp, "port");
 	port = tmp->valuestring;
+	pf("port:%s", port);
 
 	memset(timestamp, 0, 1024);
 	memcpy(timestamp, "1460631415", 10);
@@ -77,7 +78,7 @@ struct aiengine *aiengine_new(const char *cfg)
 		timestamp,
 		authId,
 		sig);
-
+	pf("path:%s\n", path);
 	/*init context*/
 	agn->ctx = nopoll_ctx_new();
 	if (!agn->ctx) {
@@ -103,18 +104,13 @@ struct aiengine *aiengine_new(const char *cfg)
 	if (!nopoll_conn_wait_until_connection_ready (agn->conn, 5)) {
 		printf("[%s %s %d]: connect not ready\n",
 		__FILE__, __func__, __LINE__);
-		return 0;
+		return NULL;
 	} else {
 		printf("[%s %s %d]: connect success\n",
 		__FILE__, __func__, __LINE__);
 	}
 
 	return agn;
-}
-
-int aiengine_delete(struct aiengine *engine)
-{
-	return 0;
 }
 
 int aiengine_start(struct aiengine *agn, const char *param, char id[64], aiengine_callback callback, const void *usrdata)
@@ -153,11 +149,13 @@ int aiengine_start(struct aiengine *agn, const char *param, char id[64], aiengin
 	samplebytes = t->valueint;
 
 	tmp = cJSON_GetObjectItem(root, "request");
-	t = cJSON_GetObjectItem(tmp, "coretype");
-	coretype = tmp->valuestring;
+	t = cJSON_GetObjectItem(tmp, "coreType");
+	coretype = t->valuestring;
+	pf("coreType:%s\n", coretype);
 
 	t = cJSON_GetObjectItem(tmp, "res");
-	res = tmp->valuestring;
+	res = t->valuestring;
+	pf("res:%s\n", res);
 	sprintf(text, "{\"coreProvideType\": \"%s\",\
 		\"audio\": {\"audioType\": \"%s\", \"sampleBytes\": %d,\
 		\"sampleRate\": %d, \"channel\": %d, \"compress\":\"%s\"},\
@@ -167,21 +165,47 @@ int aiengine_start(struct aiengine *agn, const char *param, char id[64], aiengin
 	printf("%s\n", text);
 	cx = nopoll_conn_send_text(agn->conn, text, strlen(text));
 	printf("[%s %s %d]: text len: %d\n",
-		__FILE__, __func__, __LINE__, (int)strlen(text));
+		__FILE__, __func__, __LINE__,
+		(int)strlen(text));
 	if (cx < 0)
 		printf("\n[%s %s %d]: send text error\n",
 			__FILE__, __func__, __LINE__);
 
+	agn->audioenc = audioenc_new(NULL, audioenc_notify);
+	if (agn->audioenc == NULL)
+		pf("audioenc NULL\n");
+	agn->cfg = (agn_audioenc_cfg_t *)calloc(1, sizeof(*agn->cfg));
+	if (!agn->cfg) {
+		printf("calloc cfg failed!\n");
+		while(1);
+	} else {
+		agn->cfg->spx_quality = 8;
+		agn->cfg->spx_complexity = 2;
+		agn->cfg->spx_vbr = 0;
+	}
+	audioenc_start(agn->audioenc, 16000, 1, 16, agn->cfg);
+
 	return 0;
 }
 
-int aiengine_feed(struct aiengine *engine, const void *data, int size)
+int aiengine_feed(struct aiengine *agn, const void *data, int size)
 {
+	audioenc_encode(agn->audioenc, data, size);
 	return 0;
 }
 
-int aiengine_stop(struct aiengine *engine)
+int aiengine_stop(struct aiengine *agn)
 {
+	if (agn->audioenc) {
+		audioenc_delete(agn->audioenc);
+	}
+	audioenc_stop(agn->audioenc);
+	return 0;
+}
+
+int aiengine_delete(struct aiengine *agn)
+{
+	free(agn->cfg);
 	return 0;
 }
 

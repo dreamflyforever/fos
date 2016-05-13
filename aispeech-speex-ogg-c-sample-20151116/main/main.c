@@ -26,7 +26,7 @@ struct aiengine *agn;
 	{printf("[%s : %s : %d] ", __FILE__, __func__, __LINE__);\
 	printf(format, ##__VA_ARGS__);}
 
-static int audioenc_notify(void *user_data,
+int audioenc_notify(void *user_data,
 			unsigned char *body,
 			int body_len,
 			unsigned char *head,
@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
 	agn = aiengine_new(NULL);
 	if (agn == NULL) {
 		printf("%s %s %d: error\n", __FILE__, __func__, __LINE__);
+		return 0;
 	}
 
 	int ret = check_provision(agn);;
@@ -146,8 +147,37 @@ int main(int argc, char *argv[])
 	} else {
 		printf("Authorization success\n");
 	}
+	pf("--------");
 	aiengine_start(agn, cloud_syn_param, NULL, NULL, NULL);
-	audioenc_output("1.wav");
+/*------------------------------------------------------------*/
+
+	char *wavpath = "1.wav";
+	int bytes;
+	char oggpath[1024] = {0};
+	char buf[3200]  = {0};
+
+	sprintf(oggpath, "%.*s.ogg", (int)strlen(wavpath) - 4, wavpath);
+
+	wav = fopen(wavpath, "r");
+	if (!wav) {
+		printf("open wav : %s failed\n", wavpath);
+		return 0;
+	}
+
+#ifdef SAVE_OGG
+	ogg = fopen(oggpath, "w");
+	if (!ogg) {
+		printf("open ogg : %s failed\n", oggpath);
+		return 0;
+	}
+#endif
+	fseek(wav, 44, SEEK_SET);
+	while ((bytes = fread(buf, 1, sizeof(buf), wav))) {
+		//audioenc_encode(audioenc, buf, bytes);
+		aiengine_feed(agn, buf, bytes);
+	}
+/*------------------------------------------------------------*/
+
 	/*raw send data API*/
 	nopoll_conn_send_frame(agn->conn, 1, 1, 2, 0, "", 0);
 
@@ -159,9 +189,9 @@ int main(int argc, char *argv[])
 		nopoll_sleep(10000);
 	}
 	printf("msg received \n");
-	char buf[1024 * 1024];
-	memcpy(buf, (char *)nopoll_msg_get_payload (agn->msg), nopoll_msg_get_payload_size(agn->msg));
-	printf("%s", buf);
+	char buff[1024 * 1024];
+	memcpy(buff, (char *)nopoll_msg_get_payload (agn->msg), nopoll_msg_get_payload_size(agn->msg));
+	printf("%s", buff);
 	/*unref message*/
 	nopoll_msg_unref(agn->msg);
 

@@ -94,7 +94,7 @@ HDREXTS = .h .H .hh .hpp .HPP .h++ .hxx .hp
 
 # The pre-processor and compiler options.
 # Users can override those variables from the command line.
-CFLAGS+=-Os -std=c99 -D _POSIX_C_SOURCE=200112L -D _BSD_SOURCE -fPIC  -Wall -Wno-format-zero-length -D USE_SMALLFT -D FIXED_POINT -D SAVE_OGG
+CFLAGS+=-Os -std=c99 -D _POSIX_C_SOURCE=200112L -D _BSD_SOURCE -fPIC  -Wall -Wno-format-zero-length -D USE_SMALLFT -D FIXED_POINT #-D SAVE_OGG
 # CXXFLAGS= -std=c++0x
 CXXFLAGS= 
 # The C program compiler.

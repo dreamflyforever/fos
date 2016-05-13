@@ -74,6 +74,12 @@ void audioenc_stop(struct audioenc *enc);
 int audioenc_start(struct audioenc *enc, int rate, int channels, int bits, agn_audioenc_cfg_t *cfg); 
 int audioenc_encode(struct audioenc *enc, const void *data, int size);
 
+int audioenc_notify(void *user_data,
+			unsigned char *body,
+			int body_len,
+			unsigned char *head,
+			int head_len);
+#define pf(format, ...) {printf("[%s : %s : %d] ", __FILE__, __func__, __LINE__); printf(format, ##__VA_ARGS__);}
 #ifdef __cplusplus
 }
 #endif
