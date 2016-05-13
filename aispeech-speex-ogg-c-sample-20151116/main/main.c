@@ -108,27 +108,25 @@ int agn_cb(const void *usrdata,
 
 int main(int argc, char *argv[])
 {
+	char *wavpath = "1.wav";
+	int bytes;
+	char buf[3200]  = {0};
 	int ret;
+
 	agn = aiengine_new(server_cfg);
 	if (agn == NULL) {
 		printf("%s %s %d: error\n", __FILE__, __func__, __LINE__);
 		return 0;
 	}
+
 	ret = check_provision(agn);;
 	if (ret != 0) {
 		printf("Authorization fail\n");
-		return 0;
 	} else {
 		printf("Authorization success\n");
 	}
+
 	aiengine_start(agn, cloud_syn_param, agn_cb, NULL);
-
-	char *wavpath = "1.wav";
-	int bytes;
-	char oggpath[1024] = {0};
-	char buf[3200]  = {0};
-
-	sprintf(oggpath, "%.*s.ogg", (int)strlen(wavpath) - 4, wavpath);
 
 	wav = fopen(wavpath, "r");
 	if (!wav) {
@@ -140,7 +138,9 @@ int main(int argc, char *argv[])
 	while ((bytes = fread(buf, 1, sizeof(buf), wav))) {
 		aiengine_feed(agn, buf, bytes);
 	}
+
 	aiengine_stop(agn);
+
 	aiengine_delete(agn);
 	return 0;
 }

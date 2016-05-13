@@ -176,6 +176,7 @@ int aiengine_feed(struct aiengine *agn, const void *data, int size)
 
 int aiengine_stop(struct aiengine *agn)
 {
+	char buff[1024 * 1024];
 	/*raw send data API*/
 	nopoll_conn_send_frame(agn->conn, 1, 1, 2, 0, "", 0);
 
@@ -186,7 +187,6 @@ int aiengine_stop(struct aiengine *agn)
 		}
 		nopoll_sleep(10000);
 	}
-	char buff[1024 * 1024];
 	memcpy(buff, (char *)nopoll_msg_get_payload (agn->msg), nopoll_msg_get_payload_size(agn->msg));
 	agn->message = buff;
 	agn->size = nopoll_msg_get_payload_size(agn->msg);
@@ -216,6 +216,8 @@ int aiengine_stop(struct aiengine *agn)
 int aiengine_delete(struct aiengine *agn)
 {
 	free(agn->cfg);
+	free(agn->provision_path);
+	free(agn);
 	return 0;
 }
 
@@ -226,15 +228,11 @@ int aiengine_cancel(struct aiengine *engine)
 
 int check_provision(struct aiengine *agn)
 {
-#if 0
 	int ret;
-	cJSON* root=cJSON_Parse(agn->server_cfg);
-	cJSON* tmp = cJSON_GetObjectItem(root, "provision");
-#endif
 	if (agn == NULL)
 		pf("agn NULL\n");
 
 	pf("provision path: %s\n", agn->provision_path);
-	int ret = auth_do(agn->provision_path);
+	ret = auth_do(agn->provision_path);
 	return ret;
 }
