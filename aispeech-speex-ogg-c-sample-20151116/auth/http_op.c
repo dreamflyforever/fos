@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "http.h"
 
@@ -138,15 +139,11 @@ static char *http_parse_result(const char*lpbuf)
 
 char * http_post(const char *url,const char *post_str){
 
-	char post[BUFFER_SIZE] = {'\0'};
 	int socket_fd = -1;
 	char lpbuf[BUFFER_SIZE*4] = {'\0'};
-	char *ptmp;
 	char host_addr[BUFFER_SIZE] = {'\0'};
 	char file[BUFFER_SIZE] = {'\0'};
 	int port = 0;
-	int len=0;
-	char *response = NULL;
 
 	if (!url || !post_str) {
 		printf("      failed!\n");
@@ -186,15 +183,11 @@ char * http_post(const char *url,const char *post_str){
 
 char * http_get(const char *url)
 {
-
-	char post[BUFFER_SIZE] = {'\0'};
 	int socket_fd = -1;
 	char lpbuf[BUFFER_SIZE*4] = {'\0'};
-	char *ptmp;
 	char host_addr[BUFFER_SIZE] = {'\0'};
 	char file[BUFFER_SIZE] = {'\0'};
 	int port = 0;
-	int len=0;
 
 	if(!url){
 		printf("      failed!\n");

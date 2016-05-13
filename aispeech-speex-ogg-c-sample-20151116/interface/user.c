@@ -2,40 +2,6 @@
 #include <cJSON.h>
 extern int auth_do(char *path);
 
-char *server_cfg = "{\
-	\"luaPath\": \"bin/luabin.lub\",\
-	\"appKey\": \"14500822818594e0\",\
-	\"secretKey\": \"d2fa15a90d76f190fdfd81c4cd1ff55c\",\
-	\"provision\": \"auth/config.json\",\
-	\"serialNumber\": \"bin/serialNumber\", \
-	\"audiotype\": \"ogg\",\
-	\"coretype\": \"cn.dlg.ita\",\
-	\"res\": \"xm_aihome\",\
-	\"vad\":{\
-		\"enable\": 1,\
-		\"res\": \"bin/vad.aifar.0.0.2.bin\",\
-		\"speechLowSeek\": 60,\
-		\"sampleRate\": 16000,\
-		\"strip\": 2\
-	},\
-	\"cloud\": {\
-		\"server\": \"s.api.aispeech.com\",\
-		\"port\": \"1028\"\
-	},\
-	\"native\": {\
-		\"cn.dnn\": { \
-			\"resBinPath\": \"bin/aihome_comm_xiaole_0910.bin\" \
-		},\
-		\"cn.asr.rec\":{\
-			\"netBinPath\":\"bin/local.net.bin\",\
-			\"resBinPath\":\"bin/ebnfr.aifar.0.0.1.bin\"\
-		},\
-		\"cn.gram\":{\
-			\"resBinPath\":\"bin/ebnfc.aifar.0.0.1.bin\"\
-		}\
-	}\
-}";
-
 struct aiengine *aiengine_new(const char *cfg)
 {
 	struct aiengine *agn = malloc(sizeof(struct aiengine));
@@ -51,28 +17,35 @@ struct aiengine *aiengine_new(const char *cfg)
 
 	char *coretype = NULL;
 	char *res = NULL;
+	int len;
 
-	cJSON* root=cJSON_Parse(server_cfg);
+	cJSON* root = cJSON_Parse(cfg);
 	cJSON *tmp = cJSON_GetObjectItem(root, "coretype");
 	coretype = tmp->valuestring;
+	
+	memset(agn, 0, sizeof(struct aiengine));
+	tmp = cJSON_GetObjectItem(root, "provision");
+	len = strlen(tmp->valuestring);
+	agn->provision_path = (char *)malloc(len);
+	strncpy(agn->provision_path, tmp->valuestring, len);
+
 	tmp = cJSON_GetObjectItem(root, "res");
 	res = tmp->valuestring;
 	tmp = cJSON_GetObjectItem(root, "cloud");
 	tmp = cJSON_GetObjectItem(tmp, "server");
 	host = tmp->valuestring;
-	pf("host:%s", host);
-	
+
 	tmp = cJSON_GetObjectItem(root, "cloud");
 	tmp = cJSON_GetObjectItem(tmp, "port");
 	port = tmp->valuestring;
-	pf("port:%s", port);
 
 	memset(timestamp, 0, 1024);
 	memcpy(timestamp, "1460631415", 10);
 	memset(buf, 0, 1024 * 1024);
 	memset(path, 0, 2048);
 	sprintf(path,
-		"/%s/%s?applicationId=14476531938594b9&timestamp=%s&authId=%s&sig=%s&userId=test_yuyintianxia",
+		"/%s/%s?applicationId=14476531938594b9&timestamp=%s"
+		"&authId=%s&sig=%s&userId=test_yuyintianxia",
 		coretype,
 		res,
 		timestamp,
@@ -95,13 +68,13 @@ struct aiengine *aiengine_new(const char *cfg)
 				NULL,
 				NULL);
 
-	if (!nopoll_conn_is_ok (agn->conn)) {
+	if (!nopoll_conn_is_ok(agn->conn)) {
 		printf("[%s %s %d]: connect error\n",
 		__FILE__, __func__, __LINE__);
 		return nopoll_false;
 	}
 
-	if (!nopoll_conn_wait_until_connection_ready (agn->conn, 5)) {
+	if (!nopoll_conn_wait_until_connection_ready(agn->conn, 5)) {
 		printf("[%s %s %d]: connect not ready\n",
 		__FILE__, __func__, __LINE__);
 		return NULL;
@@ -113,7 +86,10 @@ struct aiengine *aiengine_new(const char *cfg)
 	return agn;
 }
 
-int aiengine_start(struct aiengine *agn, const char *param, char id[64], aiengine_callback callback, const void *usrdata)
+int aiengine_start(struct aiengine *agn,
+			const char *param,
+			aiengine_callback cb,
+			const void *usrdata)
 {
 	char *coreprovidetype = NULL;
 	char *audiotype = NULL;
@@ -126,12 +102,10 @@ int aiengine_start(struct aiengine *agn, const char *param, char id[64], aiengin
 	int cx;
 
 	char text[1024];
-	memset(text, 0, 1024);
 
 	cJSON *root=cJSON_Parse(param);
 	cJSON *tmp = cJSON_GetObjectItem(root, "coreProvideType");
 	coreprovidetype = tmp->valuestring;
-
 	tmp = cJSON_GetObjectItem(root, "audio");
 	cJSON *t = cJSON_GetObjectItem(tmp, "audioType");
 	audiotype = t->valuestring;
@@ -151,11 +125,10 @@ int aiengine_start(struct aiengine *agn, const char *param, char id[64], aiengin
 	tmp = cJSON_GetObjectItem(root, "request");
 	t = cJSON_GetObjectItem(tmp, "coreType");
 	coretype = t->valuestring;
-	pf("coreType:%s\n", coretype);
 
 	t = cJSON_GetObjectItem(tmp, "res");
 	res = t->valuestring;
-	pf("res:%s\n", res);
+	memset(text, 0, 1024);
 	sprintf(text, "{\"coreProvideType\": \"%s\",\
 		\"audio\": {\"audioType\": \"%s\", \"sampleBytes\": %d,\
 		\"sampleRate\": %d, \"channel\": %d, \"compress\":\"%s\"},\
@@ -174,6 +147,7 @@ int aiengine_start(struct aiengine *agn, const char *param, char id[64], aiengin
 	agn->audioenc = audioenc_new(NULL, audioenc_notify);
 	if (agn->audioenc == NULL)
 		pf("audioenc NULL\n");
+
 	agn->cfg = (agn_audioenc_cfg_t *)calloc(1, sizeof(*agn->cfg));
 	if (!agn->cfg) {
 		printf("calloc cfg failed!\n");
@@ -184,6 +158,12 @@ int aiengine_start(struct aiengine *agn, const char *param, char id[64], aiengin
 		agn->cfg->spx_vbr = 0;
 	}
 	audioenc_start(agn->audioenc, 16000, 1, 16, agn->cfg);
+	if (cb == NULL) {
+		pf("cb NULL\n");	
+	} else {
+	}
+	agn->cb = cb;
+	agn->usrdata = usrdata;
 
 	return 0;
 }
@@ -196,10 +176,40 @@ int aiengine_feed(struct aiengine *agn, const void *data, int size)
 
 int aiengine_stop(struct aiengine *agn)
 {
+	/*raw send data API*/
+	nopoll_conn_send_frame(agn->conn, 1, 1, 2, 0, "", 0);
+
+	while ((agn->msg = nopoll_conn_get_msg(agn->conn)) == NULL) {
+		if (! nopoll_conn_is_ok (agn->conn)) {
+			printf ("ERROR: received websocket connection close during wait reply..\n");
+			return nopoll_false;
+		}
+		nopoll_sleep(10000);
+	}
+	char buff[1024 * 1024];
+	memcpy(buff, (char *)nopoll_msg_get_payload (agn->msg), nopoll_msg_get_payload_size(agn->msg));
+	agn->message = buff;
+	agn->size = nopoll_msg_get_payload_size(agn->msg);
+	audioenc_stop(agn->audioenc);
+	if (agn->cb) {
+		pf("callback\n");
+		agn->cb(agn->usrdata, agn->message, agn->size);
+	} else {
+		pf("callback NULL\n");	
+	}
+
 	if (agn->audioenc) {
 		audioenc_delete(agn->audioenc);
 	}
-	audioenc_stop(agn->audioenc);
+
+	/*unref message*/
+	nopoll_msg_unref(agn->msg);
+
+	/*finish connection*/
+	nopoll_conn_close(agn->conn);
+	
+	/*finish*/
+	nopoll_ctx_unref(agn->ctx);
 	return 0;
 }
 
@@ -216,11 +226,15 @@ int aiengine_cancel(struct aiengine *engine)
 
 int check_provision(struct aiengine *agn)
 {
+#if 0
 	int ret;
-	cJSON* root=cJSON_Parse(server_cfg);
+	cJSON* root=cJSON_Parse(agn->server_cfg);
 	cJSON* tmp = cJSON_GetObjectItem(root, "provision");
-	printf("provision path: %s\n", tmp->valuestring);
-	ret = auth_do(tmp->valuestring);
-	return ret;
+#endif
+	if (agn == NULL)
+		pf("agn NULL\n");
 
+	pf("provision path: %s\n", agn->provision_path);
+	int ret = auth_do(agn->provision_path);
+	return ret;
 }
