@@ -1,5 +1,7 @@
 #include <aiengine.h>
 #include <cJSON.h>
+#include <sig_output.h>
+
 extern int auth_do(char *path);
 
 int _audioenc_notify(void *user_data,
@@ -33,7 +35,8 @@ struct aiengine *aiengine_new(const char *cfg)
 	char *host = NULL;
 	char *port = NULL;
 	char *authId = "12345678909935";
-	char *sig = "507626c1889ea5db9a475f1eeda9bd184d9a7913";
+	char *appkey = NULL;
+	char *secretkey = NULL;
 
 	char *coretype = NULL;
 	char *res = NULL;
@@ -43,6 +46,12 @@ struct aiengine *aiengine_new(const char *cfg)
 	cJSON *tmp = cJSON_GetObjectItem(root, "coretype");
 	coretype = tmp->valuestring;
 	
+	tmp = cJSON_GetObjectItem(root, "appkey");
+	appkey = tmp->valuestring;
+
+	tmp = cJSON_GetObjectItem(root, "secretkey");
+	secretkey = tmp->valuestring;
+
 	memset(agn, 0, sizeof(struct aiengine));
 	tmp = cJSON_GetObjectItem(root, "provision");
 	len = strlen(tmp->valuestring);
@@ -63,6 +72,11 @@ struct aiengine *aiengine_new(const char *cfg)
 	memcpy(timestamp, "1460631415", 10);
 	memset(buf, 0, 1024 * 1024);
 	memset(path, 0, 2048);
+
+	char buffer[1024];
+	sprintf(buffer, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
+	char *sig = sig_output(buf);
+
 	sprintf(path,
 		"/%s/%s?applicationId=14476531938594b9&timestamp=%s"
 		"&authId=%s&sig=%s&userId=test_yuyintianxia",
