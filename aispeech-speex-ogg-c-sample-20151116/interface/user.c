@@ -2,6 +2,26 @@
 #include <cJSON.h>
 extern int auth_do(char *path);
 
+int _audioenc_notify(void *user_data,
+			unsigned char *body,
+			int body_len,
+			unsigned char *head,
+			int head_len)
+{
+
+	struct aiengine *agn = (struct aiengine *)user_data;
+	if (agn->conn == NULL) {
+		pf("conn == NULL\n");
+		return 0;
+	}
+	nopoll_conn_send_binary(agn->conn, (const char *)head, head_len);
+	nopoll_sleep(10000);
+
+	nopoll_conn_send_binary(agn->conn, (const char *)body, body_len);
+	nopoll_sleep(10000);
+	return 0;
+}
+
 struct aiengine *aiengine_new(const char *cfg)
 {
 	struct aiengine *agn = malloc(sizeof(struct aiengine));
@@ -144,7 +164,7 @@ int aiengine_start(struct aiengine *agn,
 		printf("\n[%s %s %d]: send text error\n",
 			__FILE__, __func__, __LINE__);
 
-	agn->audioenc = audioenc_new(NULL, audioenc_notify);
+	agn->audioenc = audioenc_new(agn, _audioenc_notify);
 	if (agn->audioenc == NULL)
 		pf("audioenc NULL\n");
 

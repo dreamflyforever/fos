@@ -71,29 +71,6 @@ char *cloud_syn_param = "{\
 static FILE *wav;
 struct aiengine *agn;
 
-#define print(format, ...) \
-	{printf("[%s : %s : %d] ", __FILE__, __func__, __LINE__);\
-	printf(format, ##__VA_ARGS__);}
-
-int audioenc_notify(void *user_data,
-			unsigned char *body,
-			int body_len,
-			unsigned char *head,
-			int head_len)
-{
-	if (agn->conn == NULL) {
-		print("conn == NULL\n");
-		return 0;
-	}
-
-	nopoll_conn_send_binary(agn->conn, (const char *)head, head_len);
-	nopoll_sleep(10000);
-
-	nopoll_conn_send_binary(agn->conn, (const char *)body, body_len);
-	nopoll_sleep(10000);
-	return 0;
-}
-
 int agn_cb(const void *usrdata,
 		const void *message,
 		int size)
