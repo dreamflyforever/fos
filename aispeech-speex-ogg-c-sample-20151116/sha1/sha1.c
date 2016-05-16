@@ -426,5 +426,4 @@ void sha1(void *message, int size, char sig[40])
         sig[2*i]   = hex[(digits[i]>>4) & 0xf];
         sig[2*i+1] = hex[(digits[i]) & 0xf];
     }
-    printf("------------------------\n");
 }
