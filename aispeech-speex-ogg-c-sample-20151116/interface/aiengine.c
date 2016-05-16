@@ -260,9 +260,12 @@ int aiengine_stop(struct aiengine *agn)
 
 int aiengine_delete(struct aiengine *agn)
 {
-	free(agn->cfg);
-	free(agn->provision_path);
-	free(agn);
+	if (agn->cfg)
+		free(agn->cfg);
+	if (agn->provision_path)
+		free(agn->provision_path);
+	if (agn)
+		free(agn);
 	return 0;
 }
 
@@ -280,8 +283,10 @@ int check_provision(struct aiengine *agn)
 	pf("provision path: %s\n", agn->provision_path);
 	ret = auth_do(agn->provision_path);
 	if (ret != 0) {
+		pf("check provision error\n");
 		agn->provision_ok = -1;
 	} else {
+		pf("check provision success\n");
 		agn->provision_ok = 1;
 	}
 	return ret;
