@@ -31,7 +31,6 @@ effort (for example the reengineering of a great many Capstone chips).
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-
 #ifndef TRUE
   #define FALSE	0
   #define TRUE	( !FALSE )
@@ -134,12 +133,10 @@ struct sha1_context
 #define sha1_init sha1_init
 #define sha1_final   sha1_final
 #define sha1_update  sha1_update
-#define sha1         sha1
 
 static void sha1_init(struct sha1_context *shsInfo);
 static void sha1_final(struct sha1_context *shsInfo, unsigned char *output);
 static void sha1_update(struct sha1_context *shsInfo, unsigned char *buffer, int count);
-static void sha1(void *message, int size, char sig[40]);
 
 static void endianTest(int *endian_ness)
 {
@@ -412,7 +409,7 @@ static void sha1_final(struct sha1_context *shsInfo, unsigned char *output)
     memset((POINTER)shsInfo, 0, sizeof(shsInfo));
 }
 
-static void sha1(void *message, int size, char sig[40])
+void sha1(void *message, int size, char sig[40])
 {
     int i;
     unsigned char digits[20];
@@ -429,4 +426,5 @@ static void sha1(void *message, int size, char sig[40])
         sig[2*i]   = hex[(digits[i]>>4) & 0xf];
         sig[2*i+1] = hex[(digits[i]) & 0xf];
     }
+    printf("------------------------\n");
 }

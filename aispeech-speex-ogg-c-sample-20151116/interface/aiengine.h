@@ -19,6 +19,7 @@ struct aiengine {
 	const void *usrdata;
 	char *message;
 	int size;
+	int provision_ok;
 };
 
 struct aiengine *aiengine_new(const char *cfg);

@@ -468,7 +468,6 @@ static void shift_timings(JitterBuffer *jitter, spx_int16_t amount)
 {
    int i;
    unsigned int j;
-   int incomplete = 0;
    spx_int16_t opt;
    
    if (start_offset != NULL)
@@ -573,8 +572,9 @@ static void shift_timings(JitterBuffer *jitter, spx_int16_t amount)
       if (found)
       {
          i=besti;
+   	/*int incomplete = 0;
          incomplete = 1;
-         /*fprintf (stderr, "incomplete: %d %d %d %d\n", jitter->packets[i].timestamp, jitter->pointer_timestamp, chunk_size, jitter->packets[i].span);*/
+         fprintf (stderr, "incomplete: %d %d %d %d\n", jitter->packets[i].timestamp, jitter->pointer_timestamp, chunk_size, jitter->packets[i].span);*/
       }
    }
 

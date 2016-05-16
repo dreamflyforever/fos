@@ -116,7 +116,8 @@ struct aiengine *aiengine_new(const char *cfg)
 		printf("[%s %s %d]: connect success\n",
 		__FILE__, __func__, __LINE__);
 	}
-
+	agn->provision_ok = -1;
+	free(sig);
 	return agn;
 }
 
@@ -136,6 +137,11 @@ int aiengine_start(struct aiengine *agn,
 	int cx;
 
 	char text[1024];
+
+	if (agn->provision_ok != 1) {
+		pf("aiengine provision check faile\n");
+		return -1;
+	}
 
 	cJSON *root=cJSON_Parse(param);
 	cJSON *tmp = cJSON_GetObjectItem(root, "coreProvideType");
@@ -204,6 +210,11 @@ int aiengine_start(struct aiengine *agn,
 
 int aiengine_feed(struct aiengine *agn, const void *data, int size)
 {
+	if (agn->provision_ok != 1) {
+		pf("aiengine provision check faile\n");
+		return -1;
+	}
+
 	audioenc_encode(agn->audioenc, data, size);
 	return 0;
 }
@@ -268,5 +279,10 @@ int check_provision(struct aiengine *agn)
 
 	pf("provision path: %s\n", agn->provision_path);
 	ret = auth_do(agn->provision_path);
+	if (ret != 0) {
+		agn->provision_ok = -1;
+	} else {
+		agn->provision_ok = 1;
+	}
 	return ret;
 }

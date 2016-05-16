@@ -1507,7 +1507,6 @@ int nb_decode(void *state, SpeexBits *bits, void *vout)
    {
       int offset;
       spx_word16_t *exc;
-      spx_word16_t *sp;
       spx_word16_t *innov_save = NULL;
       spx_word16_t tmp;
 
@@ -1516,7 +1515,6 @@ int nb_decode(void *state, SpeexBits *bits, void *vout)
       /* Excitation */
       exc=st->exc+offset;
       /* Original signal */
-      sp=out+offset;
       if (st->innov_save)
          innov_save = st->innov_save+offset;
 
@@ -1709,13 +1707,11 @@ int nb_decode(void *state, SpeexBits *bits, void *vout)
    {
       int offset;
       spx_word16_t *sp;
-      spx_word16_t *exc;
       /* Offset relative to start of frame */
       offset = st->subframeSize*sub;
       /* Original signal */
       sp=out+offset;
       /* Excitation */
-      exc=st->exc+offset;
 
       /* LSP interpolation (quantized and unquantized) */
       lsp_interpolate(st->old_qlsp, qlsp, interp_qlsp, st->lpcSize, sub, st->nbSubframes);

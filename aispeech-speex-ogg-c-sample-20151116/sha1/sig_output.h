@@ -1,1 +1,1 @@
-int sig_output(char *text);
+char *sig_output(char *text);
