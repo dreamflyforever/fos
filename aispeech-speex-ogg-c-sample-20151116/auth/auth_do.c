@@ -2,14 +2,17 @@
 #include <string.h>
 #include <stdio.h>
 #include <http.h>
+#include <aiengine.h>
 
 static int provision_http_request(void *userdata, const char *url, char response[1024])
 {
+	int ret;
 	char *body = http_get(url);
-	printf("body: %s\n", body);
+	ret = strlen(body);
+	printf("body:len %s\n", body);
 	memcpy(response, body, strlen(body));
 	printf("url: %s\n", url);
-	return 0;
+	return ret;
 }
 
 int auth_do(char *path)
@@ -31,8 +34,9 @@ int auth_do(char *path)
 		printf("no serialnumber, maybe create one\n");
 	}
 
+	pf("check provision ret:%d\n", ret);
 	ret = agn_provision_do_auth(buf, NULL, provision_http_request, NULL);
 	fclose(file_fd);
-
+	pf("check provision ret:%d\n", ret);
 	return ret;
 }
