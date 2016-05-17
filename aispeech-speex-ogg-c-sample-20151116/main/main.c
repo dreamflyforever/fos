@@ -1,16 +1,3 @@
-/*******************************************************************************
- * Copyright (C), 2008-2013, AISpeech Tech. Co., Ltd.
- * 
- * FileName    : main.c
- * Author      : hongbin.liu
- * Date        : Tue 27 Aug 2013 08:07:42 PM CST
- * Description : speex test module
- *------------------------------------------------------------------------------*
- * Record      : Add nopoll library to send data to server, and return ASR.
-	       : 20.4.2016
-	       : modify by Shanjin.Yang
- 		
- *******************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -89,35 +76,35 @@ int main(int argc, char *argv[])
 	int bytes;
 	char buf[3200]  = {0};
 	int ret;
+	while (1) {
+		agn = aiengine_new(server_cfg);
+		if (agn == NULL) {
+			printf("%s %s %d: error\n", __FILE__, __func__, __LINE__);
+			return 0;
+		}
 
-	agn = aiengine_new(server_cfg);
-	if (agn == NULL) {
-		printf("%s %s %d: error\n", __FILE__, __func__, __LINE__);
-		return 0;
+		ret = check_provision(agn);;
+		if (ret != 0) {
+			printf("Authorization fail\n");
+		} else {
+			printf("Authorization success\n");
+		}
+
+		aiengine_start(agn, cloud_syn_param, agn_cb, NULL);
+		wav = fopen(wavpath, "r");
+		if (!wav) {
+			printf("open wav : %s failed\n", wavpath);
+			return 0;
+		}
+
+		fseek(wav, 44, SEEK_SET);
+		while ((bytes = fread(buf, 1, sizeof(buf), wav))) {
+			aiengine_feed(agn, buf, bytes);
+		}
+		fclose(wav);
+		aiengine_stop(agn);
+
+		aiengine_delete(agn);
 	}
-
-	ret = check_provision(agn);;
-	if (ret != 0) {
-		printf("Authorization fail\n");
-	} else {
-		printf("Authorization success\n");
-	}
-
-	aiengine_start(agn, cloud_syn_param, agn_cb, NULL);
-
-	wav = fopen(wavpath, "r");
-	if (!wav) {
-		printf("open wav : %s failed\n", wavpath);
-		return 0;
-	}
-
-	fseek(wav, 44, SEEK_SET);
-	while ((bytes = fread(buf, 1, sizeof(buf), wav))) {
-		aiengine_feed(agn, buf, bytes);
-	}
-
-	aiengine_stop(agn);
-
-	aiengine_delete(agn);
 	return 0;
 }

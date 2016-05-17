@@ -102,6 +102,7 @@ struct aiengine *aiengine_new(const char *cfg)
 				NULL,
 				NULL);
 
+	free(sig);
 	if (!nopoll_conn_is_ok(agn->conn)) {
 		printf("[%s %s %d]: connect error\n",
 		__FILE__, __func__, __LINE__);
@@ -117,7 +118,6 @@ struct aiengine *aiengine_new(const char *cfg)
 		__FILE__, __func__, __LINE__);
 	}
 	agn->provision_ok = -1;
-	free(sig);
 	return agn;
 }
 
@@ -222,6 +222,12 @@ int aiengine_feed(struct aiengine *agn, const void *data, int size)
 int aiengine_stop(struct aiengine *agn)
 {
 	char buff[1024 * 1024];
+
+	if (agn->provision_ok != 1) {
+		pf("aiengine provision check faile\n");
+		goto provision_error;
+	}
+
 	/*raw send data API*/
 	nopoll_conn_send_frame(agn->conn, 1, 1, 2, 0, "", 0);
 
@@ -243,10 +249,10 @@ int aiengine_stop(struct aiengine *agn)
 		pf("callback NULL\n");	
 	}
 
+provision_error:
 	if (agn->audioenc) {
 		audioenc_delete(agn->audioenc);
 	}
-
 	/*unref message*/
 	nopoll_msg_unref(agn->msg);
 
