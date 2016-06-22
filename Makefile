@@ -60,12 +60,9 @@
 ##==========================================================================
 
 # The pre-processor and compiler options.
-# MY_CFLAGS = -ggdb3 -pipe -O2 -Wall -Wextra -fopenmp -march=native -mfpmath=sse -DLINUX -m64 -std=c++0x
-#MY_CFLAGS = -g -DLINUX 
 MY_CFLAGS = -g -Icpu/linux/include -Ikernel/include -Imiddleware/uip/uip -Imiddleware/uip/fos -Imiddleware/uip/apps/webserver
 
 # The linker options.
-# MY_LIBS   = -lGLEW -lglut -lGLU -lGL -lX11 -lXmu -lXi -lm -L/usr/X11R6/lib -lgomp -lOpenThreads -lpthread
 #MY_LIBS   = -lm 
 
 # The pre-processor options used by the cpp (man cpp for more).
@@ -103,6 +100,9 @@ CC     = gcc
 # The C++ program compiler.
 CXX    = g++
 
+# The C program compiler.
+STRIP  = strip
+
 # Un-comment the following line to compile C programs as C++ ones.
 #CC     = $(CXX)
 
@@ -130,6 +130,11 @@ endif
 ifeq ($(SRCDIRS),)
   SRCDIRS = .
 endif
+
+ifeq ($(STRIP),)
+  STRIP = echo
+endif
+
 SOURCES = $(foreach d,$(SRCDIRS),$(wildcard $(addprefix $(d)/*,$(SRCEXTS))))
 HEADERS = $(foreach d,$(SRCDIRS),$(wildcard $(addprefix $(d)/*,$(HDREXTS))))
 SRC_CXX = $(filter-out %.c,$(SOURCES))
@@ -152,6 +157,7 @@ LINK.cxx    = $(CXX) $(MY_CFLAGS) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS)
 .SUFFIXES:
 
 all: $(PROGRAM)
+	$(STRIP) $(PROGRAM)
 
 # Rules for creating dependency files (.d).
 #------------------------------------------
