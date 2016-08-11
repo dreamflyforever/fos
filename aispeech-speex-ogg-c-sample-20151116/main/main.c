@@ -8,40 +8,23 @@
 //\"cloud\": {\
 //		\"server\": \"s-test.api.aispeech.com\",\
 //		\"port\": \"10000\"\
-//	},\
+//	},
 
-
+#if 1
 char *server_cfg = "{\
-	\"luaPath\": \"bin/luabin.lub\",\
 	\"appKey\": \"14327742440003c5\",\
 	\"secretKey\": \"59db7351b3790ec75c776f6881b35d7e\",\
 	\"provision\": \"auth/config.json\",\
 	\"serialNumber\": \"bin/serialNumber\", \
 	\"audiotype\": \"ogg\",\
-	\"coretype\": \"cn.sds\",\
+	\"coretype\": \"cn.dlg.ita\",\
 	\"res\": \"aihome\",\
-	\"vad\":{\
-		\"enable\": 1,\
-		\"res\": \"bin/vad.aifar.0.0.2.bin\",\
-		\"speechLowSeek\": 60,\
-		\"sampleRate\": 16000,\
-		\"strip\": 2\
-	},\
+	\"app\": {\
+        	\"userId\": \"wifiBox\"\
+    	},\
 	\"cloud\": {\
 		\"server\": \"112.80.39.95\",\
 		\"port\": \"8009\"\
-	},\
-	\"native\": {\
-		\"cn.dnn\": { \
-			\"resBinPath\": \"bin/aihome_comm_xiaole_0910.bin\" \
-		},\
-		\"cn.asr.rec\":{\
-			\"netBinPath\":\"bin/local.net.bin\",\
-			\"resBinPath\":\"bin/ebnfr.aifar.0.0.1.bin\"\
-		},\
-		\"cn.gram\":{\
-			\"resBinPath\":\"bin/ebnfc.aifar.0.0.1.bin\"\
-		}\
 	}\
 }";
 
@@ -57,10 +40,48 @@ char *cloud_asr_param = "{\
         \"request\": {\
 		\"coreType\": \"cn.dlg.ita\",\
 		\"speechRate\":1.0,\
-		\"res\": \"xm_aihome\"\
+		\"res\": \"aihome\"\
         }\
 }";
+#else
 
+char *server_cfg = "{\
+	\"appKey\": \"14327742440003c5\",\
+	\"secretKey\": \"59db7351b3790ec75c776f6881b35d7e\",\
+	\"provision\": \"auth/config.json\",\
+	\"serialNumber\": \"bin/serialNumber\", \
+	\"audiotype\": \"ogg\",\
+	\"coretype\": \"cn.sds\",\
+	\"res\": \"aihome\",\
+	\"app\": {\
+        	\"userId\": \"wifiBox\"\
+    	},\
+	\"cloud\": {\
+		\"server\": \"112.80.39.95\",\
+		\"port\": \"8009\"\
+	}\
+}";
+
+char *cloud_asr_param = "{\
+	\"coreProvideType\": \"cloud\",\
+        \"audio\": {\
+            \"audioType\": \"ogg\",\
+            \"sampleRate\": 16000,\
+            \"channel\": 1,\
+	    \"compress\":\"raw\",\
+            \"sampleBytes\": 2\
+        },\
+        \"request\": {\
+		\"coreType\": \"cn.sds\",\
+		\"speechRate\":1.0,\
+		\"res\": \"aihome\"\
+        },\
+	\"sdsExpand\":{\
+		\"prevdomain\":\"\",\
+		\"lastServiceType\": \"cloud\"\
+		}\
+}";
+#endif
 static FILE *wav;
 struct aiengine *agn;
 

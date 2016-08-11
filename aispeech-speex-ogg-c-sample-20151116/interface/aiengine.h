@@ -20,6 +20,7 @@ struct aiengine {
 	char *message;
 	int size;
 	int provision_ok;
+	char *userid;
 };
 
 struct aiengine *aiengine_new(const char *cfg);

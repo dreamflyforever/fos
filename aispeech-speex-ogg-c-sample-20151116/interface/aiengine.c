@@ -36,6 +36,7 @@ struct aiengine *aiengine_new(const char *cfg)
 	char *authId = "11123343434421";
 	char *appkey = NULL;
 	char *secretkey = NULL;
+	char *userid = NULL;
 
 	char *coretype = NULL;
 	char *res = NULL;
@@ -64,6 +65,13 @@ struct aiengine *aiengine_new(const char *cfg)
 	tmp = cJSON_GetObjectItem(tmp, "server");
 	host = tmp->valuestring;
 
+	tmp = cJSON_GetObjectItem(root, "app");
+	tmp = cJSON_GetObjectItem(tmp, "userId");
+	userid = tmp->valuestring;
+	len = strlen(userid);
+	agn->userid = (char *)malloc(len);
+	strncpy(agn->userid, tmp->valuestring, len);
+
 	tmp = cJSON_GetObjectItem(root, "cloud");
 	tmp = cJSON_GetObjectItem(tmp, "port");
 	port = tmp->valuestring;
@@ -71,7 +79,7 @@ struct aiengine *aiengine_new(const char *cfg)
 	memset(buf, 0, 1024);
 	memset(path, 0, 1024);
 
-	sprintf(timestamp, "%d", rand);
+	sprintf(timestamp, "%d", (int)rand);
 	//memcpy(timestamp, "1234567891", sizeof("1234567891"));
 	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
 	char *sig = hmac_sha1(secretkey,  buf);
@@ -79,13 +87,14 @@ struct aiengine *aiengine_new(const char *cfg)
 #if 1
 	sprintf(path,
 		"/%s/%s?applicationId=%s&timestamp=%s"
-		"&authId=%s&sig=%s&userId=wifiBox",
+		"&authId=%s&sig=%s&userId=%s",
 		coretype,
 		res,
 		appkey,
 		timestamp,
 		authId,
-		sig);
+		sig,
+		userid);
 #else
 	sprintf(path, "/cn.sds/aihome?applicationId=14327742440003c5&timestamp=147081661&authId=1112334343442&sig=917a429f3d7ca05c75bd5b82efb2939b3c088d3a8&userId=wifiBox");
 #endif
@@ -150,6 +159,7 @@ int aiengine_start(struct aiengine *agn,
 	cJSON *root=cJSON_Parse(param);
 	cJSON *tmp = cJSON_GetObjectItem(root, "coreProvideType");
 	coreprovidetype = tmp->valuestring;
+
 	tmp = cJSON_GetObjectItem(root, "audio");
 	cJSON *t = cJSON_GetObjectItem(tmp, "audioType");
 	audiotype = t->valuestring;
@@ -172,17 +182,29 @@ int aiengine_start(struct aiengine *agn,
 
 	t = cJSON_GetObjectItem(tmp, "res");
 	res = t->valuestring;
+
 	memset(text, 0, 1024);
-#if 0
-	sprintf(text, "{\"coreProvideType\": \"%s\",\
+	char *r = strstr(param, "sdsExpand");
+	if (r != NULL) {
+		printf("enter sds\n");
+		sprintf(text, "{\"coreProvideType\": \"%s\",\
+		\"app\":{\"userId\":\"%s\"},\
 		\"audio\": {\"audioType\": \"%s\", \"sampleBytes\": %d,\
 		\"sampleRate\": %d, \"channel\": %d, \"compress\":\"%s\"},\
-		\"request\": {\"coreType\": \"%s\", \"res\": \"%s\"}}",
-		coreprovidetype, audiotype, samplebytes, samplerate,
+		\"request\": {\"coreType\": \"%s\", \"res\": \"%s\",\
+		\"sdsExpand\":{\"prevdomain\":\"\", \"lastServiceType\": \"cloud\"}}}",
+		coreprovidetype, agn->userid, audiotype, samplebytes, samplerate,
 		channel, compress, coretype, res);
-#else
-	sprintf(text, "{\"coreProvideType\": \"cloud\",\"app\": {\"userId\":\"wifiBox\"}, \"audio\": {\"audioType\": \"ogg\",\"sampleBytes\": 2,\"sampleRate\": 16000,\"channel\": 1,\"compress\":\"raw\"},\"request\": {\"coreType\": \"cn.sds\",\"res\": \"aihome\", \"sdsExpand\":{\"prevdomain\":\"\", \"lastServiceType\": \"cloud\"}}}");
-#endif
+	} else {
+		printf("enter syc\n");
+		sprintf(text, "{\"coreProvideType\": \"%s\",\
+			\"audio\": {\"audioType\": \"%s\", \"sampleBytes\": %d,\
+			\"sampleRate\": %d, \"channel\": %d, \"compress\":\"%s\"},\
+			\"request\": {\"coreType\": \"%s\", \"res\": \"%s\"}}",
+			coreprovidetype, audiotype, samplebytes, samplerate,
+			channel, compress, coretype, res);
+	}
+		//sprintf(text, "{\"coreProvideType\": \"cloud\",\"app\": {\"userId\":\"wifiBox\"}, \"audio\": {\"audioType\": \"ogg\",\"sampleBytes\": 2,\"sampleRate\": 16000,\"channel\": 1,\"compress\":\"raw\"},\"request\": {\"coreType\": \"cn.sds\",\"res\": \"aihome\", \"sdsExpand\":{\"prevdomain\":\"\", \"lastServiceType\": \"cloud\"}}}");
 	printf("%s\n", text);
 	cx = nopoll_conn_send_text(agn->conn, text, strlen(text));
 	printf("[%s %s %d]: text len: %d\n",

@@ -128,7 +128,6 @@ struct sha1_context
 #define sha1_init sha1_init
 #define sha1_final   sha1_final
 #define sha1_update  sha1_update
-#define sha1         sha1
 
 static void sha1_init(struct sha1_context *shsInfo);
 static void sha1_final(struct sha1_context *shsInfo, unsigned char *output);
