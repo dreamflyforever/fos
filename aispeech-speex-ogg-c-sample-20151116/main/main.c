@@ -5,15 +5,21 @@
 #include <nopoll.h>
 #include <aiengine.h>
 
+//\"cloud\": {\
+//		\"server\": \"s-test.api.aispeech.com\",\
+//		\"port\": \"10000\"\
+//	},\
+
+
 char *server_cfg = "{\
 	\"luaPath\": \"bin/luabin.lub\",\
-	\"appKey\": \"14500822818594e0\",\
-	\"secretKey\": \"d2fa15a90d76f190fdfd81c4cd1ff55c\",\
+	\"appKey\": \"14327742440003c5\",\
+	\"secretKey\": \"59db7351b3790ec75c776f6881b35d7e\",\
 	\"provision\": \"auth/config.json\",\
 	\"serialNumber\": \"bin/serialNumber\", \
 	\"audiotype\": \"ogg\",\
-	\"coretype\": \"cn.dlg.ita\",\
-	\"res\": \"xm_aihome\",\
+	\"coretype\": \"cn.sds\",\
+	\"res\": \"aihome\",\
 	\"vad\":{\
 		\"enable\": 1,\
 		\"res\": \"bin/vad.aifar.0.0.2.bin\",\
@@ -22,8 +28,8 @@ char *server_cfg = "{\
 		\"strip\": 2\
 	},\
 	\"cloud\": {\
-		\"server\": \"s.api.aispeech.com\",\
-		\"port\": \"1028\"\
+		\"server\": \"112.80.39.95\",\
+		\"port\": \"8009\"\
 	},\
 	\"native\": {\
 		\"cn.dnn\": { \
@@ -39,7 +45,7 @@ char *server_cfg = "{\
 	}\
 }";
 
-char *cloud_syn_param = "{\
+char *cloud_asr_param = "{\
 	\"coreProvideType\": \"cloud\",\
         \"audio\": {\
             \"audioType\": \"ogg\",\
@@ -72,15 +78,17 @@ int agn_cb(const void *usrdata,
 
 int main(int argc, char *argv[])
 {
-	char *wavpath = "1.wav";
+	char *wavpath = "wether.wav";
 	int bytes;
 	char buf[3200]  = {0};
 	int ret;
+start:
 	while (1) {
 		agn = aiengine_new(server_cfg);
 		if (agn == NULL) {
 			printf("%s %s %d: error\n", __FILE__, __func__, __LINE__);
 			return 0;
+			goto start;
 		}
 
 		ret = check_provision(agn);;
@@ -90,7 +98,7 @@ int main(int argc, char *argv[])
 			printf("Authorization success\n");
 		}
 
-		aiengine_start(agn, cloud_syn_param, agn_cb, NULL);
+		aiengine_start(agn, cloud_asr_param, agn_cb, NULL);
 		wav = fopen(wavpath, "r");
 		if (!wav) {
 			printf("open wav : %s failed\n", wavpath);

@@ -1,7 +1,6 @@
 #include <aiengine.h>
 #include <cJSON.h>
-#include <sig_output.h>
-
+#include <agn_hmac_sha1.h>
 extern int auth_do(char *path);
 
 int _audioenc_notify(void *user_data,
@@ -27,14 +26,14 @@ int _audioenc_notify(void *user_data,
 struct aiengine *aiengine_new(const char *cfg)
 {
 	struct aiengine *agn = malloc(sizeof(struct aiengine));
-	char timestamp[1024];
+	char timestamp[128];
 
-	char path[2048];
-	char buf[1024 * 1024];
+	char path[1024];
+	char buf[1024];
 
 	char *host = NULL;
 	char *port = NULL;
-	char *authId = "12345678909935";
+	char *authId = "11123343434421";
 	char *appkey = NULL;
 	char *secretkey = NULL;
 
@@ -45,12 +44,13 @@ struct aiengine *aiengine_new(const char *cfg)
 	cJSON* root = cJSON_Parse(cfg);
 	cJSON *tmp = cJSON_GetObjectItem(root, "coretype");
 	coretype = tmp->valuestring;
-	
-	tmp = cJSON_GetObjectItem(root, "appkey");
+
+	tmp = cJSON_GetObjectItem(root, "appKey");
 	appkey = tmp->valuestring;
 
-	tmp = cJSON_GetObjectItem(root, "secretkey");
+	tmp = cJSON_GetObjectItem(root, "secretKey");
 	secretkey = tmp->valuestring;
+	printf("secretKey: %s\n", secretkey);
 
 	memset(agn, 0, sizeof(struct aiengine));
 	tmp = cJSON_GetObjectItem(root, "provision");
@@ -68,23 +68,27 @@ struct aiengine *aiengine_new(const char *cfg)
 	tmp = cJSON_GetObjectItem(tmp, "port");
 	port = tmp->valuestring;
 
-	memset(timestamp, 0, 1024);
-	memcpy(timestamp, "1460631415", 10);
-	memset(buf, 0, 1024 * 1024);
-	memset(path, 0, 2048);
+	memset(buf, 0, 1024);
+	memset(path, 0, 1024);
 
-	char buffer[1024];
-	sprintf(buffer, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
-	char *sig = sig_output(buf);
+	sprintf(timestamp, "%d", rand);
+	//memcpy(timestamp, "1234567891", sizeof("1234567891"));
+	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
+	char *sig = hmac_sha1(secretkey,  buf);
 
+#if 1
 	sprintf(path,
-		"/%s/%s?applicationId=14476531938594b9&timestamp=%s"
-		"&authId=%s&sig=%s&userId=test_yuyintianxia",
+		"/%s/%s?applicationId=%s&timestamp=%s"
+		"&authId=%s&sig=%s&userId=wifiBox",
 		coretype,
 		res,
+		appkey,
 		timestamp,
 		authId,
 		sig);
+#else
+	sprintf(path, "/cn.sds/aihome?applicationId=14327742440003c5&timestamp=147081661&authId=1112334343442&sig=917a429f3d7ca05c75bd5b82efb2939b3c088d3a8&userId=wifiBox");
+#endif
 	pf("path:%s\n", path);
 	/*init context*/
 	agn->ctx = nopoll_ctx_new();
@@ -169,12 +173,16 @@ int aiengine_start(struct aiengine *agn,
 	t = cJSON_GetObjectItem(tmp, "res");
 	res = t->valuestring;
 	memset(text, 0, 1024);
+#if 0
 	sprintf(text, "{\"coreProvideType\": \"%s\",\
 		\"audio\": {\"audioType\": \"%s\", \"sampleBytes\": %d,\
 		\"sampleRate\": %d, \"channel\": %d, \"compress\":\"%s\"},\
 		\"request\": {\"coreType\": \"%s\", \"res\": \"%s\"}}",
 		coreprovidetype, audiotype, samplebytes, samplerate,
 		channel, compress, coretype, res);
+#else
+	sprintf(text, "{\"coreProvideType\": \"cloud\",\"app\": {\"userId\":\"wifiBox\"}, \"audio\": {\"audioType\": \"ogg\",\"sampleBytes\": 2,\"sampleRate\": 16000,\"channel\": 1,\"compress\":\"raw\"},\"request\": {\"coreType\": \"cn.sds\",\"res\": \"aihome\", \"sdsExpand\":{\"prevdomain\":\"\", \"lastServiceType\": \"cloud\"}}}");
+#endif
 	printf("%s\n", text);
 	cx = nopoll_conn_send_text(agn->conn, text, strlen(text));
 	printf("[%s %s %d]: text len: %d\n",
@@ -295,5 +303,6 @@ int check_provision(struct aiengine *agn)
 		pf("check provision success\n");
 		agn->provision_ok = 1;
 	}
+	agn->provision_ok = 1;
 	return ret;
 }
