@@ -1,6 +1,8 @@
 #include <aiengine.h>
 #include <cJSON.h>
 #include <agn_hmac_sha1.h>
+#include <assert.h>
+
 extern int auth_do(char *path);
 
 int _audioenc_notify(void *user_data,
@@ -15,6 +17,19 @@ int _audioenc_notify(void *user_data,
 		pf("conn == NULL\n");
 		return 0;
 	}
+
+	if (!nopoll_conn_is_ok(agn->conn)) {
+		pf("connect error\n");
+		return nopoll_false;
+	}
+
+	if (!nopoll_conn_wait_until_connection_ready(agn->conn, 5)) {
+		pf("connect not ready\n");
+		return 0;
+	} else {
+		pf("connect success\n");
+	}
+
 	nopoll_conn_send_binary(agn->conn, (const char *)head, head_len);
 	nopoll_sleep(10000);
 
@@ -116,20 +131,19 @@ struct aiengine *aiengine_new(const char *cfg)
 				NULL);
 
 	free(sig);
+
 	if (!nopoll_conn_is_ok(agn->conn)) {
-		printf("[%s %s %d]: connect error\n",
-		__FILE__, __func__, __LINE__);
+		pf("connect error\n");
 		return nopoll_false;
 	}
 
 	if (!nopoll_conn_wait_until_connection_ready(agn->conn, 5)) {
-		printf("[%s %s %d]: connect not ready\n",
-		__FILE__, __func__, __LINE__);
+		pf("connect not ready\n");
 		return NULL;
 	} else {
-		printf("[%s %s %d]: connect success\n",
-		__FILE__, __func__, __LINE__);
+		pf("connect success\n");
 	}
+
 	agn->provision_ok = -1;
 	return agn;
 }
@@ -196,7 +210,7 @@ int aiengine_start(struct aiengine *agn,
 		coreprovidetype, agn->userid, audiotype, samplebytes, samplerate,
 		channel, compress, coretype, res);
 	} else {
-		printf("enter syc\n");
+		printf("enter sync\n");
 		sprintf(text, "{\"coreProvideType\": \"%s\",\
 			\"audio\": {\"audioType\": \"%s\", \"sampleBytes\": %d,\
 			\"sampleRate\": %d, \"channel\": %d, \"compress\":\"%s\"},\
@@ -204,16 +218,21 @@ int aiengine_start(struct aiengine *agn,
 			coreprovidetype, audiotype, samplebytes, samplerate,
 			channel, compress, coretype, res);
 	}
-		//sprintf(text, "{\"coreProvideType\": \"cloud\",\"app\": {\"userId\":\"wifiBox\"}, \"audio\": {\"audioType\": \"ogg\",\"sampleBytes\": 2,\"sampleRate\": 16000,\"channel\": 1,\"compress\":\"raw\"},\"request\": {\"coreType\": \"cn.sds\",\"res\": \"aihome\", \"sdsExpand\":{\"prevdomain\":\"\", \"lastServiceType\": \"cloud\"}}}");
-	printf("%s\n", text);
+	//printf("%s\n", text);
+	if (agn->conn == NULL) {
+		pf("conn == NULL\n");
+		assert(0);
+		return 0;
+	}
 	cx = nopoll_conn_send_text(agn->conn, text, strlen(text));
 	printf("[%s %s %d]: text len: %d\n",
 		__FILE__, __func__, __LINE__,
 		(int)strlen(text));
-	if (cx < 0)
+	if (cx < 0) {
 		printf("\n[%s %s %d]: send text error\n",
 			__FILE__, __func__, __LINE__);
-
+		assert(0);
+	}
 	agn->audioenc = audioenc_new(agn, _audioenc_notify);
 	if (agn->audioenc == NULL)
 		pf("audioenc NULL\n");
@@ -252,52 +271,81 @@ int aiengine_feed(struct aiengine *agn, const void *data, int size)
 int aiengine_stop(struct aiengine *agn)
 {
 	char buff[1024 * 1024];
+	int times = 0;
 
 	if (agn->provision_ok != 1) {
 		pf("aiengine provision check faile\n");
 		goto provision_error;
 	}
 
+	if (!nopoll_conn_is_ok(agn->conn)) {
+		pf("connect error\n");
+		return nopoll_false;
+	}
+
+	if (!nopoll_conn_wait_until_connection_ready(agn->conn, 5)) {
+		pf("connect not ready\n");
+		return 0;
+	} else {
+		pf("connect success\n");
+	}
+
 	/*raw send data API*/
 	nopoll_conn_send_frame(agn->conn, 1, 1, 2, 0, "", 0);
 
 	while ((agn->msg = nopoll_conn_get_msg(agn->conn)) == NULL) {
-		if (! nopoll_conn_is_ok (agn->conn)) {
+		if (!nopoll_conn_is_ok(agn->conn)) {
 			printf ("ERROR: received websocket connection close during wait reply..\n");
+			return -1;
 			return nopoll_false;
 		}
 		nopoll_sleep(10000);
+		times++;
+		if (times > 500) {
+			pf("message get nothing\n");
+			goto provision_error;
+		}
 	}
-	memcpy(buff, (char *)nopoll_msg_get_payload (agn->msg), nopoll_msg_get_payload_size(agn->msg));
-	agn->message = buff;
+	memcpy(buff, (char *)nopoll_msg_get_payload(agn->msg), nopoll_msg_get_payload_size(agn->msg));
 	agn->size = nopoll_msg_get_payload_size(agn->msg);
 	audioenc_stop(agn->audioenc);
 	if (agn->cb) {
 		pf("callback\n");
-		agn->cb(agn->usrdata, agn->message, agn->size);
+		agn->cb(agn->usrdata, buff, agn->size);
 	} else {
 		pf("callback NULL\n");	
 	}
 
+	return 0;
 provision_error:
 	if (agn->audioenc) {
 		audioenc_delete(agn->audioenc);
 	}
+	if (agn->cfg)
+		free(agn->cfg);
+
 	/*unref message*/
 	nopoll_msg_unref(agn->msg);
-
-	/*finish connection*/
-	nopoll_conn_close(agn->conn);
-	
-	/*finish*/
-	nopoll_ctx_unref(agn->ctx);
 	return 0;
 }
 
 int aiengine_delete(struct aiengine *agn)
 {
-	if (agn->cfg)
-		free(agn->cfg);
+	/*finish connection*/
+	if (agn->conn == NULL) {
+		pf("conn == NULL\n");
+		return 0;
+	}
+
+	nopoll_conn_close(agn->conn);
+	
+	/*finish*/
+	if (!agn->ctx) {
+		printf("error nopoll new ctx failed!");
+		exit(1);
+	}
+	nopoll_ctx_unref(agn->ctx);
+
 	if (agn->provision_path)
 		free(agn->provision_path);
 	if (agn)
@@ -325,6 +373,8 @@ int check_provision(struct aiengine *agn)
 		pf("check provision success\n");
 		agn->provision_ok = 1;
 	}
+
+	/*XXX:*/
 	agn->provision_ok = 1;
 	return ret;
 }

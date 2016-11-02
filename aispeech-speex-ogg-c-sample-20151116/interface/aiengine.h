@@ -17,7 +17,6 @@ struct aiengine {
 	agn_audioenc_cfg_t *cfg;
 	aiengine_callback cb;
 	const void *usrdata;
-	char *message;
 	int size;
 	int provision_ok;
 	char *userid;

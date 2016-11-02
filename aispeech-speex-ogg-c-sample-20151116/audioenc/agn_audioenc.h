@@ -79,7 +79,15 @@ int audioenc_notify(void *user_data,
 			int body_len,
 			unsigned char *head,
 			int head_len);
-#define pf(format, ...) {printf("[%s : %s : %d] ", __FILE__, __func__, __LINE__); printf(format, ##__VA_ARGS__);}
+#if 0
+#define pf(format, ...) \
+	{printf("[%s : %s : %d] ", \
+	__FILE__, __func__, __LINE__); \
+	printf(format, ##__VA_ARGS__);}
+#else
+#define pf(format, ...) 
+#endif
+
 #ifdef __cplusplus
 }
 #endif

@@ -4,13 +4,14 @@
 #include <agn_audioenc.h>
 #include <nopoll.h>
 #include <aiengine.h>
+#include <pthread.h>
 
 //\"cloud\": {\
 //		\"server\": \"s-test.api.aispeech.com\",\
 //		\"port\": \"10000\"\
 //	},
 
-#if 1
+#if 0
 char *server_cfg = "{\
 	\"appKey\": \"14327742440003c5\",\
 	\"secretKey\": \"59db7351b3790ec75c776f6881b35d7e\",\
@@ -46,8 +47,8 @@ char *cloud_asr_param = "{\
 #else
 
 char *server_cfg = "{\
-	\"appKey\": \"14327742440003c5\",\
-	\"secretKey\": \"59db7351b3790ec75c776f6881b35d7e\",\
+	\"appKey\": \"14709983278595d8\",\
+	\"secretKey\": \"85d1e668eace0ce6539c299aa02b2334\",\
 	\"provision\": \"auth/config.json\",\
 	\"serialNumber\": \"bin/serialNumber\", \
 	\"audiotype\": \"ogg\",\
@@ -57,8 +58,8 @@ char *server_cfg = "{\
         	\"userId\": \"wifiBox\"\
     	},\
 	\"cloud\": {\
-		\"server\": \"112.80.39.95\",\
-		\"port\": \"8009\"\
+		\"server\": \"s-test.api.aispeech.com\",\
+		\"port\": \"10000\"\
 	}\
 }";
 
@@ -93,8 +94,29 @@ int agn_cb(const void *usrdata,
 		pf("cb message NULL\n");
 	}
 
-	pf("message:%s, size:%d\n", (char *)message, size);
+	printf("message:%s, size:%d\n", (char *)message, size);
 	return 0;
+}
+
+pthread_t thread;
+void *start_routine(void *arg)
+{
+	int ret;
+	while (1) {
+		if (agn->conn == NULL) {
+			printf("--------->%s %s %d: conn error\n", __FILE__, __func__, __LINE__);
+			return 0;
+		}
+		ret = nopoll_conn_send_ping(agn->conn);
+
+		if (ret == nopoll_true) {
+			printf("--------->%s %s %d: ping success\n", __FILE__, __func__, __LINE__);
+		} else {
+			printf("--------->%s %s %d: error\n", __FILE__, __func__, __LINE__); 
+		}
+		sleep(2);
+		printf("hello world\n");
+	}
 }
 
 int main(int argc, char *argv[])
@@ -103,22 +125,22 @@ int main(int argc, char *argv[])
 	int bytes;
 	char buf[3200]  = {0};
 	int ret;
-start:
-	while (1) {
-		agn = aiengine_new(server_cfg);
-		if (agn == NULL) {
-			printf("%s %s %d: error\n", __FILE__, __func__, __LINE__);
-			return 0;
-			goto start;
-		}
+	agn = aiengine_new(server_cfg);
+	if (agn == NULL) {
+		printf("%s %s %d: error\n", __FILE__, __func__, __LINE__);
+		return 0;
+	}
 
-		ret = check_provision(agn);;
-		if (ret != 0) {
-			printf("Authorization fail\n");
-		} else {
-			printf("Authorization success\n");
-		}
+	ret = check_provision(agn);;
+	if (ret != 0) {
+		printf("Authorization fail\n");
+	} else {
+		printf("Authorization success\n");
+	}
 
+	//pthread_create(&thread, NULL,
+          //             start_routine, NULL);
+	//while (1) {
 		aiengine_start(agn, cloud_asr_param, agn_cb, NULL);
 		wav = fopen(wavpath, "r");
 		if (!wav) {
@@ -132,8 +154,8 @@ start:
 		}
 		fclose(wav);
 		aiengine_stop(agn);
-
-		aiengine_delete(agn);
-	}
+	//}
+	aiengine_delete(agn);
+	sleep(1);
 	return 0;
 }
