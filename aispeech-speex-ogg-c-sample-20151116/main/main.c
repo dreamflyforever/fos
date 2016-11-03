@@ -6,11 +6,9 @@
 #include <aiengine.h>
 #include <pthread.h>
 
-//\"cloud\": {\
-//		\"server\": \"s-test.api.aispeech.com\",\
-//		\"port\": \"10000\"\
-//	},
-
+#if 0
+	s-test.api.aispeech.com:10000
+#endif
 #if 0
 char *server_cfg = "{\
 	\"appKey\": \"14327742440003c5\",\
@@ -119,6 +117,8 @@ void *start_routine(void *arg)
 	}
 }
 
+extern int cloud_auth_do();
+
 int main(int argc, char *argv[])
 {
 	char *wavpath = "wether.wav";
@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
 	char buf[3200]  = {0};
 	int ret;
 	agn = aiengine_new(server_cfg);
+	cloud_auth_do();
 	if (agn == NULL) {
 		printf("%s %s %d: error\n", __FILE__, __func__, __LINE__);
 		return 0;
