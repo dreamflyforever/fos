@@ -68,30 +68,6 @@ char *url_decode(char *str)
 	return buf;
 }
 
-char *tts_param =  "{\
-	\"appKey\": \"14327742440003c5\",\
-	\"secretKey\": \"85d1e668eace0ce6539c299aa02b2334\",\
-	\"userId\": \"wifiBox\",\
-	\"coretype\": \"cn.sent.syn\",\
-	\"cloud\": {\
-		\"server\": \"112.80.39.95\",\
-		\"port\": \"8009\"\
-	},\
-	\"audio\": {\
-		\"sampleBytes\": 2,\
-		\"sampleRate\": 16000,\
-		\"channel\": 1, \
-		\"audioType\": \"mp3\"\
-	},\
-	\"request\": {\
-		\"speechVolume\": 50, \
-		\"speechRate\": 0.85, \
-		\"rightMargin\": 5, \
-		\"realBack\": 1, \
-		\"res\": \"syn_chnsnt_zhilingf\"\
-	}\
-}";
-
 char *tts_url_output(char *cfg, char *text)
 {
 	char *appkey;
@@ -160,7 +136,7 @@ char *tts_url_output(char *cfg, char *text)
 
 	sprintf(timestamp, "%d", (int)rand);
 	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
-	char *sig = hmac_sha1(secretkey,  buf);
+	char *sig = hmac_sha1(secretkey, buf);
 	char *tt = url_encode(text);
 
 	sprintf(buff, "applicationId=%s&timestamp=%s&sig=%s&params="
@@ -177,15 +153,3 @@ char *tts_url_output(char *cfg, char *text)
 	sprintf(url, "http://%s:%s/%s/%s?%s", server, port, coretype, res, buff);
 	return url;
 }
-
-#if 1
-int main()
-{
-	char *url;
-	url = tts_url_output(tts_param,
-			"抱歉没找到刘德华的歌，请问您想听什么歌呢？");
-	printf("\n%s\n", url);
-	free(url);
-	return 0;
-}
-#endif
