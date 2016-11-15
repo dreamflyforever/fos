@@ -92,34 +92,6 @@ char *tts_param =  "{\
 	}\
 }";
 
-#if 0
-char *tts_param = "applicationId=146337845885959a"
-		"&timestamp=1470721766"
-		"&sig=c0bf68677e3324a4a9f5e35bbaa7b7e126b15dec"
-		"&params={"
-			"\"app\": {"
-				"\"userId\": \"wifiBox\""
-			"}, "
-			"\"audio\": {"
-				"\"sampleBytes\": 2, "
-				"\"sampleRate\": 16000, "
-				"\"channel\": 1, "
-				"\"audioType\": \"mp3\""
-			"},"
-			"\"request\": {"
-				"\"speechVolume\": 50, "
-				"\"coreType\": \"cn.sent.syn\", "
-				"\"speechRate\": 0.85, "
-				"\"rightMargin\": 5, "
-				"\"realBack\": 1, "
-				"\"res\": \"syn_chnsnt_zhilingf\","
-				"\"refText\": \"%s\""
-			"}"
-		"}";
-
-char *tts_cfg = "http:/112.80.39.95:8009/cn.sent.syn/syn_chnsnt_zhilingf?";
-#endif
-
 char *tts_url_output(char *cfg, char *text)
 {
 	char *appkey;
@@ -138,10 +110,10 @@ char *tts_url_output(char *cfg, char *text)
 	char *res;
 	char *server;
 	char *port;
-        char *audiotype;
-        char buf[1024] = {0};
-        char buff[1024] = {0};
-        char *url = malloc(2048);;
+	char *audiotype;
+	char buf[1024] = {0};
+	char buff[1024] = {0};
+	char *url = malloc(2048);;
 	/*XXX:*/
 	char *authId = "11123343434421";
 
@@ -191,8 +163,17 @@ char *tts_url_output(char *cfg, char *text)
 	char *sig = hmac_sha1(secretkey,  buf);
 	char *tt = url_encode(text);
 
-	sprintf(buff, "applicationId=%s&timestamp=%s&sig=%s&params={\"app\": {\"userId\": \"%s\"}, \"audio\": {\"sampleBytes\": %d, \"sampleRate\": %d, \"channel\": %d, \"audioType\": \"%s\"}, \"request\": {\"speechVolume\": %d, \"coreType\": \"%d\", \"speechRate\": %d, \"rightMargin\": %d, \"realBack\": %f, \"res\": \"%s\",\"refText\": \"%s\"}}", appkey, timestamp, sig, userid, samplebytes, samplerate, channel, audiotype, speechvolume, coretype, speechrate, rightmargin, realback, res, tt);
-        printf("buff: %s\n", buff);
+	sprintf(buff, "applicationId=%s&timestamp=%s&sig=%s&params="
+                        "{\"app\": {\"userId\": \"%s\"}, \"audio\": "
+                        "{\"sampleBytes\": %d, \"sampleRate\": %d, "
+                       "\"channel\": %d, \"audioType\": \"%s\"}, "
+                       "\"request\": {\"speechVolume\": %d, "
+                       "\"coreType\": \"%s\", \"speechRate\": %f, "
+                       "\"rightMargin\": %d, \"realBack\": %d, "
+                       "\"res\": \"%s\",\"refText\": \"%s\"}}",
+			appkey, timestamp, sig, userid, samplebytes,
+			samplerate, channel, audiotype, speechvolume,
+			coretype, speechrate, rightmargin, realback, res, tt);
 	sprintf(url, "http://%s:%s/%s/%s?%s", server, port, coretype, res, buff);
 	return url;
 }
