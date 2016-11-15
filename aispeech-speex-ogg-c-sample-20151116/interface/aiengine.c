@@ -57,7 +57,7 @@ struct aiengine *aiengine_new(const char *cfg)
 	char *res = NULL;
 	int len;
 
-	cJSON* root = cJSON_Parse(cfg);
+	cJSON *root = cJSON_Parse(cfg);
 	cJSON *tmp = cJSON_GetObjectItem(root, "coretype");
 	coretype = tmp->valuestring;
 
@@ -99,7 +99,6 @@ struct aiengine *aiengine_new(const char *cfg)
 	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
 	char *sig = hmac_sha1(secretkey,  buf);
 
-#if 1
 	sprintf(path,
 		"/%s/%s?applicationId=%s&timestamp=%s"
 		"&authId=%s&sig=%s&userId=%s",
@@ -110,9 +109,7 @@ struct aiengine *aiengine_new(const char *cfg)
 		authId,
 		sig,
 		userid);
-#else
-	sprintf(path, "/cn.sds/aihome?applicationId=14327742440003c5&timestamp=147081661&authId=1112334343442&sig=917a429f3d7ca05c75bd5b82efb2939b3c088d3a8&userId=wifiBox");
-#endif
+
 	pf("path:%s\n", path);
 	/*init context*/
 	agn->ctx = nopoll_ctx_new();
@@ -145,6 +142,7 @@ struct aiengine *aiengine_new(const char *cfg)
 	}
 
 	agn->provision_ok = -1;
+	 cJSON_Delete(root);
 	return agn;
 }
 
@@ -248,12 +246,12 @@ int aiengine_start(struct aiengine *agn,
 	}
 	audioenc_start(agn->audioenc, 16000, 1, 16, agn->cfg);
 	if (cb == NULL) {
-		pf("cb NULL\n");	
+		pf("cb NULL\n");
 	} else {
 	}
 	agn->cb = cb;
 	agn->usrdata = usrdata;
-
+        cJSON_Delete(root);
 	return 0;
 }
 
@@ -313,10 +311,9 @@ int aiengine_stop(struct aiengine *agn)
 		pf("callback\n");
 		agn->cb(agn->usrdata, buff, agn->size);
 	} else {
-		pf("callback NULL\n");	
+		pf("callback NULL\n");
 	}
 
-	return 0;
 provision_error:
 	if (agn->audioenc) {
 		audioenc_delete(agn->audioenc);
@@ -324,7 +321,7 @@ provision_error:
 	if (agn->cfg)
 		free(agn->cfg);
 
-	/*unref message*/
+        /*unref message*/
 	nopoll_msg_unref(agn->msg);
 	return 0;
 }
@@ -348,6 +345,8 @@ int aiengine_delete(struct aiengine *agn)
 
 	if (agn->provision_path)
 		free(agn->provision_path);
+	if (agn->userid)
+		  free(agn->userid);
 	if (agn)
 		free(agn);
 	return 0;

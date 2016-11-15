@@ -63,7 +63,7 @@
 # MY_CFLAGS = -ggdb3 -pipe -O2 -Wall -Wextra -fopenmp -march=native -mfpmath=sse -DLINUX -m64 -std=c++0x
 #MY_CFLAGS = -g -DLINUX 
 MY_CFLAGS = -g -I . -I include -I audioenc -I third -I third/ogg -I third/speex\
-	-I auth -I interface -I cJSON -I sha1 -I http -I cloud_auth
+	-I auth -I interface -I cJSON -I sha1 -I http -I cloud_auth -I tts
 
 # The linker options.
 # MY_LIBS   = -lGLEW -lglut -lGLU -lGL -lX11 -lXmu -lXi -lm -L/usr/X11R6/lib -lgomp -lOpenThreads -lpthread
@@ -77,7 +77,7 @@ LDFLAGS   =
 
 # The directories in which source files reside.
 # If not specified, only the current directory will be serached.
-SRCDIRS = nopoll audioenc third/ogg third/speex main auth interface cJSON sha1 http cloud_auth
+SRCDIRS = nopoll audioenc third/ogg third/speex main auth interface cJSON sha1 http cloud_auth tts
 
 # The executable file name.
 # If not specified, current directory name or `a.out' will be used.
@@ -95,7 +95,8 @@ HDREXTS = .h .H .hh .hpp .HPP .h++ .hxx .hp
 
 # The pre-processor and compiler options.
 # Users can override those variables from the command line.
-CFLAGS+=-Os -std=c99 -D _POSIX_C_SOURCE=200112L -D _BSD_SOURCE -fPIC  -Wall -Wno-format-zero-length -D USE_SMALLFT -D FIXED_POINT
+CFLAGS+=-Os -std=c99 -D _POSIX_C_SOURCE=200112L -D _BSD_SOURCE -fPIC \
+        -Wall -Wno-format-zero-length -D USE_SMALLFT -D FIXED_POINT
 # CXXFLAGS= -std=c++0x
 CXXFLAGS= 
 # The C program compiler.

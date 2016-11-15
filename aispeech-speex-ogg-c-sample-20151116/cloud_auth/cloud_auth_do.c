@@ -168,7 +168,6 @@ char * _http_post(const char *url,const char *post_str){
 		printf("http_tcpclient_send failed..\n");
 		return NULL;
 	}
-	//printf("发送请求:\n%s\n",lpbuf);
 
 	/*it's time to recv from server*/
 	if(http_tcpclient_recv(socket_fd,lpbuf) <= 0){
@@ -198,9 +197,8 @@ char * _http_get(const char *url)
 		printf("http_parse_url failed!\n");
 		return NULL;
 	}
-	//printf("host_addr : %s\tfile:%s\t,%d\n",host_addr,file,port);
 
-	socket_fd =  http_tcpclient_create(host_addr,port);
+	 socket_fd =  http_tcpclient_create(host_addr,port);
 	if(socket_fd < 0){
 		printf("http_tcpclient_create failed\n");
 		return NULL;
@@ -212,9 +210,8 @@ char * _http_get(const char *url)
 		printf("http_tcpclient_send failed..\n");
 		return NULL;
 	}
-	//printf("发送请求:\n%s\n",lpbuf);
 
-	if(http_tcpclient_recv(socket_fd,lpbuf) <= 0){
+	 if(http_tcpclient_recv(socket_fd,lpbuf) <= 0){
 		printf("http_tcpclient_recv failed\n");
 		return NULL;
 	}
@@ -255,5 +252,6 @@ int cloud_auth_do()
 	printf("%s\n", url);
 	char *str = _http_get(url);
 	printf("return:%s\n", str);
+	 free(str);
 	return 0;
 }
