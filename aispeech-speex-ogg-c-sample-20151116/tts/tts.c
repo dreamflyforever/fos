@@ -77,7 +77,6 @@ char *tts_url_output(char *cfg, char *text)
 	int samplebytes;
 	int samplerate;
 	int channel;
-	char *auditype;
 	int speechvolume;
 	char *coretype;
 	float speechrate;
@@ -140,16 +139,21 @@ char *tts_url_output(char *cfg, char *text)
 	char *tt = url_encode(text);
 
 	sprintf(buff, "applicationId=%s&timestamp=%s&sig=%s&params="
-                        "{\"app\": {\"userId\": \"%s\"}, \"audio\": "
-                        "{\"sampleBytes\": %d, \"sampleRate\": %d, "
-                       "\"channel\": %d, \"audioType\": \"%s\"}, "
-                       "\"request\": {\"speechVolume\": %d, "
-                       "\"coreType\": \"%s\", \"speechRate\": %f, "
-                       "\"rightMargin\": %d, \"realBack\": %d, "
-                       "\"res\": \"%s\",\"refText\": \"%s\"}}",
+			"{\"app\": {\"userId\": \"%s\"}, \"audio\": "
+			"{\"sampleBytes\": %d, \"sampleRate\": %d, "
+			"\"channel\": %d, \"audioType\": \"%s\"}, "
+			"\"request\": {\"speechVolume\": %d, "
+			"\"coreType\": \"%s\", \"speechRate\": %f, "
+			"\"rightMargin\": %d, \"realBack\": %d, "
+			"\"res\": \"%s\",\"refText\": \"%s\"}}",
 			appkey, timestamp, sig, userid, samplebytes,
 			samplerate, channel, audiotype, speechvolume,
 			coretype, speechrate, rightmargin, realback, res, tt);
-	sprintf(url, "http://%s:%s/%s/%s?%s", server, port, coretype, res, buff);
+
+	sprintf(url, "http://%s:%s/%s/%s?%s",
+			   server, port, coretype, res, buff);
+	 cJSON_Delete(root);
+	 free(tt);
+	 free(sig);
 	return url;
 }
