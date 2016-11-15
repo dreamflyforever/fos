@@ -32,7 +32,7 @@ static int _init(struct audioenc *enc) {
     enc->spx_rate = 8000;
     enc->spx_channels = 1;
     enc->spx_frames_per_packet = 1;
-    enc->spx_vbr = 0; // 0使quality生效, 1：quality不生效
+    enc->spx_vbr = 0;
     enc->spx_complexity = 2;
     enc->og_pages_per_second = 8;
 
@@ -83,7 +83,8 @@ struct audioenc* audioenc_new(void *data, audioenc_callback_f cb) {
     if (NULL != enc) {
         enc->audioenc_data_notify = cb;
         enc->user_data            = data;
-        enc->spx_quality = 8;// 0 ~ 10,默认8 
+	/*default 8*/
+        enc->spx_quality = 8;
         _init(enc);
     }
 
@@ -281,7 +282,7 @@ int audioenc_encode(struct audioenc *enc, const void *data, int size)
 
 void audioenc_stop(struct audioenc *enc)
 {
-    /* 整个文件编码完成 */
+    /*encode complete*/
     _write_speex_frame(enc, 1);
 }
 
@@ -298,10 +299,13 @@ int audioenc_start(struct audioenc *enc, int rate, int channels, int bits, agn_a
     enc->spx_rate = rate;
     enc->spx_channels = channels;
     enc->spx_bits_per_sample = bits;
-    enc->spx_quality = cfg->spx_quality;// 0 ~ 10,默认8 
+    /*range: 0~8, default: 8*/
+    enc->spx_quality = cfg->spx_quality;
     enc->spx_complexity = cfg->spx_complexity;
     enc->spx_vbr = cfg->spx_vbr;
-    printf("audioenc configure: quality:%d, complexity:%d\n", enc->spx_quality, enc->spx_complexity);
+    printf("audioenc configure: quality:%d, complexity:%d\n",
+    	enc->spx_quality,
+	enc->spx_complexity);
 
     enc->spx_frame_id = 0;
     enc->spx_frame_buf_pos = 0;

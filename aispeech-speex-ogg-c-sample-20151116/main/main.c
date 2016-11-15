@@ -73,7 +73,7 @@ char *cloud_asr_param = "{\
         \"request\": {\
 		\"coreType\": \"cn.sds\",\
 		\"speechRate\":1.0,\
-		\"res\": \"aihome\"\
+		\"res\": \"airobot\"\
         },\
 	\"sdsExpand\":{\
 		\"prevdomain\":\"\",\
@@ -102,18 +102,17 @@ void *start_routine(void *arg)
 	int ret;
 	while (1) {
 		if (agn->conn == NULL) {
-			printf("--------->%s %s %d: conn error\n", __FILE__, __func__, __LINE__);
+			pf("conn error\n");
 			return 0;
 		}
 		ret = nopoll_conn_send_ping(agn->conn);
 
 		if (ret == nopoll_true) {
-			printf("--------->%s %s %d: ping success\n", __FILE__, __func__, __LINE__);
+			pf("ping success\n");
 		} else {
-			printf("--------->%s %s %d: error\n", __FILE__, __func__, __LINE__); 
+			pf("ping error\n"); 
 		}
 		sleep(2);
-		printf("hello world\n");
 	}
 }
 

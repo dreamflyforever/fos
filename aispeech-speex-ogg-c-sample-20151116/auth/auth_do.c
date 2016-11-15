@@ -4,7 +4,9 @@
 #include <http.h>
 #include <aiengine.h>
 
-static int provision_http_request(void *userdata, const char *url, char response[1024])
+static int provision_http_request(void *userdata,
+				const char *url,
+				char response[1024])
 {
 	int ret;
 	char *body = http_get(url);

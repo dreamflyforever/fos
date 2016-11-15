@@ -1,9 +1,3 @@
-/*File : http.c
- *Auth : sjin
- *Date : 20141206
- *Mail : 413977243@qq.com
- *Modify: code indent, Jim Yang@aispeech
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
@@ -15,9 +9,10 @@
 
 #define BUFFER_SIZE 1024
 #define HTTP_POST "POST /%s HTTP/1.1\r\nHOST: %s:%d\r\nAccept: */*\r\n"\
-	"Content-Type:application/x-www-form-urlencoded\r\nContent-Length: %d\r\n\r\n%s"
-#define HTTP_GET "GET /%s HTTP/1.1\r\nHOST: %s:%d\r\nAccept: */*\r\n\r\n"
+	"Content-Type:application/x-www-form-urlencoded\r\nContent-Length:\
+	%d\r\n\r\n%s"
 
+#define HTTP_GET "GET /%s HTTP/1.1\r\nHOST: %s:%d\r\nAccept: */*\r\n\r\n"
 
 static int http_tcpclient_create(const char *host, int port)
 {
