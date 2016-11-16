@@ -2,16 +2,17 @@
 #include <cJSON.h>
 #include <agn_hmac_sha1.h>
 #include <assert.h>
+#include <time.h>
+#include "base.h"
 
 extern int auth_do(char *path);
 
 int _audioenc_notify(void *user_data,
-			unsigned char *body,
-			int body_len,
-			unsigned char *head,
-			int head_len)
+		unsigned char *body,
+		int body_len,
+		unsigned char *head,
+		int head_len)
 {
-
 	struct aiengine *agn = (struct aiengine *)user_data;
 	if (agn->conn == NULL) {
 		pf("conn == NULL\n");
@@ -93,11 +94,12 @@ struct aiengine *aiengine_new(const char *cfg)
 
 	memset(buf, 0, 1024);
 	memset(path, 0, 1024);
-
-	sprintf(timestamp, "%d", (int)rand);
-	//memcpy(timestamp, "1234567891", sizeof("1234567891"));
+	
+	int sec = time(NULL);
+	itoa(sec, timestamp);
+	//sprintf(timestamp, "%d", (int)rand);
 	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
-	char *sig = hmac_sha1(secretkey,  buf);
+	char *sig = hmac_sha1(secretkey, buf);
 
 	sprintf(path,
 		"/%s/%s?applicationId=%s&timestamp=%s"
@@ -110,7 +112,7 @@ struct aiengine *aiengine_new(const char *cfg)
 		sig,
 		userid);
 
-	pf("path:%s\n", path);
+	printf("path:%s\n", path);
 	/*init context*/
 	agn->ctx = nopoll_ctx_new();
 	if (!agn->ctx) {
@@ -119,13 +121,15 @@ struct aiengine *aiengine_new(const char *cfg)
 	}
 
 	/*create connection*/
-	agn->conn = nopoll_conn_new(agn->ctx,
-				host,
-				port,
-				NULL,
-				path,
-				NULL,
-				NULL);
+	agn->conn = nopoll_conn_new(
+			agn->ctx,
+			host,
+			port,
+			NULL,
+			path,
+			NULL,
+			NULL
+			);
 
 	free(sig);
 
@@ -142,14 +146,14 @@ struct aiengine *aiengine_new(const char *cfg)
 	}
 
 	agn->provision_ok = -1;
-	 cJSON_Delete(root);
+	cJSON_Delete(root);
 	return agn;
 }
 
 int aiengine_start(struct aiengine *agn,
-			const char *param,
-			aiengine_callback cb,
-			const void *usrdata)
+		const char *param,
+		aiengine_callback cb,
+		const void *usrdata)
 {
 	char *coreprovidetype = NULL;
 	char *audiotype = NULL;
@@ -200,13 +204,13 @@ int aiengine_start(struct aiengine *agn,
 	if (r != NULL) {
 		printf("enter sds\n");
 		sprintf(text, "{\"coreProvideType\": \"%s\",\
-		\"app\":{\"userId\":\"%s\"},\
-		\"audio\": {\"audioType\": \"%s\", \"sampleBytes\": %d,\
-		\"sampleRate\": %d, \"channel\": %d, \"compress\":\"%s\"},\
-		\"request\": {\"coreType\": \"%s\", \"res\": \"%s\",\
-		\"sdsExpand\":{\"prevdomain\":\"\", \"lastServiceType\": \"cloud\"}}}",
-		coreprovidetype, agn->userid, audiotype, samplebytes, samplerate,
-		channel, compress, coretype, res);
+			\"app\":{\"userId\":\"%s\"},\
+			\"audio\": {\"audioType\": \"%s\", \"sampleBytes\": %d,\
+			\"sampleRate\": %d, \"channel\": %d, \"compress\":\"%s\"},\
+			\"request\": {\"coreType\": \"%s\", \"res\": \"%s\",\
+			\"sdsExpand\":{\"prevdomain\":\"\", \"lastServiceType\": \"cloud\"}}}",
+			coreprovidetype, agn->userid, audiotype, samplebytes, samplerate,
+			channel, compress, coretype, res);
 	} else {
 		printf("enter sync\n");
 		sprintf(text, "{\"coreProvideType\": \"%s\",\
@@ -224,11 +228,11 @@ int aiengine_start(struct aiengine *agn,
 	}
 	cx = nopoll_conn_send_text(agn->conn, text, strlen(text));
 	printf("[%s %s %d]: text len: %d\n",
-		__FILE__, __func__, __LINE__,
-		(int)strlen(text));
+			__FILE__, __func__, __LINE__,
+			(int)strlen(text));
 	if (cx < 0) {
 		printf("\n[%s %s %d]: send text error\n",
-			__FILE__, __func__, __LINE__);
+				__FILE__, __func__, __LINE__);
 		assert(0);
 	}
 	agn->audioenc = audioenc_new(agn, _audioenc_notify);
@@ -251,7 +255,7 @@ int aiengine_start(struct aiengine *agn,
 	}
 	agn->cb = cb;
 	agn->usrdata = usrdata;
-        cJSON_Delete(root);
+	cJSON_Delete(root);
 	return 0;
 }
 
@@ -268,6 +272,11 @@ int aiengine_feed(struct aiengine *agn, const void *data, int size)
 
 int aiengine_stop(struct aiengine *agn)
 {
+	if (agn == NULL) {
+		pf("error: agn == NULL");
+		return -1;
+	}
+
 	char buff[1024 * 1024];
 	int times = 0;
 
@@ -293,8 +302,8 @@ int aiengine_stop(struct aiengine *agn)
 
 	while ((agn->msg = nopoll_conn_get_msg(agn->conn)) == NULL) {
 		if (!nopoll_conn_is_ok(agn->conn)) {
-			printf ("ERROR: received websocket connection close during wait reply..\n");
-			return -1;
+			printf ("ERROR: received websocket connection close"
+                        " during wait reply..\n");
 			return nopoll_false;
 		}
 		nopoll_sleep(10000);
@@ -304,7 +313,10 @@ int aiengine_stop(struct aiengine *agn)
 			goto provision_error;
 		}
 	}
-	memcpy(buff, (char *)nopoll_msg_get_payload(agn->msg), nopoll_msg_get_payload_size(agn->msg));
+	memcpy(buff,
+                (char *)nopoll_msg_get_payload(agn->msg),
+                nopoll_msg_get_payload_size(agn->msg));
+
 	agn->size = nopoll_msg_get_payload_size(agn->msg);
 	audioenc_stop(agn->audioenc);
 	if (agn->cb) {
@@ -321,7 +333,7 @@ provision_error:
 	if (agn->cfg)
 		free(agn->cfg);
 
-        /*unref message*/
+	/*unref message*/
 	nopoll_msg_unref(agn->msg);
 	return 0;
 }
@@ -335,7 +347,7 @@ int aiengine_delete(struct aiengine *agn)
 	}
 
 	nopoll_conn_close(agn->conn);
-	
+
 	/*finish*/
 	if (!agn->ctx) {
 		printf("error nopoll new ctx failed!");
@@ -346,7 +358,7 @@ int aiengine_delete(struct aiengine *agn)
 	if (agn->provision_path)
 		free(agn->provision_path);
 	if (agn->userid)
-		  free(agn->userid);
+		free(agn->userid);
 	if (agn)
 		free(agn);
 	return 0;

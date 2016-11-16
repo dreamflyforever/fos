@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <cJSON.h>
 #include <agn_hmac_sha1.h>
+#include <ctype.h>
+#include <time.h>
+#include "base.h"
 
 /* Converts a hex character to its integer value */
 char from_hex(char ch)
@@ -133,7 +136,9 @@ char *tts_url_output(char *cfg, char *text)
 	t = cJSON_GetObjectItem(tmp, "res");
 	res = t->valuestring;
 
-	sprintf(timestamp, "%d", (int)rand);
+        int sec= time(NULL);
+        itoa(sec, timestamp); 
+	//sprintf(timestamp, "%d", (int)rand);
 	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
 	char *sig = hmac_sha1(secretkey, buf);
 	char *tt = url_encode(text);
