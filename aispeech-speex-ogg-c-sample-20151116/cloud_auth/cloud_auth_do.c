@@ -1,8 +1,3 @@
-/*File : http.c
- *Auth : sjin
- *Date : 20141206
- *Mail : 413977243@qq.com
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
@@ -12,6 +7,7 @@
 #include <sha1.c>
 #include <time.h>
 #include <unistd.h>
+#include <cJSON.h>
 #include "base.h"
 
 #define BUFFER_SIZE 1024
@@ -179,11 +175,15 @@ char * _http_get(const char *url)
 	return http_parse_result(lpbuf);
 }
 
-int cloud_auth_do()
+int cloud_auth_do(const char *cfg)
 {
-	/*XXX:*/
-	char *appKey = "14709983278595d8";
-	char *secretKey = "85d1e668eace0ce6539c299aa02b2334";
+	cJSON *root = cJSON_Parse(cfg);
+	cJSON *tmp = cJSON_GetObjectItem(root, "appKey");
+	char *appKey = tmp->valuestring;
+
+	tmp = cJSON_GetObjectItem(root, "secretKey");
+	char *secretKey = tmp->valuestring;
+
 	char sig_in[1024];
 	int size;
 

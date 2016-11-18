@@ -58,7 +58,7 @@ int agn_cb(const void *usrdata,
 	return 0;
 }
 
-extern int cloud_auth_do();
+extern int cloud_auth_do(const char *cfg);
 
 int main(int argc, char *argv[])
 {
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	char buf[3200] = {0};
 	int ret;
 	agn = aiengine_new(server_cfg);
-	cloud_auth_do();
+	cloud_auth_do(server_cfg);
 	if (agn == NULL) {
 		pf("error\n");
 		return 0;
