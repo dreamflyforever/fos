@@ -1,11 +1,11 @@
 #include <aiengine.h>
 #include <cJSON.h>
 #include <agn_hmac_sha1.h>
-#include <assert.h>
 #include <time.h>
 #include "base.h"
 
 extern int auth_do(char *path);
+#define use_pcm 1
 
 int _audioenc_notify(void *user_data,
 		unsigned char *body,
@@ -28,7 +28,7 @@ int _audioenc_notify(void *user_data,
 		pf("connect not ready\n");
 		return 0;
 	} else {
-		pf("connect success\n");
+		//pf("connect success\n");
 	}
 
 	nopoll_conn_send_binary(agn->conn, (const char *)head, head_len);
@@ -42,14 +42,14 @@ int _audioenc_notify(void *user_data,
 struct aiengine *aiengine_new(const char *cfg)
 {
 	struct aiengine *agn = malloc(sizeof(struct aiengine));
-	char timestamp[128];
+	char timestamp[12] = {0};
 
-	char path[1024];
-	char buf[1024];
+	char *path = malloc(600);
+	char *buf = malloc(128);
 
 	char *host = NULL;
 	char *port = NULL;
-	char *authId = "11123343434421";
+	char *authId = "5836b9b835847e46d1000009";
 	char *appkey = NULL;
 	char *secretkey = NULL;
 	char *userid = NULL;
@@ -92,14 +92,28 @@ struct aiengine *aiengine_new(const char *cfg)
 	tmp = cJSON_GetObjectItem(tmp, "port");
 	port = tmp->valuestring;
 
-	memset(buf, 0, 1024);
-	memset(path, 0, 1024);
+	memset(path, 0, 600);
 	
 	int sec = time(NULL);
 	itoa(sec, timestamp);
 	//sprintf(timestamp, "%d", (int)rand);
-	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
+	sprintf(buf, "%s\n%s\n%s%s", appkey, timestamp, secretkey, authId);
 	char *sig = hmac_sha1(secretkey, buf);
+#if use_pcm
+#if 0
+	sprintf(path,
+		"/%s/%s?version=1.0.0&applicationId=%s&timestamp=%s"
+		"&authId=%s&sig=%s",
+		coretype,
+		res,
+		appkey,
+		timestamp,
+		authId,
+		sig);
+#endif
+	sprintf(path, "/cn.sds/airobot?version=1.0.0&applicationId=1454033453859541&timestamp=1480066182&authId=5836b9b835847e46d1000009&sig=4c49fd542b3989a30e5d43257f068981019726d7");
+#else
+
 
 	sprintf(path,
 		"/%s/%s?applicationId=%s&timestamp=%s"
@@ -111,13 +125,14 @@ struct aiengine *aiengine_new(const char *cfg)
 		authId,
 		sig,
 		userid);
-
-	printf("path:%s\n", path);
+#endif
+	printf("%s:%s", host, port);
+	printf("%s\n", path);
 	/*init context*/
 	agn->ctx = nopoll_ctx_new();
 	if (!agn->ctx) {
 		printf("error nopoll new ctx failed!");
-		exit(1);
+		goto handle;
 	}
 
 	/*create connection*/
@@ -131,21 +146,21 @@ struct aiengine *aiengine_new(const char *cfg)
 			NULL
 			);
 
-	free(sig);
-
 	if (!nopoll_conn_is_ok(agn->conn)) {
 		pf("connect error\n");
-		return nopoll_false;
+		goto handle;
 	}
 
 	if (!nopoll_conn_wait_until_connection_ready(agn->conn, 5)) {
 		pf("connect not ready\n");
-		return NULL;
 	} else {
 		pf("connect success\n");
 	}
-
-	agn->provision_ok = -1;
+handle:
+	free(sig);
+	free(path);
+	agn->provision_ok = 1;
+	free(buf);
 	cJSON_Delete(root);
 	return agn;
 }
@@ -155,6 +170,7 @@ int aiengine_start(struct aiengine *agn,
 		aiengine_callback cb,
 		const void *usrdata)
 {
+	int retvalue = 0;
 	char *coreprovidetype = NULL;
 	char *audiotype = NULL;
 	int channel;
@@ -165,7 +181,11 @@ int aiengine_start(struct aiengine *agn,
 	char *res = NULL;
 	int cx;
 
-	char text[1024];
+	char *text = malloc(1024);
+	if (text == NULL) {
+		retvalue = -1;
+		goto handle;
+	}
 
 	if (agn->provision_ok != 1) {
 		pf("aiengine provision check faile\n");
@@ -200,6 +220,10 @@ int aiengine_start(struct aiengine *agn,
 	res = t->valuestring;
 
 	memset(text, 0, 1024);
+#if use_pcm
+	sprintf(text, "{\"request\":{\"sdsExpand\":{\"lastServiceType\":\"cloud\",\"prevdomain\":\"\"},\"version\":\"1.0.0\",\"contextId\":\"\",\"recordId\":\"5836b9b835847e46d1000009\",\"res\":\"airobot\",\"env\":\"lbs_city=\\\"苏州市\\\";use_frame_split=0;use_vad_restart=1;\",\"coreType\":\"cn.sds\"},\"app\":{\"deviceId\":\"dev-test\",\"userId\":\"leChange\",\"applicationId\":\"1454033453859541\"},\"audio\":{\"audioType\":\"wav\",\"sampleRate\":16000,\"sampleBytes\":2,\"channel\":1}}");
+	printf("%s, %d\n", text, strlen(text));
+#else
 	char *r = strstr(param, "sdsExpand");
 	if (r != NULL) {
 		printf("enter sds\n");
@@ -220,29 +244,30 @@ int aiengine_start(struct aiengine *agn,
 			coreprovidetype, audiotype, samplebytes, samplerate,
 			channel, compress, coretype, res);
 	}
-	//printf("%s\n", text);
+#endif
 	if (agn->conn == NULL) {
 		pf("conn == NULL\n");
-		assert(0);
-		return 0;
+		retvalue = -1;
+		goto error_handle;
 	}
 	cx = nopoll_conn_send_text(agn->conn, text, strlen(text));
-	printf("[%s %s %d]: text len: %d\n",
-			__FILE__, __func__, __LINE__,
-			(int)strlen(text));
 	if (cx < 0) {
 		printf("\n[%s %s %d]: send text error\n",
 				__FILE__, __func__, __LINE__);
-		assert(0);
+		retvalue = -1;
+		goto error_handle;
 	}
 	agn->audioenc = audioenc_new(agn, _audioenc_notify);
-	if (agn->audioenc == NULL)
+	if (agn->audioenc == NULL) {
 		pf("audioenc NULL\n");
-
+		retvalue = -1;
+		goto error_handle;
+	}
 	agn->cfg = (agn_audioenc_cfg_t *)calloc(1, sizeof(*agn->cfg));
 	if (!agn->cfg) {
 		printf("calloc cfg failed!\n");
-		while(1);
+		retvalue = -1;
+		goto error_handle;
 	} else {
 		agn->cfg->spx_quality = 8;
 		agn->cfg->spx_complexity = 2;
@@ -251,12 +276,14 @@ int aiengine_start(struct aiengine *agn,
 	audioenc_start(agn->audioenc, 16000, 1, 16, agn->cfg);
 	if (cb == NULL) {
 		pf("cb NULL\n");
-	} else {
 	}
 	agn->cb = cb;
 	agn->usrdata = usrdata;
+error_handle:
+	free(text);
 	cJSON_Delete(root);
-	return 0;
+handle:
+	return retvalue;
 }
 
 int aiengine_feed(struct aiengine *agn, const void *data, int size)
@@ -265,41 +292,55 @@ int aiengine_feed(struct aiengine *agn, const void *data, int size)
 		pf("aiengine provision check faile\n");
 		return -1;
 	}
+	pf("size: %d\n", size);
+	if (agn->conn == NULL) {
+		pf("conn == NULL\n");
+		return 0;
+	}
 
+#if use_pcm
+	nopoll_conn_send_binary(agn->conn, data, size);
+	nopoll_sleep(100000);
+#else
 	audioenc_encode(agn->audioenc, data, size);
+#endif
 	return 0;
 }
 
 int aiengine_stop(struct aiengine *agn)
 {
+	int retvalue = 0;
+
+	char *buff = malloc(1024*1024);
+	if (buff == NULL) {
+		retvalue = -1;
+		goto error;
+	}
+
 	if (agn == NULL) {
 		pf("error: agn == NULL");
-		return -1;
+		retvalue = -1;
+		goto error;
 	}
 
-	char buff[1024 * 1024];
+	memset(buff, 0, 1024*1024);
 	int times = 0;
-
-	if (agn->provision_ok != 1) {
-		pf("aiengine provision check faile\n");
-		goto provision_error;
-	}
 
 	if (!nopoll_conn_is_ok(agn->conn)) {
 		pf("connect error\n");
-		return nopoll_false;
+		retvalue = -1;
+		goto error;
 	}
 
 	if (!nopoll_conn_wait_until_connection_ready(agn->conn, 5)) {
 		pf("connect not ready\n");
-		return 0;
+		retvalue = -1;
+		goto error;
 	} else {
-		pf("connect success\n");
 	}
 
 	/*raw send data API*/
 	nopoll_conn_send_frame(agn->conn, 1, 1, 2, 0, "", 0);
-
 	while ((agn->msg = nopoll_conn_get_msg(agn->conn)) == NULL) {
 		if (!nopoll_conn_is_ok(agn->conn)) {
 			printf ("ERROR: received websocket connection close"
@@ -310,7 +351,7 @@ int aiengine_stop(struct aiengine *agn)
 		times++;
 		if (times > 500) {
 			pf("message get nothing\n");
-			goto provision_error;
+			goto msg_error;
 		}
 	}
 	memcpy(buff,
@@ -320,48 +361,45 @@ int aiengine_stop(struct aiengine *agn)
 	agn->size = nopoll_msg_get_payload_size(agn->msg);
 	audioenc_stop(agn->audioenc);
 	if (agn->cb) {
-		pf("callback\n");
 		agn->cb(agn->usrdata, buff, agn->size);
 	} else {
-		pf("callback NULL\n");
 	}
-
-provision_error:
+msg_error:
+	/*unref message*/
+	nopoll_msg_unref(agn->msg);
+error:
 	if (agn->audioenc) {
 		audioenc_delete(agn->audioenc);
 	}
 	if (agn->cfg)
 		free(agn->cfg);
-
-	/*unref message*/
-	nopoll_msg_unref(agn->msg);
-	return 0;
+	if (buff != NULL)
+		free(buff);
+	return retvalue;
 }
 
 int aiengine_delete(struct aiengine *agn)
 {
+	int retvalue = 0;
+	if (agn == NULL) {
+		retvalue = -1;
+		goto error;
+	}
 	/*finish connection*/
-	if (agn->conn == NULL) {
-		pf("conn == NULL\n");
-		return 0;
+	if (agn->conn != NULL) {
+		nopoll_conn_close(agn->conn);
 	}
-
-	nopoll_conn_close(agn->conn);
-
 	/*finish*/
-	if (!agn->ctx) {
-		printf("error nopoll new ctx failed!");
-		exit(1);
-	}
-	nopoll_ctx_unref(agn->ctx);
-
+	if (agn->ctx)
+		nopoll_ctx_unref(agn->ctx);
 	if (agn->provision_path)
 		free(agn->provision_path);
 	if (agn->userid)
 		free(agn->userid);
 	if (agn)
 		free(agn);
-	return 0;
+error:
+	return retvalue;
 }
 
 int aiengine_cancel(struct aiengine *engine)
