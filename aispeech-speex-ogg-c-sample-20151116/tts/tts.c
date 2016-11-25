@@ -29,10 +29,10 @@ char *url_encode(char *str)
 	char *pbuf = buf;
 	while (*pstr) {
 		if (isalnum(*pstr) ||
-			*pstr == '-' ||
-			*pstr == '_' ||
-			*pstr == '.' ||
-			*pstr == '~')
+				*pstr == '-' ||
+				*pstr == '_' ||
+				*pstr == '.' ||
+				*pstr == '~')
 			*pbuf++ = *pstr;
 		else if (*pstr == ' ') 
 			*pbuf++ = '+';
@@ -57,7 +57,7 @@ char *url_decode(char *str)
 		if (*pstr == '%') {
 			if (pstr[1] && pstr[2]) {
 				*pbuf++ = from_hex(pstr[1]) << 4
-						| from_hex(pstr[2]);
+					| from_hex(pstr[2]);
 				pstr += 2;
 			}
 		} else if (*pstr == '+') { 
@@ -75,7 +75,7 @@ char *tts_url_output(char *cfg, char *text)
 {
 	char *appkey;
 	char *secretkey;
-	char timestamp[128] = {0};
+	char timestamp[12] = {0};
 	char *userid;
 	int samplebytes;
 	int samplerate;
@@ -85,15 +85,15 @@ char *tts_url_output(char *cfg, char *text)
 	float speechrate;
 	int rightmargin;
 	int realback;
-	char *res;
-	char *server;
+	char *res; char *server;
 	char *port;
 	char *audiotype;
-	char buf[1024] = {0};
-	char buff[1024] = {0};
-	char *url = malloc(2048);;
-	/*XXX:*/
-	char *authId = "11123343434421";
+	char *buf = malloc(77);
+	char *buff = malloc(1024);
+	char *url = malloc(2048);
+	memset(buf, 0, 77);
+	memset(buff, 0, 1024);
+	memset(url, 0, 2048);
 
 	cJSON *root = cJSON_Parse(cfg);
 	cJSON *tmp = cJSON_GetObjectItem(root, "appKey");
@@ -136,29 +136,37 @@ char *tts_url_output(char *cfg, char *text)
 	t = cJSON_GetObjectItem(tmp, "res");
 	res = t->valuestring;
 
-        int sec= time(NULL);
-        itoa(sec, timestamp); 
-	//sprintf(timestamp, "%d", (int)rand);
-	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authId);
+	int sec= time(NULL);
+	itoa(sec, timestamp); 
+	char authid[20] = {0};
+	memset(authid, 0, 20);
+	sprintf(authid, "%d", (int)rand);
+	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authid);
 	char *sig = hmac_sha1(secretkey, buf);
 	char *tt = url_encode(text);
-
-	sprintf(buff, "applicationId=%s&timestamp=%s&sig=%s&params="
-			"{\"app\": {\"userId\": \"%s\"}, \"audio\": "
-			"{\"sampleBytes\": %d, \"sampleRate\": %d, "
-			"\"channel\": %d, \"audioType\": \"%s\"}, "
-			"\"request\": {\"speechVolume\": %d, "
-			"\"coreType\": \"%s\", \"speechRate\": %f, "
-			"\"rightMargin\": %d, \"realBack\": %d, "
-			"\"res\": \"%s\",\"refText\": \"%s\"}}",
-			appkey, timestamp, sig, userid, samplebytes,
-			samplerate, channel, audiotype, speechvolume,
-			coretype, speechrate, rightmargin, realback, res, tt);
+	sprintf(buff, "applicationId=%s&timestamp=%s&authId=%s&sig=%s&params="
+			"{"
+				"\"audio\": "
+					"{\"sampleBytes\": %d, \"sampleRate\": %d, "
+					"\"channel\": %d, \"audioType\": \"%s\", \"compress\": \"raw\""
+				"}, "
+				"\"request\": "
+					"{"
+					"\"coreType\": \"%s\", "
+					"\"realBack\": %d, "
+					"\"res\": \"%s\",\"refText\": \"%s\""
+				"}"
+			"}",
+			appkey, timestamp, authid, sig, samplebytes,
+			samplerate, channel, audiotype,
+			coretype, realback, res, tt);
 
 	sprintf(url, "http://%s:%s/%s/%s?%s",
-			   server, port, coretype, res, buff);
-	 cJSON_Delete(root);
-	 free(tt);
-	 free(sig);
+			server, port, coretype, res, buff);
+	cJSON_Delete(root);
+	free(tt);
+	free(sig);
+	free(buf);
+	free(buff);
 	return url;
 }
