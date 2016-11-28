@@ -100,7 +100,6 @@ struct aiengine *aiengine_new(const char *cfg)
 	sprintf(buf, "%s\n%s\n%s%s", appkey, timestamp, secretkey, authId);
 	char *sig = hmac_sha1(secretkey, buf);
 #if use_pcm
-#if 0
 	sprintf(path,
 		"/%s/%s?version=1.0.0&applicationId=%s&timestamp=%s"
 		"&authId=%s&sig=%s",
@@ -110,11 +109,7 @@ struct aiengine *aiengine_new(const char *cfg)
 		timestamp,
 		authId,
 		sig);
-#endif
-	sprintf(path, "/cn.sds/airobot?version=1.0.0&applicationId=1454033453859541&timestamp=1480066182&authId=5836b9b835847e46d1000009&sig=4c49fd542b3989a30e5d43257f068981019726d7");
 #else
-
-
 	sprintf(path,
 		"/%s/%s?applicationId=%s&timestamp=%s"
 		"&authId=%s&sig=%s&userId=%s",
@@ -126,8 +121,7 @@ struct aiengine *aiengine_new(const char *cfg)
 		sig,
 		userid);
 #endif
-	printf("%s:%s", host, port);
-	printf("%s\n", path);
+	printf("%s:%s%s\n", host, port, path);
 	/*init context*/
 	agn->ctx = nopoll_ctx_new();
 	if (!agn->ctx) {
@@ -221,7 +215,7 @@ int aiengine_start(struct aiengine *agn,
 
 	memset(text, 0, 1024);
 #if use_pcm
-	sprintf(text, "{\"request\":{\"sdsExpand\":{\"lastServiceType\":\"cloud\",\"prevdomain\":\"\"},\"version\":\"1.0.0\",\"contextId\":\"\",\"recordId\":\"5836b9b835847e46d1000009\",\"res\":\"airobot\",\"env\":\"lbs_city=\\\"苏州市\\\";use_frame_split=0;use_vad_restart=1;\",\"coreType\":\"cn.sds\"},\"app\":{\"deviceId\":\"dev-test\",\"userId\":\"leChange\",\"applicationId\":\"1454033453859541\"},\"audio\":{\"audioType\":\"wav\",\"sampleRate\":16000,\"sampleBytes\":2,\"channel\":1}}");
+	sprintf(text, "{\"request\":{\"sdsExpand\":{\"lastServiceType\":\"cloud\",\"prevdomain\":\"\"},\"version\":\"1.0.0\",\"contextId\":\"\",\"recordId\":\"5836b9b835847e46d1000010\",\"res\":\"airobot\",\"env\":\"lbs_city=\\\"苏州市\\\";use_frame_split=0;use_vad_restart=1;\",\"coreType\":\"cn.sds\"},\"app\":{\"deviceId\":\"dev-test\",\"userId\":\"leChange\",\"applicationId\":\"1454033453859541\"},\"audio\":{\"audioType\":\"wav\",\"sampleRate\":16000,\"sampleBytes\":2,\"channel\":1}}");
 	printf("%s, %d\n", text, strlen(text));
 #else
 	char *r = strstr(param, "sdsExpand");
@@ -257,6 +251,7 @@ int aiengine_start(struct aiengine *agn,
 		retvalue = -1;
 		goto error_handle;
 	}
+#if !use_pcm
 	agn->audioenc = audioenc_new(agn, _audioenc_notify);
 	if (agn->audioenc == NULL) {
 		pf("audioenc NULL\n");
@@ -277,6 +272,7 @@ int aiengine_start(struct aiengine *agn,
 	if (cb == NULL) {
 		pf("cb NULL\n");
 	}
+#endif
 	agn->cb = cb;
 	agn->usrdata = usrdata;
 error_handle:
@@ -359,8 +355,11 @@ int aiengine_stop(struct aiengine *agn)
                 nopoll_msg_get_payload_size(agn->msg));
 
 	agn->size = nopoll_msg_get_payload_size(agn->msg);
+#if !use_pcm	
 	audioenc_stop(agn->audioenc);
+#endif
 	if (agn->cb) {
+		pf("msg received\n");
 		agn->cb(agn->usrdata, buff, agn->size);
 	} else {
 	}
@@ -368,9 +367,11 @@ msg_error:
 	/*unref message*/
 	nopoll_msg_unref(agn->msg);
 error:
+#if !use_pcm
 	if (agn->audioenc) {
 		audioenc_delete(agn->audioenc);
 	}
+#endif
 	if (agn->cfg)
 		free(agn->cfg);
 	if (buff != NULL)
