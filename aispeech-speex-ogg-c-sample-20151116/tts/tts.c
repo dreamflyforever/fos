@@ -143,9 +143,11 @@ char *tts_url_output(char *cfg, char *text)
 	sprintf(authid, "%d", (int)rand);
 	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authid);
 	char *sig = hmac_sha1(secretkey, buf);
-	char *tt = url_encode(text);
-	sprintf(buff, "applicationId=%s&timestamp=%s&authId=%s&sig=%s&params="
-			"{"
+	char *head = malloc(150);
+	memset(head, 0, 150);
+	sprintf(head, "applicationId=%s&timestamp=%s&authId=%s&sig=%s&params=",
+			appkey, timestamp, authid, sig);
+	sprintf(buff, "{"
 				"\"audio\": "
 					"{\"sampleBytes\": %d, \"sampleRate\": %d, "
 					"\"channel\": %d, \"audioType\": \"%s\", \"compress\": \"raw\""
@@ -157,14 +159,17 @@ char *tts_url_output(char *cfg, char *text)
 					"\"res\": \"%s\",\"refText\": \"%s\""
 				"}"
 			"}",
-			appkey, timestamp, authid, sig, samplebytes,
-			samplerate, channel, audiotype,
-			coretype, realback, res, tt);
-
+			samplebytes, samplerate, channel, audiotype,
+			coretype, realback, res, text);
+	printf("buff: %d\n", strlen(buff));
+	char *tt= url_encode(buff);
+	sprintf(buff, "%s%s", head, tt);
 	sprintf(url, "http://%s:%s/%s/%s?%s",
-			server, port, coretype, res, buff);
+		server, port, coretype, res, buff);
+
 	cJSON_Delete(root);
 	free(tt);
+	free(head);
 	free(sig);
 	free(buf);
 	free(buff);
