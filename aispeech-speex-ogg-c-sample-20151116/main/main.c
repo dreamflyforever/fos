@@ -26,7 +26,7 @@ char *server_cfg = "{\
 	\"coretype\": \"cn.dlg.ita\",\
 	\"res\": \"aihome\",\
 	\"app\": {\
-        	\"userId\": \"wifiBox\"\
+		\"userId\": \"wifiBox\"\
     	},\
 	\"cloud\": {\
 		\"server\": \"112.80.39.95\",\
@@ -36,18 +36,18 @@ char *server_cfg = "{\
 
 char *cloud_asr_param = "{\
 	\"coreProvideType\": \"cloud\",\
-        \"audio\": {\
-            \"audioType\": \"ogg\",\
-            \"sampleRate\": 16000,\
-            \"channel\": 1,\
+	\"audio\": {\
+	    \"audioType\": \"ogg\",\
+	    \"sampleRate\": 16000,\
+	    \"channel\": 1,\
 	    \"compress\":\"raw\",\
-            \"sampleBytes\": 2\
-        },\
-        \"request\": {\
+	    \"sampleBytes\": 2\
+	},\
+	\"request\": {\
 		\"coreType\": \"cn.dlg.ita\",\
 		\"speechRate\":1.0,\
 		\"res\": \"aihome\"\
-        }\
+	}\
 }";
 rtt:
 	appKey\": \"14796952588595df\",\
@@ -55,10 +55,9 @@ rtt:
 
 #else
 
-/*rtt*/
 char *server_cfg = "{\
-	\"appKey\": \"1454033453859541\",\
-	\"secretKey\": \"0b4ea783ac366dc0ce3d28561e1a3489\",\
+	\"appKey\": \"14709983278595d8\",\
+	\"secretKey\": \"85d1e668eace0ce6539c299aa02b2334\",\
 	\"provision\": \"auth/config.json\",\
 	\"serialNumber\": \"bin/serialNumber\", \
 	\"audiotype\": \"pcm\",\
@@ -68,8 +67,8 @@ char *server_cfg = "{\
 		\"userId\": \"wifiBox\"\
 	},\
 	\"cloud\": {\
-		\"server\": \"s-test.api.aispeech.com\",\
-		\"port\": \"10000\"\
+		\"server\": \"58.210.96.236\",\
+		\"port\": \"8888\"\
 	}\
 }";
 
@@ -94,6 +93,25 @@ char *cloud_asr_param = "{\
 }";
 #endif
 
+#define MILLION 1000000
+long clock_get()
+{
+	long ret;
+	struct timespec t;
+	clock_gettime(CLOCK_MONOTONIC, &t);
+	ret = t.tv_sec * MILLION + t.tv_nsec/1000;
+	return ret;
+}
+
+long calcu(long start, long end)
+{
+	long r = (end - start)/1000;
+	return r;
+}
+
+long start;
+long end;
+
 static FILE *wav;
 struct aiengine *agn;
 
@@ -106,6 +124,9 @@ int agn_cb(const void *usrdata,
 	}
 
 	printf("message:%s, size:%d\n", (char *)message, size);
+	end = clock_get();
+	long t = calcu(start, end);
+	printf("time  interval: %ld milliseconds\n", t);
 	return 0;
 }
 
@@ -117,8 +138,8 @@ char *tts_param =  "{\
 	\"userId\": \"wifiBox\",\
 	\"coretype\": \"cn.sent.syn\",\
 	\"cloud\": {\
-		\"server\": \"s-test.api.aispeech.com\",\
-		\"port\": \"80\"\
+		\"server\": \"58.210.96.236\",\
+		\"port\": \"8888\"\
 	},\
 	\"audio\": {\
 		\"sampleBytes\": 2,\
@@ -137,7 +158,7 @@ char *tts_param =  "{\
 
 int main(int argc, char *argv[])
 {
-#if 0
+#if 1
 	char *url;
 	url = tts_url_output(tts_param,
 			"抱歉没找到刘德华的歌，请问您想听什么歌呢？");
@@ -147,7 +168,6 @@ int main(int argc, char *argv[])
 	char *wavpath = "wether.wav";
 	int bytes;
 	char buf[3200] = {0};
-	int ret;
 	agn = aiengine_new(server_cfg);
 	//cloud_auth_do(server_cfg);
 	if (agn == NULL) {
@@ -155,6 +175,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 #if 0
+	int ret;
 	ret = check_provision(agn);;
 	if (ret != 0) {
 		printf("Authorization fail\n");
@@ -175,6 +196,7 @@ int main(int argc, char *argv[])
 	}
 
 	fclose(wav);
+	start = clock_get();
 	aiengine_stop(agn);
 
 	aiengine_delete(agn);

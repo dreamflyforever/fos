@@ -1,9 +1,3 @@
-/*File : http.h 
- *Auth : sjin 
- *Date : 20141206 
- *Mail : 413977243@qq.com 
- *Modify: code indent, Jim Yang@aispeech
- */ 
 #ifndef _MY_HTTP_H
 #define _MY_HTTP_H
  

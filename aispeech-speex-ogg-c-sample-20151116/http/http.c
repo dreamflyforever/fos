@@ -20,7 +20,7 @@ static int http_tcpclient_create(const char *host, int port)
 	struct sockaddr_in server_addr; 
 	int socket_fd;
 
-	if((he = gethostbyname(host))==NULL){
+	if ((he = gethostbyname(host)) == NULL) {
 		return -1;
 	}
 
@@ -28,11 +28,13 @@ static int http_tcpclient_create(const char *host, int port)
 	server_addr.sin_port = htons(port);
 	server_addr.sin_addr = *((struct in_addr *)he->h_addr);
 
-	if((socket_fd = socket(AF_INET,SOCK_STREAM,0))==-1){
+	if ((socket_fd = socket(AF_INET,SOCK_STREAM,0)) == (-1)) {
 		return -1;
 	}
 
-	if(connect(socket_fd, (struct sockaddr *)&server_addr,sizeof(struct sockaddr)) == -1){
+	if (connect(socket_fd,
+		(struct sockaddr *)&server_addr,
+		sizeof(struct sockaddr)) == -1) {
 		return -1;
 	}
 
@@ -112,12 +114,12 @@ static char *http_parse_result(const char*lpbuf)
 	char *ptmp = NULL; 
 	char *response = NULL;
 	ptmp = (char*)strstr(lpbuf, "HTTP/1.1");
-	if (!ptmp){
+	if (!ptmp) {
 		printf("http/1.1 not faind\n");
 		return NULL;
 	}
-	if (atoi(ptmp + 9)!=200){
-		printf("result:\n%s\n",lpbuf);
+	if (atoi(ptmp + 9) != 200){
+		printf("result:\n%s\n", lpbuf);
 		return NULL;
 	}
 
@@ -210,7 +212,7 @@ char *http_get(const char *url)
 
 	sprintf(lpbuf,HTTP_GET,file,host_addr,port);
 
-	if(http_tcpclient_send(socket_fd,lpbuf,strlen(lpbuf)) < 0) {
+	if (http_tcpclient_send(socket_fd,lpbuf,strlen(lpbuf)) < 0) {
 		printf("http_tcpclient_send failed..\n");
 		return NULL;
 	}

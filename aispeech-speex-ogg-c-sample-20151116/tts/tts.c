@@ -94,6 +94,10 @@ char *tts_url_output(char *cfg, char *text)
 	memset(buf, 0, 77);
 	memset(buff, 0, 1024);
 	memset(url, 0, 2048);
+	if ((cfg == NULL) & (text == NULL)) {
+		printf("please make sure cfg and text is right!");
+		return NULL;
+	}
 
 	cJSON *root = cJSON_Parse(cfg);
 	cJSON *tmp = cJSON_GetObjectItem(root, "appKey");
@@ -149,8 +153,11 @@ char *tts_url_output(char *cfg, char *text)
 			appkey, timestamp, authid, sig);
 	sprintf(buff, "{"
 				"\"audio\": "
-					"{\"sampleBytes\": %d, \"sampleRate\": %d, "
-					"\"channel\": %d, \"audioType\": \"%s\", \"compress\": \"raw\""
+					"{\"sampleBytes\": %d, "
+					"\"sampleRate\": %d, "
+					"\"channel\": %d, "
+					"\"audioType\": \"%s\", "
+					"\"compress\": \"raw\""
 				"}, "
 				"\"request\": "
 					"{"
