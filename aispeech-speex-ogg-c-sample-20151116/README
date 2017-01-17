@@ -1,0 +1,15 @@
+## linux_asr
+
+This project is for linux to speech recognition.
+
+## compile
+
+`make`
+
+## execute
+
+./fos
+
+## author
+
+Jim@aispeech, AIspeech.INC copyright
