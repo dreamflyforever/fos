@@ -59,6 +59,7 @@
 #define FALSE             0
 #endif
 
+#define SHELL
 #define SYSTEM_WORD       32
 #define DEBUG             0
 
@@ -83,18 +84,19 @@ enum {
 #define CYCLE            1
 #define TIMEOUT          0
 
-#define OS_ASSERT(X)                                                   \
-if (!(X))                                                              \
-{                                                                      \
-    os_printf("(%s) is wrong at %s: %d\n", #X, __FUNCTION__, __LINE__);\
-    while(1);                                                          \
+/*for system debug*/
+#define OS_ASSERT(X)                                                       \
+if (!(X))                                                                  \
+{                                                                          \
+	os_printf("(%s) is wrong at %s: %d\n", #X, __FUNCTION__, __LINE__);\
+	while(1);                                                          \
 }
 
-#define OS_LOG(X)                                                      \
-if (!(X))                                                              \
-{                                                                      \
-    os_printf("log: (%s) is wrong at %s: %d\n", #X, __FUNCTION__,      \
-    __LINE__);                                                         \
+#define OS_LOG(X)                                                          \
+if (!(X))                                                                  \
+{                                                                          \
+	os_printf("log: (%s) is wrong at %s: %d\n", #X, __FUNCTION__,      \
+	__LINE__);                                                         \
 }
 
 /*for delay*/
@@ -107,10 +109,12 @@ typedef void (*FUNC_PTR) (void *p_arg);
 /*time manage*/
 typedef struct TICK_STR {
 	LIST list;
-	U8 style;		// timer,delay,wait signer
+	/*timer,delay,wait signer*/
+	U8 style;
 	U32 timeout;
 	struct TCB_STR *tcb;
-	FUNC_PTR func;		// for software timer
+	/*for software timer*/
+	FUNC_PTR func;
 	void *func_arg;
 	BOOL period;
 	U32 timeout_copy;
@@ -172,6 +176,7 @@ extern U32 task_prio_map;
 #define bit_clear(num, i) num = num & (~(1<<i))
 #define bit_set(num, i)   num = num | (1<<i)
 
+/*fetch ready-high-priority task algorithm*/
 TCB *bit_first_one_search(U32 num);
 void prio_ready_queue_init();
 void prio_ready_queue_insert_tail(TCB * tcb);
@@ -181,7 +186,7 @@ void prio_ready_queue_insert_head(TCB * tcb);
 
 void tick_queue_init();
 ULONG tick_get();
-/*For prot function*/
+/*For port function*/
 void hardware_timer();
 
 BOOL start_which_task(TCB * tcb);

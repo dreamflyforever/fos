@@ -52,7 +52,6 @@ void start_schedule(TCB * tcb)
 	if (setcontext((ucontext_t *) tcb->stack_ptr) == -1) {
 		handle_error("swapcontext");
 	}
-
 }
 
 void hw_timer_init()

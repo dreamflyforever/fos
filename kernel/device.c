@@ -49,11 +49,12 @@ int device_unregister(DEVICE * device)
 }
 
 int ops_init(OPERATIONS * ops,
-	     int (*open) (void *arg),
-	     FUNC write,
-	     FUNC read,
-	     int (*ioctrl) (U8 cmd, void *arg), int (*close) (void *arg)
-    )
+		int (*open) (void *arg),
+		FUNC write,
+		FUNC read,
+		int (*ioctrl)(U8 cmd, void *arg),
+		int (*close) (void *arg)
+)
 {
 	if (ops == NULL)
 		OS_LOG("OPS null\n");
@@ -99,6 +100,7 @@ int device_write(DEVICE * device, U8 * buff, U8 size)
 
 int device_ioctrl(DEVICE * device, U8 cmd, void *arg)
 {
+	OS_ASSERT(device);
 	if (device == NULL) {
 		OS_LOG("Not device\n");
 		return NO_DEVICE;
@@ -114,6 +116,7 @@ int device_ioctrl(DEVICE * device, U8 cmd, void *arg)
 
 DEVICE *device_find(U8 * name)
 {
+	OS_ASSERT(name);
 	DEVICE *device;
 	LIST *tmp = &device_queue_head.list;
 

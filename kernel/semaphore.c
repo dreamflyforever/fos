@@ -39,16 +39,19 @@
 
 void sem_block_queue_init(SEM * sem_block_queue_head)
 {
+	OS_ASSERT(sem_block_queue_head);
 	list_init(&sem_block_queue_head->list);
 }
 
 void sem_block_queue_insert(SEM * semphore)
 {
+	OS_ASSERT(semphore);
 	list_insert_behind(&semphore->list, &semphore->tcb->list);
 }
 
 void sem_block_queue_delete(TCB * tcb)
 {
+	OS_ASSERT(tcb);
 	list_delete(&tcb->list);
 }
 
