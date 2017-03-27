@@ -6,6 +6,8 @@
 #include <ctype.h>
 #include <time.h>
 #include "base.h"
+#include <uuid/uuid.h>
+#include <agn_audioenc.h>
 
 /* Converts a hex character to its integer value */
 char from_hex(char ch)
@@ -75,7 +77,7 @@ char *tts_url_output(char *cfg, char *text)
 {
 	char *appkey;
 	char *secretkey;
-	char timestamp[12] = {0};
+	char timestamp[11] = {0};
 	char *userid;
 	int samplebytes;
 	int samplerate;
@@ -88,12 +90,8 @@ char *tts_url_output(char *cfg, char *text)
 	char *res; char *server;
 	char *port;
 	char *audiotype;
-	char *buf = malloc(77);
-	char *buff = malloc(1024);
-	char *url = malloc(2048);
-	memset(buf, 0, 77);
-	memset(buff, 0, 1024);
-	memset(url, 0, 2048);
+	char *buf = malloc(100);
+	memset(buf, 0, 100);
 	if ((cfg == NULL) & (text == NULL)) {
 		printf("please make sure cfg and text is right!");
 		return NULL;
@@ -140,17 +138,20 @@ char *tts_url_output(char *cfg, char *text)
 	t = cJSON_GetObjectItem(tmp, "res");
 	res = t->valuestring;
 
-	int sec= time(NULL);
+	unsigned int sec = time(NULL);
 	itoa(sec, timestamp); 
-	char authid[20] = {0};
-	memset(authid, 0, 20);
-	sprintf(authid, "%d", (int)rand);
+	uuid_t uuid;
+    	char authid[36] = {0};
+    	uuid_generate(uuid);
+	uuid_unparse(uuid, authid);
 	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authid);
 	char *sig = hmac_sha1(secretkey, buf);
 	char *head = malloc(150);
 	memset(head, 0, 150);
 	sprintf(head, "applicationId=%s&timestamp=%s&authId=%s&sig=%s&params=",
 			appkey, timestamp, authid, sig);
+	char *buff = malloc(strlen(text) + 300);
+	memset(buff, 0, (int)strlen(text) + 300);
 	sprintf(buff, "{"
 				"\"audio\": "
 					"{\"sampleBytes\": %d, "
@@ -168,11 +169,13 @@ char *tts_url_output(char *cfg, char *text)
 			"}",
 			samplebytes, samplerate, channel, audiotype,
 			coretype, realback, res, text);
-	printf("buff: %d\n", strlen(buff));
-	char *tt= url_encode(buff);
-	sprintf(buff, "%s%s", head, tt);
+	char *tt = url_encode(buff);
+	char *b = malloc(strlen(tt) + strlen(head) + 1);
+	memset(b, 0, strlen(tt) + strlen(head) + 1);
+	sprintf(b, "%s%s", head, tt);
+	char *url = malloc(1024 + strlen(b));
 	sprintf(url, "http://%s:%s/%s/%s?%s",
-		server, port, coretype, res, buff);
+		server, port, coretype, res, b);
 
 	cJSON_Delete(root);
 	free(tt);
@@ -180,5 +183,6 @@ char *tts_url_output(char *cfg, char *text)
 	free(sig);
 	free(buf);
 	free(buff);
+	free(b);
 	return url;
 }
