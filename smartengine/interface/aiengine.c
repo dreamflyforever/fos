@@ -3,6 +3,7 @@
 #include <agn_hmac_sha1.h>
 #include <time.h>
 #include "base.h"
+#include <uuid/uuid.h>
 
 extern int auth_do(char *path);
 #define use_pcm 0
@@ -49,7 +50,6 @@ struct aiengine *aiengine_new(const char *cfg)
 
 	char *host = NULL;
 	char *port = NULL;
-	char *authId = "5836b9b835847e46d1000009";
 	char *appkey = NULL;
 	char *secretkey = NULL;
 	char *userid = NULL;
@@ -57,6 +57,11 @@ struct aiengine *aiengine_new(const char *cfg)
 	char *coretype = NULL;
 	char *res = NULL;
 	int len;
+ 
+	uuid_t uuid;
+	char authId[36] = {0};
+    	uuid_generate(uuid);
+	uuid_unparse(uuid, authId);
 
 	cJSON *root = cJSON_Parse(cfg);
 	cJSON *tmp = cJSON_GetObjectItem(root, "coretype");
