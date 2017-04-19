@@ -26,10 +26,12 @@ typedef struct MSG_STR {
 	U8 *buff;
 } MSG;
 
-void msg_queue_create(QUEUE * entry, U32 length, U8 * name);
+enum {FULL = 10, EMPTY};
 
-void msg_put(QUEUE * entry, MSG * msg, U8 method);
+U8 msg_queue_create(QUEUE * entry, U32 length, U8 * name);
 
-void msg_get(QUEUE * entry, void *buffer);
+U8 msg_put(QUEUE * entry, MSG * msg, U8 method);
+
+U8 msg_get(QUEUE * entry, void *buffer);
 
 #endif

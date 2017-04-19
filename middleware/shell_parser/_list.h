@@ -7,8 +7,6 @@
 #define NULL (void *)0
 #endif
 
-#define printf os_printf
-
 typedef struct _LIST {
 	struct _LIST *next;
 } _LIST;

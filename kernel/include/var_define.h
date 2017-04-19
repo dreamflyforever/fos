@@ -46,12 +46,21 @@
 #include <mem_block.h>
 #include <device.h>
 
+#define DEBUG 1
 #define LINUX 1
 #if LINUX
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#define os_printf printf
+#if DEBUG
+#define os_printf(format, ...) \
+	{printf("[%s : %s : %d] ", \
+	__FILE__, __func__, __LINE__); \
+	printf(format, ##__VA_ARGS__);}
+#else
+#define os_printf(format, ...) 
+#endif
+
 #endif
 
 #ifndef TRUE
@@ -60,7 +69,6 @@
 #endif
 
 #define SYSTEM_WORD       32
-#define DEBUG             0
 
 #define STACK unsigned int
 
