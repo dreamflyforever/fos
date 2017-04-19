@@ -37,8 +37,6 @@
 
 #include <var_define.h>
 
-#define SHELL
-
 /*Init hardware and system resource*/
 void system_init()
 {
@@ -60,7 +58,7 @@ void system_init()
 	task_create(&idle_tcb, (U8 *) "idle_task", idle_task, NULL, idle_stack,
 		    IDLE_STACK_SIZE, 31, 1);
 
-	//ethoc_initialize(0, 0x92000000);
+	/*ethoc_initialize(0, 0x92000000);*/
 }
 
 int main(void)
@@ -80,11 +78,11 @@ int main(void)
 
 	hw_timer_init();
 
-	/*Which task run first */
+	/*Which task run first*/
 	BOOL result = start_which_task(&idle_tcb);
 	OS_ASSERT(result);
 
-	/*Never reach here */
+	/*Never reach here*/
 	for (;;) {
 		os_printf("hello");
 	};

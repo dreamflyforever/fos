@@ -45,7 +45,7 @@ TCB *bit_first_one_search(U32 num)
 
 	U8 i;
 	for (i = 0; i < SYSTEM_WORD; i++) {
-		/* The first task of each priority queue must be representative */
+		/*The first task of each priority queue must be representative*/
 		if ((num >> i) & 0x01) {
 			prio_list_head = &task_prio_queue[i].list;
 			tcb_ret = list_entry(prio_list_head->next, TCB, list);
@@ -69,18 +69,21 @@ void prio_ready_queue_init()
 
 void prio_ready_queue_insert_tail(TCB * tcb)
 {
+	OS_ASSERT(tcb);
 	bit_set(task_prio_map, tcb->prio);
 	list_insert_behind(&task_prio_queue[tcb->prio].list, &tcb->list);
 }
 
 void prio_ready_queue_insert_head(TCB * tcb)
 {
+	OS_ASSERT(tcb);
 	bit_set(task_prio_map, tcb->prio);
 	list_insert_spec(&task_prio_queue[tcb->prio].list, &tcb->list);
 }
 
 void prio_ready_queue_delete(TCB * tcb)
 {
+	OS_ASSERT(tcb);
 	list_delete(&tcb->list);
 
 	/* If the task ready queue have no task, clear the corresponding task_prio_map */
@@ -112,6 +115,7 @@ U8 prio_ready_queue_fetch()
 	return SCHED;
 }
 
+/*schedule task*/
 void schedule()
 {
 	if (schedule_is_lock == TRUE)
@@ -130,6 +134,7 @@ void schedule()
 /*Start the first task*/
 BOOL start_which_task(TCB * first_task)
 {
+	OS_ASSERT(first_task);
 	if (first_task == NULL) {
 		OS_LOG("First task is NULL\n");
 		return FALSE;
