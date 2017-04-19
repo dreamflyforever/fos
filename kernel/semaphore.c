@@ -101,9 +101,9 @@ U8 sem_put(SEM * semaphore)
 		sem_block_queue_delete(tcb_tmp);
 		prio_ready_queue_insert_head(tcb_tmp);
 
-	} else if (semaphore->count != 0xffffffff)
+	} else if (semaphore->count != 0xffffffff) {
 		semaphore->count++;
-	else {
+	} else {
 		OS_LOG("Semaphore overflow\n");
 	}
 

@@ -23,9 +23,9 @@ MUTEX mutex;
 #endif
 
 #if msg_queue_test
-QUEUE my_queue;
-QUEUE my_queue1;
-QUEUE my_queue2;
+QUEUE queue;
+QUEUE queue1;
+QUEUE queue2;
 MSG msg1;
 MSG msg2;
 MSG msg3;
@@ -43,15 +43,15 @@ void task1(void *arg)
 	os_printf("task1 start....\n");
 	for (;;) {
 #if msg_queue_test
-		msg_put(&my_queue, &msg1, FIFO);
-		msg_put(&my_queue, &msg2, FIFO);
-		msg_put(&my_queue, &msg3, FIFO);
-		msg_put(&my_queue1, &msg4, FIFO);
-		msg_put(&my_queue1, &msg5, FIFO);
-		msg_put(&my_queue1, &msg6, FIFO);
-		msg_put(&my_queue2, &msg7, FIFO);
-		msg_put(&my_queue2, &msg8, FIFO);
-		msg_put(&my_queue2, &msg9, FIFO);
+		msg_put(&queue, &msg1, FIFO);
+		msg_put(&queue, &msg2, FIFO);
+		msg_put(&queue, &msg3, FIFO);
+		msg_put(&queue1, &msg4, FIFO);
+		msg_put(&queue1, &msg5, FIFO);
+		msg_put(&queue1, &msg6, FIFO);
+		msg_put(&queue2, &msg7, FIFO);
+		msg_put(&queue2, &msg8, FIFO);
+		msg_put(&queue2, &msg9, FIFO);
 #endif
 
 #if sem_test
@@ -76,13 +76,16 @@ void task2(void *arg)
 	for (;;) {
 #if msg_queue_test
 		memset(buffer, 0, 10);
-		msg_get(&my_queue, buffer);
-		os_printf("queue 0 read = %s\n", buffer);
+		if (EMPTY != msg_get(&queue, buffer)) {
+			os_printf("queue 0 read = %s\n", buffer);
+		} else {
+			os_printf("empty\n");
+		}
 		memset(buffer, 0, 10);
-		msg_get(&my_queue1, buffer);
+		msg_get(&queue1, buffer);
 		os_printf("queue 1 read = %s\n", buffer);
 		memset(buffer, 0, 10);
-		msg_get(&my_queue2, buffer);
+		msg_get(&queue2, buffer);
 		os_printf("queue 2 read = %s\n", buffer);
 #endif
 
@@ -130,9 +133,9 @@ void app_main()
 #endif
 
 #if msg_queue_test
-	msg_queue_create(&my_queue, 100, (U8 *) "my_queue");
-	msg_queue_create(&my_queue1, 100, (U8 *) "my_queue1");
-	msg_queue_create(&my_queue2, 100, (U8 *) "my_queue2");
+	msg_queue_create(&queue, 2, (U8 *) "queue");
+	msg_queue_create(&queue1, 1, (U8 *) "queue1");
+	msg_queue_create(&queue2, 1, (U8 *) "queue2");
 	msg1.buff = (U8 *) "1aaa";
 	msg2.buff = (U8 *) "2bbb";
 	msg3.buff = (U8 *) "3ccc";
