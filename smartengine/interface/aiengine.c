@@ -90,7 +90,8 @@ struct aiengine *aiengine_new(const char *cfg)
 	tmp = cJSON_GetObjectItem(tmp, "userId");
 	userid = tmp->valuestring;
 	len = strlen(userid);
-	agn->userid = (char *)malloc(len);
+	agn->userid = (char *)malloc(len + 1);
+	memset(agn->userid, 0, len + 1);
 	strncpy(agn->userid, tmp->valuestring, len);
 
 	tmp = cJSON_GetObjectItem(root, "cloud");
