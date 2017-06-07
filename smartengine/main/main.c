@@ -19,7 +19,7 @@ char *url_strip(char *url)
 {
 	int len;
 	char *cp;
-	int i, j=0;
+	int i, j = 0;
 	if (url == NULL) {
 		printf("url error\n");
 		return NULL;
@@ -57,19 +57,24 @@ char *fetch_url(unsigned char const *start, unsigned long length)
 			&& start[i+4] == ':'
 			&& start[i+5] == '"') {
 			int j;
-			c = malloc(length-i);
+			c = malloc(length-i-5);
 			if (c == NULL) {
 				printf("%s %s %d\n", __FILE__, __func__, __LINE__);
 				return NULL;
 			}
-			memset(c, 0, length-i);
+			memset(c, 0, length-i-5);
 
-			for (j = 0; j < length; j++) {
+			/*notice "url" is interrupt*/
+			for (j = 0; j < length-i-5; j++) {
 				if (start[i+6+j] == '"')
 					break;
 				c[j] = start[i+6+j];
 			}
-			//printf("%s", c);
+			if (c[j] != '"') {
+				free(c);
+				c = NULL;
+				printf("\nurl error\n");
+			}
 			break;
 		}
 	}
@@ -85,6 +90,7 @@ char *fetch_output(unsigned char const *start, unsigned long length)
 		printf("start error\n");
 		return NULL;
 	}
+	printf("\n");
 	for (i = 0; i < (length - 8); i++) {
 		if ((start[i] == 'o')
 			&& start[i+1] == 'u'
@@ -96,20 +102,19 @@ char *fetch_output(unsigned char const *start, unsigned long length)
 			&& start[i+7] == ':'
 			&& start[i+8] == '"') {
 			int j;
-			c = malloc(length-i);
+			c = malloc(length-i-8);
 			if (c == NULL) {
 				printf("%s %s %s\n", __FILE__, __func__, __LINE__);
 				return NULL;
 			}
-			memset(c, 0, length-i);
+			memset(c, 0, length-i-8);
 
-			for (j = 0; j < length; j++) {
+			/*notice "output" is interrupt*/
+			for (j = 0; j < length-i-8; j++) {
 				if (start[i+9+j] == '"')
 					break;
 				c[j] = start[i+9+j];
 			}
-			//printf("%s  ", c);
-			//printf("\n");
 		}
 	}
 	return c;
@@ -275,7 +280,7 @@ int agn_cb(const void *usrdata,
 				printf("\noutput: %s\n", url);
 				g_url = tts_url_output(tts_param, url);
 				if (g_url == NULL) {
-					printf("%d: error\n");
+					printf("%d: error\n", __LINE__);
 					while (1);
 				}
 				printf("\n%s\n", g_url);
