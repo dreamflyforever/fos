@@ -9,6 +9,8 @@
  *
  * Author         Date              content
  * Shanjin Yang   2015-3-30         the first version
+  * Shanjin Yang   2017-6-14         modify the open and close API, add handle of
+ * 				    the many times device-init.
  */
 
 #include <var_define.h>
@@ -17,10 +19,17 @@ DEVICE device_queue_head;
 
 void device_queue_init(void)
 {
+	static int times;
+	times++;
+	if (times >= 2) {
+		printf("device initial %d times\n", times);
+		return ;
+	}
+
 	list_init(&device_queue_head.list);
 }
 
-int device_register(DEVICE * device, const U8 * name, OPERATIONS * ops)
+int device_register(DEVICE * device, const char * name, OPERATIONS * ops)
 {
 	if (device == NULL) {
 		OS_LOG("Device null\n");
@@ -43,17 +52,18 @@ int device_unregister(DEVICE * device)
 		return NO_DEVICE;
 	}
 
+	ops_init(device->ops, NULL, NULL, NULL, NULL, NULL);
 	list_delete(&device->list);
 
 	return 0;
 }
 
 int ops_init(OPERATIONS * ops,
-		int (*open) (void *arg),
-		FUNC write,
-		FUNC read,
-		int (*ioctrl)(U8 cmd, void *arg),
-		int (*close) (void *arg)
+	     int (*open)(char *arg, U8 flag),
+	     FUNC write,
+	     FUNC read,
+	     int (*ioctrl)(U8 cmd, void *arg),
+	     int (*close)()
 )
 {
 	if (ops == NULL)
@@ -68,7 +78,7 @@ int ops_init(OPERATIONS * ops,
 	return 0;
 }
 
-int device_read(DEVICE * device, U8 * buff, U8 size)
+int device_read(DEVICE * device, char * buff, U8 size)
 {
 	if (device == NULL) {
 		OS_LOG("Not device\n");
@@ -83,7 +93,7 @@ int device_read(DEVICE * device, U8 * buff, U8 size)
 	return 0;
 }
 
-int device_write(DEVICE * device, U8 * buff, U8 size)
+int device_write(DEVICE * device, char * buff, U8 size)
 {
 	if (device == NULL) {
 		OS_LOG("Not device\n");
@@ -100,7 +110,6 @@ int device_write(DEVICE * device, U8 * buff, U8 size)
 
 int device_ioctrl(DEVICE * device, U8 cmd, void *arg)
 {
-	OS_ASSERT(device);
 	if (device == NULL) {
 		OS_LOG("Not device\n");
 		return NO_DEVICE;
@@ -114,9 +123,8 @@ int device_ioctrl(DEVICE * device, U8 cmd, void *arg)
 	return 0;
 }
 
-DEVICE *device_find(U8 * name)
+DEVICE *device_find(char * name)
 {
-	OS_ASSERT(name);
 	DEVICE *device;
 	LIST *tmp = &device_queue_head.list;
 
@@ -133,17 +141,15 @@ DEVICE *device_find(U8 * name)
 	return NULL;
 }
 
-int device_open(U8 * name, U8 flag)
+int device_open(DEVICE *device, char * name, U8 flag)
 {
-	DEVICE *device = device_find(name);
-
 	if (!device) {
 		OS_LOG("No device\n");
 		return NO_DEVICE;
 	}
 
 	if (device->ops->open) {
-		device->ops->open(NULL);
+		device->ops->open(name, flag);
 	}
 
 	device->flag |= flag;
@@ -154,21 +160,37 @@ int device_open(U8 * name, U8 flag)
 	return 0;
 }
 
-int device_close(U8 * name)
+int device_close(DEVICE *device)
 {
-	DEVICE *device = device_find(name);
-
 	if (!device) {
 		OS_LOG("No device\n");
 		return NO_DEVICE;
 	}
 
 	if (device->ops->close) {
-		device->ops->close(NULL);
+		device->ops->close();
 	}
 
 	device->flag = 0;
 	device->open_count--;
+
+	return 0;
+}
+
+int device_traverse()
+{
+	DEVICE *device;
+	LIST *tmp = &device_queue_head.list;
+	printf("device list :\n");
+	while (!is_list_last(tmp)) {
+
+		device = list_entry(tmp->next, DEVICE, list);
+		tmp = tmp->next;
+
+		if (device->name != NULL) {
+			printf("%s\n", device->name);
+		}
+	}
 
 	return 0;
 }
