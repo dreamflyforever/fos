@@ -441,3 +441,110 @@ int check_provision(struct aiengine *agn)
 	agn->provision_ok = 1;
 	return ret;
 }
+
+
+char *text_asr_output(char *cfg, char *text)
+{
+	char *appkey;
+	char *secretkey;
+	char timestamp[11] = {0};
+	char *userid;
+	int samplebytes;
+	int samplerate;
+	int channel;
+	int speechvolume;
+	char *coretype;
+	float speechrate;
+	int rightmargin;
+	int realback;
+	char *res; char *server;
+	char *port;
+	char *audiotype;
+	char *buf = malloc(100);
+	memset(buf, 0, 100);
+	if ((cfg == NULL) & (text == NULL)) {
+		printf("please make sure cfg and text is right!");
+		return NULL;
+	}
+
+	cJSON *root = cJSON_Parse(cfg);
+	cJSON *tmp = cJSON_GetObjectItem(root, "appKey");
+	appkey = tmp->valuestring;
+
+	tmp = cJSON_GetObjectItem(root, "secretKey");
+	secretkey = tmp->valuestring;
+
+	tmp = cJSON_GetObjectItem(root, "userId");
+	userid = tmp->valuestring;
+
+	tmp = cJSON_GetObjectItem(root, "coretype");
+	coretype = tmp->valuestring;
+
+	tmp = cJSON_GetObjectItem(root, "cloud");
+	cJSON *t = cJSON_GetObjectItem(tmp, "server");
+	server = t->valuestring;
+	t = cJSON_GetObjectItem(tmp, "port");
+	port = t->valuestring;
+
+	tmp = cJSON_GetObjectItem(root, "audio");
+	t = cJSON_GetObjectItem(tmp, "sampleBytes");
+	samplebytes = t->valueint;
+	t = cJSON_GetObjectItem(tmp, "sampleRate");
+	samplerate = t->valueint;
+	t = cJSON_GetObjectItem(tmp, "channel");
+	channel = t->valueint;
+	t = cJSON_GetObjectItem(tmp, "audioType");
+	audiotype = t->valuestring;
+
+	tmp = cJSON_GetObjectItem(root, "request");
+	t = cJSON_GetObjectItem(tmp, "speechVolume");
+	speechvolume = t->valueint;
+	t = cJSON_GetObjectItem(tmp, "speechRate");
+	speechrate = t->valueint;
+	t = cJSON_GetObjectItem(tmp, "rightMargin");
+	rightmargin = t->valueint;
+	t = cJSON_GetObjectItem(tmp, "realBack");
+	realback = t->valueint;
+	t = cJSON_GetObjectItem(tmp, "res");
+	res = t->valuestring;
+
+	unsigned int sec = time(NULL);
+	itoa(sec, timestamp); 
+	uuid_t uuid;
+    	char authid[36] = {0};
+    	uuid_generate(uuid);
+	uuid_unparse(uuid, authid);
+	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authid);
+	char *sig = hmac_sha1(secretkey, buf);
+	char *head = malloc(150);
+	memset(head, 0, 150);
+	sprintf(head, "applicationId=%s&timestamp=%s&authId=%s&sig=%s&params=",
+			appkey, timestamp, authid, sig);
+	char *buff = malloc(strlen(text) + 300);
+	memset(buff, 0, (int)strlen(text) + 300);
+
+	sprintf(buff, "{"
+			"\"app\":"
+				"{\"userId\":\"dreamflyfoerver\","
+				"\"userName\":\"jim\"},"
+			"\"request\":{\"sdsExpand\":{\"prevdomain\":\"\","
+				"\"lastServiceType\":\"cloud\"},"
+				"\"recordId\":\"58888888888888888888888888888114\","
+				"\"refText\":\"%s\"}}", text);
+
+	char *tt = url_encode(buff);
+	char *b = malloc(strlen(tt) + strlen(head) + 1);
+	memset(b, 0, strlen(tt) + strlen(head) + 1);
+	sprintf(b, "%s%s", head, tt);
+	char *url = malloc(1024 + strlen(b));
+	sprintf(url, "http://%s:%s/cn.sds/airobot?%s",
+		server, port, b);
+	cJSON_Delete(root);
+	free(tt);
+	free(head);
+	free(sig);
+	free(buf);
+	free(buff);
+	free(b);
+	return url;
+}
