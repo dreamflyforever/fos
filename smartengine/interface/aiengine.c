@@ -6,6 +6,7 @@
 #include <uuid/uuid.h>
 
 extern int auth_do(char *path);
+#define DUI 0
 #define use_pcm 0
 
 int _audioenc_notify(void *user_data,
@@ -105,6 +106,9 @@ struct aiengine *aiengine_new(const char *cfg)
 	//sprintf(timestamp, "%d", (int)rand);
 	sprintf(buf, "%s\n%s\n%s%s", appkey, timestamp, secretkey, authId);
 	char *sig = hmac_sha1(secretkey, buf);
+#if DUI
+	sprintf(path, "/dm/v1/test?productId=100000363&serviceType=websocket&deviceId=xxx&userId=aaa");
+#else
 #if use_pcm
 	sprintf(path,
 		"/%s/%s?version=1.0.0&applicationId=%s&timestamp=%s"
@@ -126,6 +130,7 @@ struct aiengine *aiengine_new(const char *cfg)
 		authId,
 		sig,
 		userid);
+#endif
 #endif
 	printf("%s:%s%s\n", host, port, path);
 	/*init context*/
@@ -220,6 +225,23 @@ int aiengine_start(struct aiengine *agn,
 	res = t->valuestring;
 
 	memset(text, 0, 1024);
+#if DUI
+	sprintf(text, "{"
+			"\"topic\": \"recorder.stream.start\","
+			"\"recordId\": \"12341asdfa\","
+			"\"audio\": {"
+				"\"audioType\": \"ogg\","
+				"\"sampleRate\": 16000,"
+				"\"channel\": 1,"
+				"\"sampleBytes\": 2}"
+			"}");
+#elif DUI_TEXT
+	sprintf(text, 	"{"
+		 "\"topic\": \"nlu.input.text\","
+	     "\"recordId\": \"12341asdfa\","
+	     "\"refText\": \"啦啦啦\""
+	"}");
+#else
 #if use_pcm
 	sprintf(text, "{\"request\":{\"sdsExpand\":{\"lastServiceType\":\"cloud\","
 	"\"prevdomain\":\"\"},\"version\":\"1.0.0\",\"contextId\":\"\",\"recordId\""
@@ -251,6 +273,7 @@ int aiengine_start(struct aiengine *agn,
 			coreprovidetype, audiotype, samplebytes, samplerate,
 			channel, compress, coretype, res);
 	}
+#endif
 #endif
 	if (agn->conn == NULL) {
 		pf("conn == NULL\n");
