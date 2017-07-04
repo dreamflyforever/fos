@@ -244,6 +244,30 @@ char *tts_param =  "{\
 	}\
 }";
 
+char *result_process(char *buf, int len)
+{
+	char *ret_url = NULL;
+	char *url = fetch_url(buf, len);
+	if (url != NULL) {
+		ret_url = url_strip(url);
+		free(url);
+	} else {
+		url = fetch_output(buf, len);
+		if (url == NULL) {
+			printf("\noutput null\n");
+			goto end;
+		}
+		ret_url = tts_url_output(tts_param, url);
+		if (ret_url == NULL) {
+			printf("%d: error\n");
+			while (1);
+		}
+		free(url);
+	}
+end:
+	return ret_url;
+}
+
 int agn_cb(const void *usrdata,
 		const void *message,
 		int size)
@@ -263,31 +287,8 @@ int agn_cb(const void *usrdata,
 	while (1) {
 		aispeech_len = strlen(message);
 		if (aispeech_len != 0) {
-			char *url = fetch_url(message, aispeech_len);
-			if (url != NULL) {
-				printf("\n%s\n", url);
-				g_url = url_strip(url);
-				printf("g_url: %s\n", g_url);
-				free(g_url);
-				g_url = NULL;
-				free(url);
-			} else {
-				url = fetch_output(message, aispeech_len);
-				if (url == NULL) {
-					printf("\noutput null\n");
-					break;
-				}
-				printf("\noutput: %s\n", url);
-				g_url = tts_url_output(tts_param, url);
-				if (g_url == NULL) {
-					printf("%d: error\n", __LINE__);
-					while (1);
-				}
-				printf("\n%s\n", g_url);
-				free(url);
-				free(g_url);
-				g_url = NULL;
-			}
+			g_url = result_process(message, aispeech_len);
+			printf("%d: %s\n", __LINE__, g_url);
 			break;
 		}
 	}
