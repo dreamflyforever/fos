@@ -162,6 +162,7 @@ char *tts_url_output(char *cfg, char *text)
 				"}, "
 				"\"request\": "
 					"{"
+					"\"speechVolume\": 100, "
 					"\"coreType\": \"%s\", "
 					"\"realBack\": %d, "
 					"\"res\": \"%s\",\"refText\": \"%s\""
