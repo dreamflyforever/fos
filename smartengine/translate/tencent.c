@@ -35,6 +35,7 @@ char *tran_output(int from, int to, char *s)
 	free(message);
 	free(buf);
 	free(ue);
+	free(sig);
 	return str;
 }
 
