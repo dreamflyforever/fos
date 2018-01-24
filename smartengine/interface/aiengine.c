@@ -7,7 +7,9 @@
 
 extern int auth_do(char *path);
 #define DUI 0
+#define WECHAT 1
 #define use_pcm 0
+#define use_free_server 0
 
 int _audioenc_notify(void *user_data,
 		unsigned char *body,
@@ -120,27 +122,63 @@ struct aiengine *aiengine_new(const char *cfg)
 		authId,
 		sig);
 #else
-	sprintf(path,
-		"/%s/%s?applicationId=%s&timestamp=%s"
-		"&authId=%s&sig=%s&userId=%s",
-		coretype,
-		res,
-		appkey,
-		timestamp,
-		authId,
-		sig,
-		userid);
+
+	if (strcmp(userid, "wechat") == 0) {
+		sig = hmac_sha1(appkey, "0123456789");
+		sprintf(path, "/AIHomeMP/websocket?sig=%s&deviceid=%s", sig, "abcdef");
+	} else {
+		sprintf(path,
+			"/%s/%s?applicationId=%s&timestamp=%s"
+			"&authId=%s&sig=%s&userId=%s",
+			coretype,
+			res,
+			appkey,
+			timestamp,
+			authId,
+			sig,
+			userid);
+	}
 #endif
 #endif
-	printf("%s:%s%s\n", host, port, path);
+#if use_free_server
+	sprintf(buf, "%s\n%s\n%s%s", appkey, timestamp);
+	sig = hmac_sha1(appkey, buf);
+	sprintf(path, "/appkey=%s&timestamp=%s&sig=%s", appkey, timestamp, sig);
+#endif
+	/*printf("%s:%s%s\n", host, port, path);*/
 	/*init context*/
 	agn->ctx = nopoll_ctx_new();
 	if (!agn->ctx) {
 		printf("error nopoll new ctx failed!");
 		goto handle;
 	}
-
+#if DUI
 	/*create connection*/
+	agn->conn = nopoll_conn_new(
+			agn->ctx,
+			"s.dui.ai",
+			NULL,
+			NULL,
+			path,
+			NULL,
+			NULL
+			);
+#elif WECHAT
+	char *_host = "test.iot.aispeech.com";
+	char *_port = "80";
+	char *_path = "/AIHomeMP/websocket?deviceId=123&wechatId=456";
+	/*create connection*/
+	agn->conn = nopoll_conn_new(
+			agn->ctx,
+			_host,
+			_port,
+			NULL,
+			_path,
+			NULL,
+			NULL
+			);
+#else
+	 /*create connection*/
 	agn->conn = nopoll_conn_new(
 			agn->ctx,
 			host,
@@ -150,7 +188,7 @@ struct aiengine *aiengine_new(const char *cfg)
 			NULL,
 			NULL
 			);
-
+#endif
 	if (!nopoll_conn_is_ok(agn->conn)) {
 		pf("connect error\n");
 		goto handle;
@@ -280,6 +318,7 @@ int aiengine_start(struct aiengine *agn,
 		retvalue = -1;
 		goto error_handle;
 	}
+	printf("\n\n%s\n\n", text);
 	cx = nopoll_conn_send_text(agn->conn, text, strlen(text));
 	if (cx < 0) {
 		printf("\n[%s %s %d]: send text error\n",
@@ -412,6 +451,7 @@ error:
 		free(agn->cfg);
 	if (buff != NULL)
 		free(buff);
+	printf("aiengine stop\n");
 	return retvalue;
 }
 

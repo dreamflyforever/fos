@@ -7,14 +7,14 @@
 #include <time.h>
 #include "base.h"
 #include <uuid/uuid.h>
-#include <agn_audioenc.h>
 
 char *tran_output(int from, int to, char *s)
 {
 	char *message = malloc(2048);
 	memset(message, 0, 2048);
-	char *appkey = "14709983278595d8";
-	char *secretkey = "85d1e668eace0ce6539c299aa02b2334";
+#if 0
+	char *appkey = "1500886067859698";
+	char *secretkey = "3f8133582992427f7b041441a05e43dd";
 	char timestamp[11] = {0};
 	unsigned int sec = time(NULL);
 	char *buf = malloc(100);
@@ -27,15 +27,25 @@ char *tran_output(int from, int to, char *s)
 	uuid_unparse(uuid, authid);
 	sprintf(buf, "%s\n%s\n%s\n%s", appkey, timestamp, secretkey, authid);
 	char *sig = hmac_sha1(secretkey, buf);
+#endif
 	char *ue = url_encode(s);
-	sprintf(message, "http://112.80.39.95:9003/data/translate?sig=%s&appKey=%s&timestamp=%s&authId=%s&q=%s&from=%s&to=%s&source=tencent", sig, appkey, timestamp, authid, ue, from, to);
+#if 0
+	sprintf(message,
+	"http://112.80.39.95:9003/data/translate?sig=%s&appKey=%s&timestamp=%s&authId=%s&q=%s&from=%s&to=%s&source=tencent",
+	sig, appkey, timestamp, authid, ue, from, to);
+#endif
+	sprintf(message,
+	"http://112.80.39.95:9003/data/translate?__internal__=1&q=%s&from=en&to=zh&source=tencent",
+	ue);
+
 	printf("\n\n%s\n\n", message);
 	char *str = http_get(message);
-	//printf("%s:%s\n", __func__, str);
 	free(message);
+#if 0
 	free(buf);
-	free(ue);
 	free(sig);
+#endif
+	free(ue);
 	return str;
 }
 

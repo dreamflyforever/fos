@@ -158,6 +158,9 @@ rtt:
 	appKey\": \"14796952588595df\",\
 	ecretKey\": \"1cd1349a6ad1fe31de37ad4a9005f626\",\
 
+english engine:
+		\"server\": \"192.168.3.27\",\
+		\"port\": \"8080\"\
 #else
 
 char *server_cfg = "{\
@@ -166,10 +169,10 @@ char *server_cfg = "{\
 	\"provision\": \"auth/config.json\",\
 	\"serialNumber\": \"bin/serialNumber\", \
 	\"audiotype\": \"pcm\",\
-	\"coretype\": \"cn.sds\",\
-	\"res\": \"airobot\",\
+	\"coretype\": \"cn.asr.rec\",\
+	\"res\": \"english\",\
 	\"app\": {\
-		\"userId\": \"wifiBox\"\
+		\"userId\": \"wechat\"\
 	},\
 	\"cloud\": {\
 		\"server\": \"s-test.api.aispeech.com\",\
@@ -273,7 +276,7 @@ int agn_cb(const void *usrdata,
 		int size)
 {
 	if (message == NULL) {
-		pf("cb message NULL\n");
+		printf("cb message NULL\n");
 	}
 
 	printf("message:%s, size:%d\n", (char *)message, size);
@@ -298,15 +301,53 @@ int agn_cb(const void *usrdata,
 
 extern int cloud_auth_do(const char *cfg);
 
+char *server_cfg = "{\
+	\"appKey\": \"14709983278595d8\",\
+	\"secretKey\": \"85d1e668eace0ce6539c299aa02b2334\",\
+	\"provision\": \"auth/config.json\",\
+	\"serialNumber\": \"bin/serialNumber\", \
+	\"audiotype\": \"pcm\",\
+	\"coretype\": \"cn.asr.rec\",\
+	\"res\": \"english\",\
+	\"app\": {\
+		\"userId\": \"wechat\"\
+	},\
+	\"cloud\": {\
+		\"server\": \"s-test.api.aispeech.com\",\
+		\"port\": \"10000\"\
+	}\
+}";
+
+char *cloud_asr_param = "{\
+	\"coreProvideType\": \"cloud\",\
+	\"audio\": {\
+	    \"audioType\": \"ogg\",\
+	    \"sampleRate\": 16000,\
+	    \"channel\": 1,\
+	    \"compress\":\"raw\",\
+	    \"sampleBytes\": 2\
+	},\
+	\"request\": {\
+		\"coreType\": \"cn.sds\",\
+		\"speechRate\":1.0,\
+		\"res\": \"airobot\"\
+	},\
+	\"sdsExpand\":{\
+		\"prevdomain\":\"\",\
+		\"lastServiceType\": \"cloud\"\
+		}\
+}";
+
 int main(int argc, char *argv[])
 {
-#if 1
-	char *url;
+#if 0
+	char *url = NULL;
 	url = tts_url_output(tts_param,
 			"抱歉没找到刘德华的歌，请问您想听什么歌呢？");
 	printf("\n%s\n", url);
 	free(url);
 #endif
+#if 1
 	char *wavpath = "wether.wav";
 	int bytes;
 	char buf[3200] = {0};
@@ -341,7 +382,17 @@ int main(int argc, char *argv[])
 	start = clock_get();
 	aiengine_stop(agn);
 
+	sleep(2);
 	aiengine_delete(agn);
+#endif
+#if 1
+	char *to = tran_output("en", "zh", "COULD YOU HELP ME");
+	printf("tran: %s\n", to);
+	char *top = tran_output_parse(to);
+	printf("\n%s\n", top);
+	free(to);
+	free(top);
+#endif
 	sleep(1);
 	return 0;
 }
