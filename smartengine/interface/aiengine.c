@@ -6,7 +6,7 @@
 #include <uuid/uuid.h>
 
 extern int auth_do(char *path);
-#define DUI 0
+#define DUI 1
 #define WECHAT 1
 #define use_pcm 0
 #define use_free_server 0
@@ -109,7 +109,7 @@ struct aiengine *aiengine_new(const char *cfg)
 	sprintf(buf, "%s\n%s\n%s%s", appkey, timestamp, secretkey, authId);
 	char *sig = hmac_sha1(secretkey, buf);
 #if DUI
-	sprintf(path, "/dm/v1/test?productId=100000363&serviceType=websocket&deviceId=xxx&userId=aaa");
+	sprintf(path, "/dm/v1/prod?productId=278569448&serviceType=websocket&deviceId=xxx&userId=aaa");
 #else
 #if use_pcm
 	sprintf(path,
@@ -409,35 +409,45 @@ int aiengine_stop(struct aiengine *agn)
 		goto error;
 	} else {
 	}
-
+#if !use_pcm	
+		audioenc_stop(agn->audioenc);
+#endif
 	/*raw send data API*/
 	nopoll_conn_send_frame(agn->conn, 1, 1, 2, 0, "", 0);
-	while ((agn->msg = nopoll_conn_get_msg(agn->conn)) == NULL) {
-		if (!nopoll_conn_is_ok(agn->conn)) {
-			printf ("ERROR: received websocket connection close"
-                        " during wait reply..\n");
-			return nopoll_false;
-		}
-		nopoll_sleep(10000);
-		times++;
-		if (times > 500) {
-			pf("message get nothing\n");
-			goto msg_error;
-		}
-	}
-	memcpy(buff,
-                (char *)nopoll_msg_get_payload(agn->msg),
-                nopoll_msg_get_payload_size(agn->msg));
-
-	agn->size = nopoll_msg_get_payload_size(agn->msg);
-#if !use_pcm	
-	audioenc_stop(agn->audioenc);
+#if DUI
+	int i;
+	for (i = 0; i < 2; i++) {
+		times = 0;
+		printf("recv times: %d\n", i);
+		memset(buff, 0, 1024*1024);
 #endif
-	if (agn->cb) {
-		pf("msg received\n");
-		agn->cb(agn->usrdata, buff, agn->size);
-	} else {
+		while ((agn->msg = nopoll_conn_get_msg(agn->conn)) == NULL) {
+			if (!nopoll_conn_is_ok(agn->conn)) {
+				printf ("ERROR: received websocket connection close"
+        	                " during wait reply..\n");
+				return nopoll_false;
+			}
+			nopoll_sleep(10000);
+			times++;
+			if (times > 500) {
+				printf("message get nothing\n");
+				goto msg_error;
+			}
+		}
+		memcpy(buff,
+        	        (char *)nopoll_msg_get_payload(agn->msg),
+        	        nopoll_msg_get_payload_size(agn->msg));
+
+		agn->size = nopoll_msg_get_payload_size(agn->msg);
+
+		if (agn->cb) {
+			pf("msg received: %s\n", buff);
+			agn->cb(agn->usrdata, buff, agn->size);
+		} else {
+		}
+#if DUI
 	}
+#endif
 msg_error:
 	/*unref message*/
 	nopoll_msg_unref(agn->msg);
