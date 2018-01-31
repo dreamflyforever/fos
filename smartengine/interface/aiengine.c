@@ -4,12 +4,8 @@
 #include <time.h>
 #include "base.h"
 #include <uuid/uuid.h>
-
+char session[40] = {0};
 extern int auth_do(char *path);
-#define DUI 1
-#define WECHAT 1
-#define use_pcm 0
-#define use_free_server 0
 
 int _audioenc_notify(void *user_data,
 		unsigned char *body,
@@ -49,8 +45,7 @@ struct aiengine *aiengine_new(const char *cfg)
 	char timestamp[12] = {0};
 
 	char *path = malloc(600);
-	char *buf = malloc(128);
-
+	char *buf = malloc(128); 
 	char *host = NULL;
 	char *port = NULL;
 	char *appkey = NULL;
@@ -264,7 +259,23 @@ int aiengine_start(struct aiengine *agn,
 
 	memset(text, 0, 1024);
 #if DUI
-	sprintf(text, "{"
+	char *sessionid = aiengine_get_dui_session(agn);
+	if (sessionid != NULL) {
+		sprintf(text, "{"
+			"\"topic\": \"recorder.stream.start\","
+			"\"recordId\": \"12341asdfa\","
+			"\"sessionId\":\"%s\","
+			"\"audio\": {"
+				"\"audioType\": \"ogg\","
+				"\"sampleRate\": 16000,"
+				"\"channel\": 1,"
+				"\"sampleBytes\": 2}"
+			"}", sessionid);
+
+		//printf("%s %d]\n", __func__, __LINE__);
+		free(sessionid);
+	} else {
+		sprintf(text, "{"
 			"\"topic\": \"recorder.stream.start\","
 			"\"recordId\": \"12341asdfa\","
 			"\"audio\": {"
@@ -273,6 +284,8 @@ int aiengine_start(struct aiengine *agn,
 				"\"channel\": 1,"
 				"\"sampleBytes\": 2}"
 			"}");
+	}
+	//printf("text: %s\n", text);
 #elif DUI_TEXT
 	sprintf(text, 	"{"
 		 "\"topic\": \"nlu.input.text\","
@@ -429,7 +442,7 @@ int aiengine_stop(struct aiengine *agn)
 			}
 			nopoll_sleep(10000);
 			times++;
-			if (times > 500) {
+			if (times > 5000) {
 				printf("message get nothing\n");
 				goto msg_error;
 			}
@@ -442,6 +455,9 @@ int aiengine_stop(struct aiengine *agn)
 
 		if (agn->cb) {
 			pf("msg received: %s\n", buff);
+#if DUI
+			aiengine_set_dui_session(agn, buff, agn->size);
+#endif
 			agn->cb(agn->usrdata, buff, agn->size);
 		} else {
 		}
@@ -621,3 +637,70 @@ char *text_asr_output(char *cfg, char *text)
 	free(b);
 	return url;
 }
+
+#if DUI
+
+char *fetch_session(char const *start, char *key, unsigned long length)
+{
+	char *p = strstr(start, key);
+	if (p == NULL) return NULL;
+	char *url = malloc(2048);
+	memset(url, 0, 2048);
+	int i = 0;
+	int len = strlen(key);
+	p = p + len + 2;
+	/*TODO: add size judge*/
+	while (!((p[i] == '}') || (p[i] == ','))) {
+		url[i] = p[i];
+		if (p[i] == "\0") break;
+		i++;
+		if (i == 200) break;
+	}
+
+	//printf("[%s %s %d]%s\n", __FILE__, __func__, __LINE__, url);
+	return url;
+}
+
+char *aiengine_get_dui_session(struct aiengine *agn)
+{
+	printf("%s %d\n", __func__, __LINE__);
+	char *tmp = NULL;
+	if (strlen(session) != 0) {
+		printf("[%s %d]sessionid: %s\n", __func__, __LINE__, session);
+		tmp = malloc(40);
+		memset(tmp, 0, 40);
+		memcpy(tmp, session, 38);
+	} else {
+		printf("[%s %d]no sessionid\n", __func__, __LINE__);
+	}
+	return tmp;
+}
+
+int aiengine_set_dui_session(struct aiengine *agn, char *buf, int size)
+{
+	int retvalue = 0;
+	char *sessionid = NULL;
+	char *is_session_end = fetch_session(buf, "shouldEndSession", 0);
+	if (is_session_end == NULL) {
+		retvalue = -1;
+		goto handle_is_session_end;
+	}
+	printf("[%d]shouldEndSession: %s\n", __LINE__, is_session_end);
+	if (strcmp(is_session_end, "false") == 0) {
+		char *sessionid = fetch_key(buf, "sessionId", 0);
+		if (sessionid == NULL) {
+			retvalue = -1;
+			goto handle_sessionid;
+		}
+		memset(session, 0, 40);
+		memcpy(session, sessionid, 40);
+		printf("[%d]sessionid : %s\n", __LINE__, sessionid);
+	}
+	free(sessionid);
+handle_sessionid:
+	free(is_session_end);
+handle_is_session_end:
+	return retvalue;
+}
+
+#endif

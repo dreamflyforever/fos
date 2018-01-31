@@ -10,6 +10,7 @@
 	s-test.api.aispeech.com:10000
 
 mico:
+	"error":"appKey has exceeded the expired date"
 	appKey: 14709983278595d8
 	secretKey: 85d1e668eace0ce6539c299aa02b2334
 
@@ -104,7 +105,7 @@ char *fetch_output(unsigned char const *start, unsigned long length)
 			int j;
 			c = malloc(length-i-8);
 			if (c == NULL) {
-				printf("%s %s %s\n", __FILE__, __func__, __LINE__);
+				printf("%s %s %d\n", __FILE__, __func__, __LINE__);
 				return NULL;
 			}
 			memset(c, 0, length-i-8);
@@ -164,8 +165,8 @@ english engine:
 #else
 
 char *server_cfg = "{\
-	\"appKey\": \"14709983278595d8\",\
-	\"secretKey\": \"85d1e668eace0ce6539c299aa02b2334\",\
+	\"appKey\": \"14796952588595df\",\
+	\"secretKey\": \"1cd1349a6ad1fe31de37ad4a9005f626\",\
 	\"provision\": \"auth/config.json\",\
 	\"serialNumber\": \"bin/serialNumber\", \
 	\"audiotype\": \"pcm\",\
@@ -271,6 +272,27 @@ end:
 	return ret_url;
 }
 
+char *fetch_key(const char *start, char *key, unsigned long length)
+{
+	char *p = strstr(start, key);
+	if (p == NULL) return NULL;
+	char *url = malloc(2048);
+	memset(url, 0, 2048);
+	int i = 0;
+	int len = strlen(key);
+	p = p + len + 3;
+	/*TODO: add size judge*/
+	while (!(p[i] == '"')) {
+		url[i] = p[i];
+		if (p[i] == "\0") break;
+		i++;
+		if (i == 200) break;
+	}
+
+	//printf("[%s %s %d]%s\n", __FILE__, __func__, __LINE__, url);
+	return url;
+}
+
 int agn_cb(const void *usrdata,
 		const void *message,
 		int size)
@@ -281,19 +303,16 @@ int agn_cb(const void *usrdata,
 
 	printf("message:%s, size:%d\n", (char *)message, size);
 	int ttt = strlen((char *)message);
-	printf("------------->%d\n", ttt);
 	end = clock_get();
 	long t = calcu(start, end);
 	printf("time  interval: %ld milliseconds\n", t);
 	int aispeech_len = size;
 	char *g_url;
-	while (1) {
-		aispeech_len = strlen(message);
-		if (aispeech_len != 0) {
-			g_url = result_process(message, aispeech_len);
-			printf("%d: %s\n", __LINE__, g_url);
-			break;
-		}
+	aispeech_len = strlen(message);
+	if (aispeech_len != 0) {
+		//g_url = aiengine_set_dui_session(message, aispeech_len);
+		//if (g_url != NULL)
+		//	printf("%d: %s\n", __LINE__, g_url);
 	}
 
 	return 0;
@@ -302,15 +321,15 @@ int agn_cb(const void *usrdata,
 extern int cloud_auth_do(const char *cfg);
 
 char *server_cfg = "{\
-	\"appKey\": \"14709983278595d8\",\
-	\"secretKey\": \"85d1e668eace0ce6539c299aa02b2334\",\
+	\"appKey\": \"14327742440003c5\",\
+	\"secretKey\": \"59db7351b3790ec75c776f6881b35d7e\",\
 	\"provision\": \"auth/config.json\",\
 	\"serialNumber\": \"bin/serialNumber\", \
 	\"audiotype\": \"pcm\",\
 	\"coretype\": \"cn.asr.rec\",\
 	\"res\": \"english\",\
 	\"app\": {\
-		\"userId\": \"wechat\"\
+		\"userId\": \"wifi\"\
 	},\
 	\"cloud\": {\
 		\"server\": \"s-test.api.aispeech.com\",\
@@ -343,52 +362,55 @@ int main(int argc, char *argv[])
 #if 0
 	char *url = NULL;
 	url = tts_url_output(tts_param,
-			"抱歉没找到刘德华的歌，请问您想听什么歌呢？");
+			"今天");
 	printf("\n%s\n", url);
 	free(url);
 #endif
 #if 1
-	char *wavpath = "wether.wav";
-	int bytes;
-	char buf[3200] = {0};
-	agn = aiengine_new(server_cfg);
-	//cloud_auth_do(server_cfg);
-	if (agn == NULL) {
-		pf("error\n");
-		return 0;
+	char wavpath[11] = {0};
+	int i;
+	for (i = 0; i < 2; i++) {
+		if (i == 0) {
+			memcpy(wavpath, "1.wav", 10);
+		} else {
+			memset(wavpath, 0, 10);
+			memcpy(wavpath, "wether.wav", 10);
+		}
+		int bytes;
+		char buf[3200] = {0};
+		agn = aiengine_new(server_cfg);
+		cloud_auth_do(server_cfg);
+		if (agn == NULL) {
+			pf("error\n");
+			return 0;
+		}
+		aiengine_start(agn, cloud_asr_param, agn_cb, NULL);
+		wav = fopen(wavpath, "rb");
+		if (!wav) {
+			printf("open wav : %s failed\n", wavpath);
+			return 0;
+		} else {
+			printf("open wav : %s success\n", wavpath);
+		}
+
+		fseek(wav, 44, SEEK_SET);
+		while ((bytes = fread(buf, 1, sizeof(buf), wav))) {
+			printf("-");
+			aiengine_feed(agn, buf, bytes);
+		}
+		printf("\n");
+		fclose(wav);
+		start = clock_get();
+		aiengine_stop(agn);
+
+		sleep(2);
+		aiengine_delete(agn);
 	}
+#endif
 #if 0
-	int ret;
-	ret = check_provision(agn);;
-	if (ret != 0) {
-		printf("Authorization fail\n");
-	} else {
-		printf("Authorization success\n");
-	}
-#endif
-	aiengine_start(agn, cloud_asr_param, agn_cb, NULL);
-	wav = fopen(wavpath, "rb");
-	if (!wav) {
-		printf("open wav : %s failed\n", wavpath);
-		return 0;
-	}
-
-	fseek(wav, 44, SEEK_SET);
-	while ((bytes = fread(buf, 1, sizeof(buf), wav))) {
-		aiengine_feed(agn, buf, bytes);
-	}
-
-	fclose(wav);
-	start = clock_get();
-	aiengine_stop(agn);
-
-	sleep(2);
-	aiengine_delete(agn);
-#endif
-#if 1
 	char *to = tran_output("en", "zh", "COULD YOU HELP ME");
 	printf("tran: %s\n", to);
-	char *top = tran_output_parse(to);
+	char *top = fetch_key(to, "dst", strlen(to));
 	printf("\n%s\n", top);
 	free(to);
 	free(top);

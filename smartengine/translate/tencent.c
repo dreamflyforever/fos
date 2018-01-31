@@ -48,28 +48,3 @@ char *tran_output(int from, int to, char *s)
 	free(ue);
 	return str;
 }
-
-char *fetch_key(unsigned char const *start, char *key, unsigned long length)
-{
-	char *p = strstr(start, key);
-	if (p == NULL) return NULL;
-	char *url = malloc(2048);
-	memset(url, 0, 2048);
-	int i = 0;
-	int len = strlen(key);
-	p = p + len + 3;
-	/*TODO: add size judge*/
-	while (!(p[i] == '"')) {
-		url[i] = p[i];
-		if (p[i] == "\0") break;
-		i++;
-	}
-
-	return url;
-}
-
-char *tran_output_parse(char *s)
-{
-	char *c = fetch_key(s, "dst", strlen(s));
-	return c;
-}
