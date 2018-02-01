@@ -259,39 +259,37 @@ int aiengine_start(struct aiengine *agn,
 
 	memset(text, 0, 1024);
 #if DUI
-	char *sessionid = aiengine_get_dui_session(agn);
-	if (sessionid != NULL) {
-		sprintf(text, "{"
-			"\"topic\": \"recorder.stream.start\","
-			"\"recordId\": \"12341asdfa\","
-			"\"sessionId\":\"%s\","
-			"\"audio\": {"
-				"\"audioType\": \"ogg\","
-				"\"sampleRate\": 16000,"
-				"\"channel\": 1,"
-				"\"sampleBytes\": 2}"
-			"}", sessionid);
-
-		//printf("%s %d]\n", __func__, __LINE__);
-		free(sessionid);
+	if (usrdata == NULL) {
+		char *sessionid = aiengine_get_dui_session(agn);
+		if (sessionid != NULL) {
+			sprintf(text, "{"
+				"\"topic\": \"recorder.stream.start\","
+				"\"recordId\": \"12341asdfa\","
+				"\"sessionId\":\"%s\","
+				"\"audio\": {"
+					"\"audioType\": \"ogg\","
+					"\"sampleRate\": 16000,"
+					"\"channel\": 1,"
+					"\"sampleBytes\": 2}"
+				"}", sessionid);
+			free(sessionid);
+		} else {
+			sprintf(text, "{"
+				"\"topic\": \"recorder.stream.start\","
+				"\"recordId\": \"12341asdfa\","
+				"\"audio\": {"
+					"\"audioType\": \"ogg\","
+					"\"sampleRate\": 16000,"
+					"\"channel\": 1,"
+					"\"sampleBytes\": 2}"
+				"}");
+		}
 	} else {
 		sprintf(text, "{"
-			"\"topic\": \"recorder.stream.start\","
+			"\"topic\": \"nlu.input.text\","
 			"\"recordId\": \"12341asdfa\","
-			"\"audio\": {"
-				"\"audioType\": \"ogg\","
-				"\"sampleRate\": 16000,"
-				"\"channel\": 1,"
-				"\"sampleBytes\": 2}"
-			"}");
+			"\"refText\": \"%s\"}", usrdata);
 	}
-	//printf("text: %s\n", text);
-#elif DUI_TEXT
-	sprintf(text, 	"{"
-		 "\"topic\": \"nlu.input.text\","
-	     "\"recordId\": \"12341asdfa\","
-	     "\"refText\": \"啦啦啦\""
-	"}");
 #else
 #if use_pcm
 	sprintf(text, "{\"request\":{\"sdsExpand\":{\"lastServiceType\":\"cloud\","
@@ -702,5 +700,4 @@ handle_sessionid:
 handle_is_session_end:
 	return retvalue;
 }
-
 #endif
