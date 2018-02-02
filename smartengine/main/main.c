@@ -309,10 +309,15 @@ int agn_cb(const void *usrdata,
 	int aispeech_len = size;
 	char *g_url;
 	aispeech_len = strlen(message);
+	char os[1024] ={0};
+	char ol[1024] ={0};
 	if (aispeech_len != 0) {
-		//g_url = aiengine_set_dui_session(message, aispeech_len);
-		//if (g_url != NULL)
-		//	printf("%d: %s\n", __LINE__, g_url);
+		dui_result_process(message, aispeech_len, os, ol);
+		if (strlen(os) != 0) {
+			char *url = player_url(os);
+			printf("\nurl: %s\n", url);
+			free(url);
+		}
 	}
 
 	return 0;
@@ -367,14 +372,14 @@ int main(int argc, char *argv[])
 	free(url);
 #endif
 #if 1
-	char wavpath[11] = {0};
+	char wavpath[20] = {0};
 	int i;
 	for (i = 0; i < 2; i++) {
 		if (i == 0) {
 			memcpy(wavpath, "1.wav", 10);
 		} else {
-			memset(wavpath, 0, 10);
-			memcpy(wavpath, "wether.wav", 10);
+			memset(wavpath, 0, 20);
+			memcpy(wavpath, "2.wav", 18);
 		}
 		int bytes;
 		char buf[3200] = {0};

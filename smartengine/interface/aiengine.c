@@ -700,4 +700,53 @@ handle_sessionid:
 handle_is_session_end:
 	return retvalue;
 }
+
+int dui_result_process(char *buf, int size,
+	char *output_speakurl, char *output_linkurl)
+{
+	int retval = 0;
+	if (buf == NULL) {
+		retval = -1;
+		goto error;
+	}
+	char *linkurl = NULL;
+	char *speakurl = fetch_key(buf, "speakUrl", 0);
+	if (speakurl != NULL) {
+		memcpy(output_speakurl, speakurl, strlen(speakurl));
+	}
+	linkurl = fetch_key(buf, "linkUrl", 0);
+	if (linkurl != NULL) {
+		//printf("linkUrl: %s\n", linkurl);
+		memcpy(output_linkurl, speakurl, strlen(linkurl));
+	}
+end:
+	free(speakurl);
+	free(linkurl);
+error:
+	return retval;
+}
+
+char *player_url(char *buf)
+{
+	char *returl = NULL;
+	if (buf == NULL) {
+		goto end;
+	}
+	char *url = strstr(buf, "refText=");
+	char url_encode_part[100] = {0};
+	int i;
+	for (i = 0; i < 100; i++) {
+		url_encode_part[i] = url[i+8];
+		if (url[i+8] == '&') break;
+	}
+	char *path = url_encode(url_encode_part);
+	returl = malloc(1024);
+	memset(returl, 0, 1024);
+	sprintf(returl,
+		"https://s.dui.ai/tts/v1?refText=%s&speed=1.000000&volume=30&speaker=lucyf",
+		path);
+	free(path);
+end:
+	return returl;
+}
 #endif

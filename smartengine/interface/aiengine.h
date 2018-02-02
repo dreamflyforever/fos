@@ -44,5 +44,8 @@ int check_provision(struct aiengine *agn);
 #if DUI
 char *aiengine_get_dui_session(struct aiengine *agn);
 int aiengine_set_dui_session(struct aiengine *agn, char *buf, int size);
+int dui_result_process(char *buf, int size,
+	char *output_speakurl, char *output_linkurl);
+char *player_url(char *buf);
 #endif
 #endif
