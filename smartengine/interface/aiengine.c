@@ -104,7 +104,7 @@ struct aiengine *aiengine_new(const char *cfg)
 	sprintf(buf, "%s\n%s\n%s%s", appkey, timestamp, secretkey, authId);
 	char *sig = hmac_sha1(secretkey, buf);
 #if DUI
-	sprintf(path, "/dm/v1/prod?productId=278569448&serviceType=websocket&deviceId=xxx&userId=aaa");
+	sprintf(path, "/dm/v1/prod?productId=278569972&serviceType=websocket&deviceId=xxx&userId=aaa");
 #else
 #if use_pcm
 	sprintf(path,
@@ -712,12 +712,13 @@ int dui_result_process(char *buf, int size,
 	char *linkurl = NULL;
 	char *speakurl = fetch_key(buf, "speakUrl", 0);
 	if (speakurl != NULL) {
+		printf("speakUrl: %s\n", speakurl);
 		memcpy(output_speakurl, speakurl, strlen(speakurl));
 	}
 	linkurl = fetch_key(buf, "linkUrl", 0);
 	if (linkurl != NULL) {
-		//printf("linkUrl: %s\n", linkurl);
-		memcpy(output_linkurl, speakurl, strlen(linkurl));
+		printf("linkUrl: %s\n", linkurl);
+		memcpy(output_linkurl, linkkurl, strlen(linkurl));
 	}
 end:
 	free(speakurl);
