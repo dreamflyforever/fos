@@ -155,6 +155,7 @@ char *cloud_asr_param = "{\
 		\"res\": \"aihome\"\
 	}\
 }";
+/*
 rtt:
 	appKey\": \"14796952588595df\",\
 	ecretKey\": \"1cd1349a6ad1fe31de37ad4a9005f626\",\
@@ -162,18 +163,38 @@ rtt:
 english engine:
 		\"server\": \"192.168.3.27\",\
 		\"port\": \"8080\"\
-#else
+*/
+#endif
 
-char *server_cfg = "{\
-	\"appKey\": \"14796952588595df\",\
-	\"secretKey\": \"1cd1349a6ad1fe31de37ad4a9005f626\",\
+#if 1
+
+char *server_english_cfg = "{\
+	\"appKey\": \"1500886067859698\",\
+	\"secretKey\": \"3f8133582992427f7b041441a05e43dd\",\
 	\"provision\": \"auth/config.json\",\
 	\"serialNumber\": \"bin/serialNumber\", \
 	\"audiotype\": \"pcm\",\
 	\"coretype\": \"cn.asr.rec\",\
 	\"res\": \"english\",\
 	\"app\": {\
-		\"userId\": \"wechat\"\
+		\"userId\": \"wifiBox\"\
+	},\
+	\"cloud\": {\
+		\"server\": \"s-test.api.aispeech.com\",\
+		\"port\": \"10000\"\
+	}\
+}";
+
+char *server_cfg = "{\
+	\"appKey\": \"15111705248596ee\",\
+	\"secretKey\": \"6f85495917a9b5da336cc55b43d0c71e\",\
+	\"provision\": \"auth/config.json\",\
+	\"serialNumber\": \"bin/serialNumber\", \
+	\"audiotype\": \"pcm\",\
+	\"coretype\": \"cn.sds\",\
+	\"res\": \"airobot\",\
+	\"app\": {\
+		\"userId\": \"wifBox\"\
 	},\
 	\"cloud\": {\
 		\"server\": \"s-test.api.aispeech.com\",\
@@ -312,55 +333,20 @@ int agn_cb(const void *usrdata,
 	char os[1024] ={0};
 	char ol[1024] ={0};
 	if (aispeech_len != 0) {
+#if DUI
 		dui_result_process(message, aispeech_len, os, ol);
 		if (strlen(os) != 0) {
-			char *url = player_url(os);
-			printf("\nurl: %s\n", url);
-			free(url);
+			//char *url = player_url(os);
+			//printf("\nurl: %s\n", url);
+			//free(url);
 		}
+#endif
 	}
 
 	return 0;
 }
 
 extern int cloud_auth_do(const char *cfg);
-
-char *server_cfg = "{\
-	\"appKey\": \"14327742440003c5\",\
-	\"secretKey\": \"59db7351b3790ec75c776f6881b35d7e\",\
-	\"provision\": \"auth/config.json\",\
-	\"serialNumber\": \"bin/serialNumber\", \
-	\"audiotype\": \"pcm\",\
-	\"coretype\": \"cn.asr.rec\",\
-	\"res\": \"english\",\
-	\"app\": {\
-		\"userId\": \"wifi\"\
-	},\
-	\"cloud\": {\
-		\"server\": \"s-test.api.aispeech.com\",\
-		\"port\": \"10000\"\
-	}\
-}";
-
-char *cloud_asr_param = "{\
-	\"coreProvideType\": \"cloud\",\
-	\"audio\": {\
-	    \"audioType\": \"ogg\",\
-	    \"sampleRate\": 16000,\
-	    \"channel\": 1,\
-	    \"compress\":\"raw\",\
-	    \"sampleBytes\": 2\
-	},\
-	\"request\": {\
-		\"coreType\": \"cn.sds\",\
-		\"speechRate\":1.0,\
-		\"res\": \"airobot\"\
-	},\
-	\"sdsExpand\":{\
-		\"prevdomain\":\"\",\
-		\"lastServiceType\": \"cloud\"\
-		}\
-}";
 
 int main(int argc, char *argv[])
 {

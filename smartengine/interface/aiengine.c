@@ -70,7 +70,7 @@ struct aiengine *aiengine_new(const char *cfg)
 
 	tmp = cJSON_GetObjectItem(root, "secretKey");
 	secretkey = tmp->valuestring;
-	printf("secretKey: %s\n", secretkey);
+	pf("secretKey: %s\n", secretkey);
 
 	memset(agn, 0, sizeof(struct aiengine));
 	tmp = cJSON_GetObjectItem(root, "provision");
@@ -140,7 +140,6 @@ struct aiengine *aiengine_new(const char *cfg)
 	sig = hmac_sha1(appkey, buf);
 	sprintf(path, "/appkey=%s&timestamp=%s&sig=%s", appkey, timestamp, sig);
 #endif
-	/*printf("%s:%s%s\n", host, port, path);*/
 	/*init context*/
 	agn->ctx = nopoll_ctx_new();
 	if (!agn->ctx) {
@@ -718,7 +717,7 @@ int dui_result_process(char *buf, int size,
 	linkurl = fetch_key(buf, "linkUrl", 0);
 	if (linkurl != NULL) {
 		printf("linkUrl: %s\n", linkurl);
-		memcpy(output_linkurl, linkkurl, strlen(linkurl));
+		memcpy(output_linkurl, linkurl, strlen(linkurl));
 	}
 end:
 	free(speakurl);

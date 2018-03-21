@@ -4,8 +4,8 @@
 #include <nopoll.h>
 #include <agn_audioenc.h>
 
-#define DUI 1
-#define WECHAT 1
+#define DUI 0
+#define WECHAT 0
 #define use_pcm 0
 #define use_free_server 0
 
