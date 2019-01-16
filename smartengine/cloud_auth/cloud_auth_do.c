@@ -49,6 +49,14 @@ int cloud_auth_do(const char *cfg)
 		sig);
 	printf("%s\n", url);
 	char *str = http_get(url);
+		if ((strstr(str, "error") != NULL) &&
+		(strstr(str, "frequent") == NULL)) {
+		/*XXX: notice maybe need to know the return result of http get*/
+		printf("provision error\n");
+	} else {
+		printf("provision success\n");
+	}
+
 	printf("return:%s\n", str);
 	free(str);
 	free(sig_in);
