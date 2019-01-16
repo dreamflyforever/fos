@@ -30,12 +30,13 @@ int _audioenc_notify(void *user_data,
 	} else {
 		//pf("connect success\n");
 	}
-
+#if 1
 	nopoll_conn_send_binary(agn->conn, (const char *)head, head_len);
 	nopoll_sleep(10000);
 
 	nopoll_conn_send_binary(agn->conn, (const char *)body, body_len);
 	nopoll_sleep(10000);
+#endif
 	return 0;
 }
 
@@ -100,11 +101,16 @@ struct aiengine *aiengine_new(const char *cfg)
 	
 	int sec = time(NULL);
 	itoa(sec, timestamp);
+	char *ts = "10334";
+	char *authid = "54352b05-273a-466e-bd50-0f6bcc3f409a";
 	//sprintf(timestamp, "%d", (int)rand);
-	sprintf(buf, "%s\n%s\n%s%s", appkey, timestamp, secretkey, authId);
+	sprintf(buf, "%s\n%s\n%s%s", appkey, ts, secretkey, authid);
 	char *sig = hmac_sha1(secretkey, buf);
+	printf("%s\n", sig);
 #if DUI
-	sprintf(path, "/dm/v1/prod?productId=278569448&serviceType=websocket&deviceId=xxx&userId=aaa");
+	sprintf(path, "/dds/v1/prod?serviceType=websocket&productId=278575318&"
+		"deviceName=%s&userId=\"numberone\"&accessToken=geComesHere"
+		"&deviceId=tryDeviceId&securityCode=geComesHere", "123545678");
 #else
 #if use_pcm
 	sprintf(path,
@@ -151,8 +157,8 @@ struct aiengine *aiengine_new(const char *cfg)
 	/*create connection*/
 	agn->conn = nopoll_conn_new(
 			agn->ctx,
-			"s.dui.ai",
-			NULL,
+			"dds.dui.ai",
+			"80",
 			NULL,
 			path,
 			NULL,
@@ -173,13 +179,14 @@ struct aiengine *aiengine_new(const char *cfg)
 			NULL
 			);
 #else
+	char *pa="/cn.asr.rec/english?applicationId=1531109559458467&timestamp=10334&authId=54352b05-273a-466e-bd50-0f6bcc3f409a&sig=ebe2ee6b3b463ea8f684368b154b46dc0f47ae16&userId=wifiBox";
 	 /*create connection*/
 	agn->conn = nopoll_conn_new(
 			agn->ctx,
 			host,
 			port,
 			NULL,
-			path,
+			pa,
 			NULL,
 			NULL
 			);
@@ -188,11 +195,17 @@ struct aiengine *aiengine_new(const char *cfg)
 		pf("connect error\n");
 		goto handle;
 	}
+#if 0
+	[aiengine_server_init server] scheme: ws, host: s.api.aispeech.com, port: 1028, path: /cn.asr.rec/english?applicationId=1531109559458467&timestamp=50&authId=8bca20b7-65ec-4b78-9443-4f5d15421836&sig=032379cc5ec722039c2188f43809c71bcefd8fc5&userId=wifiBox, userid: wifiBox
 
+[T: 51008 M: common C: info F: display_event_handler L: 171]: change display: 080A
+
+ws://s.api.aispeech.com:1028/cn.asr.rec/english?applicationId=1531109559458467&timestamp=15454&authId=54352b05-273a-466e-bd50-0f6bcc3f409a&sig=6cc5e59c7cece7baf21df17791d0fc2a10b0bb51&userId=wifiBox
+#endif
 	if (!nopoll_conn_wait_until_connection_ready(agn->conn, 5)) {
-		pf("connect not ready\n");
+		printf("connect not ready\n");
 	} else {
-		pf("connect success\n");
+		printf("connect success\n");
 	}
 handle:
 	free(sig);
@@ -719,6 +732,13 @@ int dui_result_process(char *buf, int size,
 		//printf("linkUrl: %s\n", linkurl);
 		memcpy(output_linkurl, speakurl, strlen(linkurl));
 	}
+	char *output = fetch_key(buf, ",\"nlg", 0);
+	if (output == NULL) {
+		output = fetch_key(buf, "{\"nlg", 0);
+	}
+	if (output != NULL) printf("\n\n%s\n\n", output);
+	else printf("\n\nNULL\n\n");
+
 end:
 	free(speakurl);
 	free(linkurl);
@@ -733,6 +753,9 @@ char *player_url(char *buf)
 		goto end;
 	}
 	char *url = strstr(buf, "refText=");
+	if (url == NULL) {
+		goto end;
+	}
 	char url_encode_part[100] = {0};
 	int i;
 	for (i = 0; i < 100; i++) {

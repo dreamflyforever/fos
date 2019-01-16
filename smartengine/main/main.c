@@ -164,6 +164,7 @@ english engine:
 		\"port\": \"8080\"\
 #else
 
+#if 0
 char *server_cfg = "{\
 	\"appKey\": \"14796952588595df\",\
 	\"secretKey\": \"1cd1349a6ad1fe31de37ad4a9005f626\",\
@@ -201,6 +202,7 @@ char *cloud_asr_param = "{\
 		}\
 }";
 #endif
+#endif
 
 #define MILLION 1000000
 long clock_get()
@@ -224,14 +226,38 @@ long end;
 static FILE *wav;
 struct aiengine *agn;
 
+char *tts_synth_config =  "{\
+    \"appKey\": \"1531109559458467\",\
+    \"secretKey\": \"ec939d53c0a5105f0f5ca7d9ef13cfcc\",\
+    \"userId\": \"wifiBox\",\
+    \"coretype\": \"cn.sent.syn\",\
+    \"cloud\": {\
+        \"server\": \"s.api.aispeech.com\",\
+        \"port\": \"1028\"\
+    },\
+    \"audio\": {\
+        \"sampleBytes\": 2,\
+        \"sampleRate\": 16000,\
+        \"channel\": 1, \
+        \"audioType\": \"mp3\"\
+    },\
+    \"request\": {\
+        \"speechVolume\": 100, \
+        \"speechRate\": 0.85, \
+        \"rightMargin\": 5, \
+        \"realBack\": 0, \
+        \"res\": \"syn_chnsnt_qianranf\"\
+    }\
+}";
+
 char *tts_param =  "{\
-	\"appKey\": \"14796952588595df\",\
-	\"secretKey\": \"1cd1349a6ad1fe31de37ad4a9005f626\",\
+	\"appKey\": \"1531109559458467\",\
+	\"secretKey\": \"ec939d53c0a5105f0f5ca7d9ef13cfcc\",\
 	\"userId\": \"wifiBox\",\
 	\"coretype\": \"cn.sent.syn\",\
 	\"cloud\": {\
-		\"server\": \"58.210.96.236\",\
-		\"port\": \"8888\"\
+        	\"server\": \"s.api.aispeech.com\",\
+        	\"port\": \"1028\"\
 	},\
 	\"audio\": {\
 		\"sampleBytes\": 2,\
@@ -244,7 +270,7 @@ char *tts_param =  "{\
 		\"speechRate\": 0.85, \
 		\"rightMargin\": 5, \
 		\"realBack\": 0, \
-		\"res\": \"syn_chnsnt_zhilingf\"\
+        	\"res\": \"syn_chnsnt_qianranf\"\
 	}\
 }";
 
@@ -264,8 +290,7 @@ char *result_process(char *buf, int len)
 		ret_url = tts_url_output(tts_param, url);
 		if (ret_url == NULL) {
 			printf("%d: error\n");
-			while (1);
-		}
+			while (1); }
 		free(url);
 	}
 end:
@@ -276,8 +301,8 @@ char *fetch_key(const char *start, char *key, unsigned long length)
 {
 	char *p = strstr(start, key);
 	if (p == NULL) return NULL;
-	char *url = malloc(2048);
-	memset(url, 0, 2048);
+	char *url = malloc(148);
+	memset(url, 0, 148);
 	int i = 0;
 	int len = strlen(key);
 	p = p + len + 3;
@@ -305,12 +330,13 @@ int agn_cb(const void *usrdata,
 	int ttt = strlen((char *)message);
 	end = clock_get();
 	long t = calcu(start, end);
-	printf("time  interval: %ld milliseconds\n", t);
+	printf("server return time interval: %ld milliseconds\n", t);
 	int aispeech_len = size;
 	char *g_url;
 	aispeech_len = strlen(message);
 	char os[1024] ={0};
 	char ol[1024] ={0};
+#if DUI
 	if (aispeech_len != 0) {
 		dui_result_process(message, aispeech_len, os, ol);
 		if (strlen(os) != 0) {
@@ -319,6 +345,7 @@ int agn_cb(const void *usrdata,
 			free(url);
 		}
 	}
+#endif
 
 	return 0;
 }
@@ -326,19 +353,19 @@ int agn_cb(const void *usrdata,
 extern int cloud_auth_do(const char *cfg);
 
 char *server_cfg = "{\
-	\"appKey\": \"14327742440003c5\",\
-	\"secretKey\": \"59db7351b3790ec75c776f6881b35d7e\",\
+	\"appKey\": \"1531109559458467\",\
+	\"secretKey\": \"ec939d53c0a5105f0f5ca7d9ef13cfcc\",\
 	\"provision\": \"auth/config.json\",\
 	\"serialNumber\": \"bin/serialNumber\", \
-	\"audiotype\": \"pcm\",\
+	\"audiotype\": \"ogg\",\
 	\"coretype\": \"cn.asr.rec\",\
-	\"res\": \"english\",\
+	\"res\": \"wifi\",\
 	\"app\": {\
 		\"userId\": \"wifi\"\
 	},\
 	\"cloud\": {\
-		\"server\": \"s-test.api.aispeech.com\",\
-		\"port\": \"10000\"\
+		\"server\": \"s.api.aispeech.com\",\
+		\"port\": \"1028\"\
 	}\
 }";
 
@@ -362,8 +389,14 @@ char *cloud_asr_param = "{\
 		}\
 }";
 
+
 int main(int argc, char *argv[])
 {
+//	char *a = tran_output("EN", "zh-CHS", "hello world");
+//	free(a);
+//	a = tran_output("zh-CHS", "EN", "你好");
+//	free(a);
+//	return 0;
 #if 0
 	char *url = NULL;
 	url = tts_url_output(tts_param,
@@ -372,11 +405,12 @@ int main(int argc, char *argv[])
 	free(url);
 #endif
 #if 1
+	printf("compile: %s\n", __TIME__);
 	char wavpath[20] = {0};
 	int i;
-	for (i = 0; i < 2; i++) {
+	for (i = 0; i < 1; i++) {
 		if (i == 0) {
-			memcpy(wavpath, "1.wav", 10);
+			memcpy(wavpath, argv[1], 10);
 		} else {
 			memset(wavpath, 0, 20);
 			memcpy(wavpath, "2.wav", 18);
@@ -403,7 +437,7 @@ int main(int argc, char *argv[])
 			printf("-");
 			aiengine_feed(agn, buf, bytes);
 		}
-		printf("\n");
+		printf("read end\n");
 		fclose(wav);
 		start = clock_get();
 		aiengine_stop(agn);
@@ -413,13 +447,12 @@ int main(int argc, char *argv[])
 	}
 #endif
 #if 0
-	char *to = tran_output("en", "zh", "COULD YOU HELP ME");
+	char *to = tran_output("en", "zh", "COULD YOU HELP ME PLEASE");
 	printf("tran: %s\n", to);
 	char *top = fetch_key(to, "dst", strlen(to));
 	printf("\n%s\n", top);
 	free(to);
 	free(top);
 #endif
-	sleep(1);
 	return 0;
 }
