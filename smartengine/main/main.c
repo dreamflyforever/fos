@@ -155,6 +155,7 @@ char *cloud_asr_param = "{\
 		\"res\": \"aihome\"\
 	}\
 }";
+/*
 rtt:
 	appKey\": \"14796952588595df\",\
 	ecretKey\": \"1cd1349a6ad1fe31de37ad4a9005f626\",\
@@ -162,7 +163,8 @@ rtt:
 english engine:
 		\"server\": \"192.168.3.27\",\
 		\"port\": \"8080\"\
-#else
+*/
+#endif
 
 #if 0
 char *server_cfg = "{\
@@ -174,7 +176,24 @@ char *server_cfg = "{\
 	\"coretype\": \"cn.asr.rec\",\
 	\"res\": \"english\",\
 	\"app\": {\
-		\"userId\": \"wechat\"\
+		\"userId\": \"wifiBox\"\
+	},\
+	\"cloud\": {\
+		\"server\": \"s-test.api.aispeech.com\",\
+		\"port\": \"10000\"\
+	}\
+}";
+
+char *server_cfg = "{\
+	\"appKey\": \"15111705248596ee\",\
+	\"secretKey\": \"6f85495917a9b5da336cc55b43d0c71e\",\
+	\"provision\": \"auth/config.json\",\
+	\"serialNumber\": \"bin/serialNumber\", \
+	\"audiotype\": \"pcm\",\
+	\"coretype\": \"cn.sds\",\
+	\"res\": \"airobot\",\
+	\"app\": {\
+		\"userId\": \"wifBox\"\
 	},\
 	\"cloud\": {\
 		\"server\": \"s-test.api.aispeech.com\",\
@@ -201,7 +220,6 @@ char *cloud_asr_param = "{\
 		\"lastServiceType\": \"cloud\"\
 		}\
 }";
-#endif
 #endif
 
 #define MILLION 1000000
@@ -338,12 +356,14 @@ int agn_cb(const void *usrdata,
 	char ol[1024] ={0};
 #if DUI
 	if (aispeech_len != 0) {
+#if DUI
 		dui_result_process(message, aispeech_len, os, ol);
 		if (strlen(os) != 0) {
-			char *url = player_url(os);
-			printf("\nurl: %s\n", url);
-			free(url);
+			//char *url = player_url(os);
+			//printf("\nurl: %s\n", url);
+			//free(url);
 		}
+#endif
 	}
 #endif
 
@@ -388,7 +408,6 @@ char *cloud_asr_param = "{\
 		\"lastServiceType\": \"cloud\"\
 		}\
 }";
-
 
 int main(int argc, char *argv[])
 {

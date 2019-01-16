@@ -1,0 +1,23 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+__updated__	rbin2.py	/^__updated__ = "2015-07-10 15:37:26"$/;"	v
+args	rbin2.py	/^    args = p.parse_args()$/;"	v	class:rbin2
+create_dir	rbin2.py	/^    def create_dir(self, dn):$/;"	m	class:rbin2
+extract	rbin2.py	/^    def extract(self, fn, dn):$/;"	m	class:rbin2
+file_list	rbin2.py	/^    file_list = {}$/;"	v	class:rbin2
+fn	rbin2.py	/^    fn = ""$/;"	v	class:rbin2Item
+len	rbin2.py	/^    len = 0$/;"	v	class:rbin2Item
+loc	rbin2.py	/^    loc = ""$/;"	v	class:rbin2Item
+p	rbin2.py	/^    p = ArgumentParser()$/;"	v	class:rbin2
+pos	rbin2.py	/^    pos = 0$/;"	v	class:rbin2Item
+r	rbin2.py	/^    r = rbin2()$/;"	v	class:rbin2
+rbin2	rbin2.py	/^class rbin2:$/;"	c
+rbin2Item	rbin2.py	/^class rbin2Item:$/;"	c
+reverse	rbin2.py	/^    def reverse(self, data):$/;"	m	class:rbin2
+reverse	rbin2.py	/^    reverse = False$/;"	v	class:rbin2Item
+write	rbin2.py	/^    def write(self, fp, data, reverse=False):$/;"	m	class:rbin2
+zip	rbin2.py	/^    def zip(self, dn, fn):$/;"	m	class:rbin2
