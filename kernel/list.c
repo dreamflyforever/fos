@@ -48,6 +48,9 @@ BOOL is_list_last(LIST * head)
 	return (head->next == head);
 }
 
+/*
+for node insert the last one
+*/
 void list_insert(LIST * head, LIST * node)
 {
 	node->next = node;
@@ -55,6 +58,9 @@ void list_insert(LIST * head, LIST * node)
 	head->next = node;
 }
 
+/*
+node insert head behind
+*/
 void list_insert_spec(LIST * head, LIST * node)
 {
 	if (is_list_last(head)) {
@@ -80,6 +86,7 @@ void list_delete(LIST * node)
 	node->next->prev = node->prev;
 }
 
+/*node insert the head list last one*/
 void list_insert_behind(LIST * head, LIST * node)
 {
 	LIST *list = head;

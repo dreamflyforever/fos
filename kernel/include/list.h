@@ -47,7 +47,8 @@
 #define BOOL   U8
 #define ULONG  unsigned long
 
-#define list_entry(node, type, member)    ((type *)((U8*)(node) - (U32)(&((type *)0)->member)))
+#define list_entry(node, type, member) ((type *)((U8*)(node) -\
+		(U32)(&((type *)0)->member)))
 
 typedef struct LIST {
 	struct LIST *prev;
@@ -55,7 +56,6 @@ typedef struct LIST {
 } LIST;
 
 void list_init(LIST * head);
-void list_insert(LIST * head, LIST * node);
 void list_insert_spec(LIST * head, LIST * node);
 void list_delete(LIST * node);
 BOOL is_list_last(LIST * node);
@@ -85,7 +85,6 @@ void main()
 	printf("%0x\n", &b.task_list);
 	printf("%0x\n", &c.task_list);
 	list_init(&a.task_list);
-	list_insert(&a.task_list, &b.task_list);
 	list_insert_spec(&a.task_list, &c.task_list);
 	LIST *tmp = &a.task_list;
 	TEST *d;
