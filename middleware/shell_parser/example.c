@@ -34,6 +34,50 @@ void fuck(void *arg)
 	printf("bla bla!!!\n");
 }
 
+#if LINUX
+#include <sys/types.h>
+#include <unistd.h>
+static char* find_value(char* str)
+{
+	int count = 0;
+	const char* split = ": \r"; 
+	char* p = strtok(str, split);
+
+	while(NULL != p) {
+		if(NULL == strchr(split, p[0]) && ++count == 3) {
+			return p;
+		}
+
+		p = strtok(NULL, split); 
+	}
+
+	return "";
+}
+
+void show_memory_use(void *arg)
+{
+	FILE* reader;
+	char str[512];
+
+	sprintf(str, "/proc/%d/status", getpid());
+	reader = fopen(str, "r");
+
+	if(NULL == reader)
+		return;
+
+	while(!feof(reader)) {
+		fgets(str, sizeof(str), reader);
+
+		if(NULL != strstr(str, "VmSize"))
+		{
+			printf(">>>>>>>>>>>>> VmSize: %sB <<<<<<<<<<<<<<<\n", find_value(str));
+		}
+	}
+
+	fclose(reader);
+}
+#endif
+
 void shell_thread(void *arg)
 {
 	U8 i;
@@ -70,6 +114,7 @@ void shell_init()
 	export(help, (U8 *) "help");
 	export(version, (U8 *) "version");
 	export(fuck, (U8 *) "show");
+	export(show_memory_use, (U8 *) "show memory use");
 
 	task_create(&tcb_shell, (U8 *) "shell_task", shell_thread, NULL,
 		    stack_shell, STACK_SHELL_SIZE, 30, 1);
