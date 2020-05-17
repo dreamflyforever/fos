@@ -60,7 +60,8 @@
 ##==========================================================================
 
 # The pre-processor and compiler options.
-MY_CFLAGS = -g -Icpu/linux/include -Ikernel/include -Imiddleware/uip/uip -Imiddleware/uip/fos -Imiddleware/uip/apps/webserver
+MY_CFLAGS = -g -Icpu/linux/include -Ikernel/include -Imiddleware/uip/uip
+MY_CFLAGS += -Imiddleware/uip/fos -Imiddleware/uip/apps/webserver -Ilibc/include
 
 # The linker options.
 #MY_LIBS   = -lm 
@@ -73,7 +74,8 @@ LDFLAGS   =
 
 # The directories in which source files reside.
 # If not specified, only the current directory will be serached.
-SRCDIRS   = app kernel cpu/linux middleware/shell_parser middleware/uip/apps/webserver middleware/uip/lib middleware/uip/uip middleware/uip/fos
+SRCDIRS   = app kernel libc cpu/linux middleware/shell_parser middleware/uip/apps/webserver
+SRCDIRS  += middleware/uip/lib middleware/uip/uip middleware/uip/fos
 
 # The executable file name.
 # If not specified, current directory name or `a.out' will be used.
@@ -249,6 +251,7 @@ endif
 
 clean:
 	$(RM) $(OBJS) $(PROGRAM) $(PROGRAM).exe
+	find -name "*.d" | xargs rm
 
 distclean: clean
 	$(RM) $(DEPS) TAGS
