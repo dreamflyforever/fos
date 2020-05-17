@@ -47,6 +47,10 @@
 #define BOOL   U8
 #define ULONG  unsigned long
 
+
+/*
+according the struct entity member address to calcuate the struct entity address
+*/
 #define list_entry(node, type, member) ((type *)((U8*)(node) -\
 		(U32)(&((type *)0)->member)))
 
@@ -55,11 +59,11 @@ typedef struct LIST {
 	struct LIST *next;
 } LIST;
 
-void list_init(LIST * head);
-void list_insert_spec(LIST * head, LIST * node);
-void list_delete(LIST * node);
-BOOL is_list_last(LIST * node);
-void list_insert_behind(LIST * head, LIST * node);
+void list_init(LIST *head);
+void list_insert_spec(LIST *spec_node, LIST *node);
+void list_delete(LIST *node);
+BOOL is_list_last(LIST *node);
+void list_insert_behind(LIST *head, LIST * node);
 
 /*
  * Test double list function
