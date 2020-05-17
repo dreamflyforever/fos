@@ -1,5 +1,7 @@
 FOS( Fast Operating System )
 ==========
+
+[中文页](README_zh.md)  
 [![Build Status](https://secure.travis-ci.org/php/php-src.png?branch=master)](https://travis-ci.org/dreamflyforever/fos)
 
 It's an open soruce project about code RTOS(Real Time Operating Systems), named FOS, alias Chinese Operating System, not COPY OTHER SYSTEM, based on OpenRISC, and now it port to linux.
