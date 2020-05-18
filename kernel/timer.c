@@ -83,18 +83,19 @@ void hardware_timer(void)
 		if (tick_tmp->timeout == TIMEOUT) {
 
 			switch (tick_tmp->style) {
-				/*Callback timeout */
+			/*Callback timeout */
 			case SOFTWARE_TIMER:
 				tick_tmp->func(tick_tmp->func_arg);
 
 				if (tick_tmp->period == CYCLE) {
 					tick_tmp->timeout =
 					    tick_tmp->timeout_copy;
-				} else
+				} else {
 					tick_queue_delete(tick_tmp);
+				}
 				break;
 
-				/*Sleep timeout */
+			/*Sleep timeout */
 			case DELAY:
 				/*Put the delay task to ready queue head */
 				tick_queue_delete(tick_tmp);
@@ -105,20 +106,27 @@ void hardware_timer(void)
 				OS_LOG("Timeout status error\n");
 			}
 
-		} else
+		} else {
 			(tick_tmp->timeout)--;
+		}
 	}
 
 	interrupt_enable(cpu);
-
+	/*everytime touch timer maybe cause thread switch*/
 	schedule();
 }
 
-void timer_req(TICK * timer, FUNC_PTR func, U32 timeout, BOOL period, void *arg)
+/*set timer*/
+void timer_req(TICK *timer, FUNC_PTR func, U32 timeout, BOOL period, void *arg)
 {
+	if ((func == NULL) || (timer ==NULL) || (timeout <= 0)) {
+		os_printf("please check the argument\n");
+		return ;
+	}
 	U32 cpu = interrupt_disable();
 	timer->func = func;
 	timer->timeout = timeout;
+	/*period is about timer for cycle or once*/
 	timer->period = period;
 	timer->timeout_copy = timeout;
 	timer->style = SOFTWARE_TIMER;
@@ -127,6 +135,7 @@ void timer_req(TICK * timer, FUNC_PTR func, U32 timeout, BOOL period, void *arg)
 	interrupt_enable(cpu);
 }
 
+/*system sleep time, it will cause thread switch*/
 void os_delay(U32 timeslice)
 {
 	U32 cpu = interrupt_disable();

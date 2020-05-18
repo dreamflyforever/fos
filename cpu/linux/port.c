@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <hw_include.h>
 
+/*initialize user thread stack to store or pop switch-content*/
 STACK *stack_init(STACK * stack_ptr, U32 stack_size, TASK_ENTRY p_task,
 		  void *arg, void *task_exit)
 {
@@ -38,6 +39,7 @@ STACK *stack_init(STACK * stack_ptr, U32 stack_size, TASK_ENTRY p_task,
 	return (STACK *) stack;
 }
 
+/*swap stack pointer to run new thread*/
 void port_schedule()
 {
 	if (swapcontext
@@ -47,6 +49,7 @@ void port_schedule()
 	}
 }
 
+/*first start thread*/
 void start_schedule(TCB * tcb)
 {
 	if (setcontext((ucontext_t *) tcb->stack_ptr) == -1) {
@@ -54,6 +57,7 @@ void start_schedule(TCB * tcb)
 	}
 }
 
+/*initialize system heartbeat, function hardware_timer will run loop*/
 void hw_timer_init()
 {
 	struct itimerval t;
