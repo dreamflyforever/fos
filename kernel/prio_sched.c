@@ -104,9 +104,9 @@ U8 prio_ready_queue_fetch()
 	}
 
 	/*if the fetch task is equal to current task, no sched */
-	if (tmp == new_task)
+	if (tmp == new_task) {
 		return NO_SCHED;
-	else {
+	} else {
 		/*Switch the task */
 		old_task = new_task;
 		new_task = tmp;
