@@ -64,6 +64,7 @@ void list_insert_spec(LIST *spec_node, LIST *node);
 void list_delete(LIST *node);
 BOOL is_list_last(LIST *node);
 void list_insert_behind(LIST *head, LIST * node);
+U8 is_list_empty(LIST *list);
 
 /*
  * Test double list function

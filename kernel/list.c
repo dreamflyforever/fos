@@ -96,3 +96,8 @@ void list_insert_behind(LIST * head, LIST * node)
 
 	list_insert(list, node);
 }
+
+U8 is_list_empty(LIST *list)
+{
+	return (list->next == list);	
+}
