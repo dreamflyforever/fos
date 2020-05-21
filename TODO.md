@@ -17,9 +17,9 @@ Support:
 WIP:
 =================
 - `1`. Memory overflow check.
-- `2`. 0 delay interrupt time.
-- `3`. Add fsm/hsm as low priority task framework.
-- `4`. Cut kernel to low memory adapt to IOT.
+~~ - `2`. 0 delay interrupt time.~~
+~~ - `3`. Add fsm/hsm as low priority task framework.~~
+~~ - `4`. Cut kernel to low memory adapt to IOT.~~
 - `5`. Port to amp/smp.
 - `6`. JS engin.
 - `7`. Port to posix interface.
