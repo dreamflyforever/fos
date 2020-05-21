@@ -45,6 +45,7 @@
 #include <queue.h>
 #include <mem_block.h>
 #include <device.h>
+#include <fsm.h>
 
 #define DEBUG 1
 #define LINUX 1
