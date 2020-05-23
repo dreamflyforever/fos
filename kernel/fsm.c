@@ -19,13 +19,13 @@ int fsm_init()
 {
 	state_obj = (STATE_DIS *)malloc(sizeof(STATE_DIS));
 	if (state_obj == NULL) {
-		printf("malloc error: %s %d\n", __FILE__, __LINE__);
+		os_printf("malloc error\n");
 		return 0;
 	}
 
 	fsm_obj = (FSM *)malloc(sizeof(FSM));
 	if (fsm_obj == NULL) {
-		printf("malloc error: %s %d\n", __FILE__, __LINE__);
+		os_printf("malloc error\n");
 		return 0;
 	}
 
@@ -87,7 +87,7 @@ int state_remove(int state)
 
 		return 0;
 	}
-	printf("State no fund\n");
+	os_printf("State no fund\n");
 	return 0;
 }
 
@@ -121,14 +121,16 @@ int state_tran(int state, void *message)
 	}
 	state_default(fsm_default.state, fsm_default.func, fsm_default.name);
 
-	printf("state is no found, and fsm will transfer to default, It is name: %s\n", fsm_obj->name);
+	os_printf("state is no found, and fsm will transfer to default,"
+		"It is name: %s\n", fsm_obj->name);
 	return 0;
 }
 
+/*state dispatch*/
 void fsm_while(FSM *obj)
 {
 	while (1) {
-		printf("state name = %s\n", obj->name);
+		os_printf("state name = %s\n", obj->name);
 		obj->func(obj->message);
 	}
 }
@@ -155,7 +157,7 @@ void wakeup_state_func(void *arg)
 {
 	char *message = (char *)arg;
 	if (message != NULL)
-		printf("%s: %s\n", __func__, message);
+		os_printf("%s: %s\n", __func__, message);
 	state_tran(asr_state, "wakeup end message");
 }
 
@@ -163,7 +165,7 @@ void asr_state_func(void *arg)
 {
 	char *message = (char *)arg;
 	if (message != NULL)
-		printf("%s: %s\n", __func__, message);
+		os_printf("%s: %s\n", __func__, message);
 	state_tran(tts_state, "asr end message");
 }
 
@@ -171,7 +173,7 @@ void tts_state_func(void *arg)
 {
 	char *message = (char *)arg;
 	if (message != NULL)
-		printf("%s: %s\n", __func__, message);
+		os_printf("%s: %s\n", __func__, message);
 	state_tran(wakeup_state, NULL);
 }
 
@@ -179,7 +181,7 @@ void comm_state_func(void *arg)
 {
 	char *message = (char *)arg;
 	if (message != NULL)
-		printf("%s: %s\n", __func__, message);
+		os_printf("%s: %s\n", __func__, message);
 	state_tran(10, "ten message");
 }
 
@@ -187,7 +189,7 @@ void sock_state_func(void *arg)
 {
 	char *message = (char *)arg;
 	if (message != NULL)
-		printf("%s: %s\n", __func__, message);
+		os_printf("%s: %s\n", __func__, message);
 	state_tran(10, "ten message");
 }
 
@@ -195,7 +197,7 @@ void func_default(void *arg)
 {
 	char *message = (char *)arg;
 	if (message != NULL)
-		printf("default: %s\n", message);
+		os_printf("default: %s\n", message);
 	state_tran(wakeup_state, "default message");
 }
 
