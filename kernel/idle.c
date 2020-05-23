@@ -44,7 +44,7 @@ U32 idle_stack[IDLE_STACK_SIZE];
 void idle_task(void *arg)
 {
 	for (;;) {
-		//os_printf("Enter idle task\n");
+		/*do low power action or low priority thing, then schedule*/
 		schedule();
 	}
 }
