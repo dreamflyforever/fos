@@ -75,15 +75,16 @@ U8 sem_get(SEM * semaphore)
 
 	U32 cpu_sr = interrupt_disable();
 
-	/*If not semaphore count, then block current task and switch new task */
+	/*If not semaphore count, then block current task and switch new task*/
 	if (semaphore->count == 0) {
 		semaphore->tcb = new_task;
 		prio_ready_queue_delete(semaphore->tcb);
 		sem_block_queue_insert(semaphore);
 
 		schedule();
-	} else
+	} else {
 		semaphore->count--;
+	}
 
 	interrupt_enable(cpu_sr);
 	return TRUE;
