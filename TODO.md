@@ -13,13 +13,13 @@ Support:
 - `11`. Port to flatform: s3c2440/openrisc/linux
 - `12`. Support device manage.
 - `13`. Support software time.
+- `14` 0 delay interrupt time
+- `15` add fsm/hsm as low priority task framework
+- `14` delay interrupt time
 
 WIP:
 =================
-- `1`. Memory overflow check.
-~~ - `2`. 0 delay interrupt time.~~
-~~ - `3`. Add fsm/hsm as low priority task framework.~~
-~~ - `4`. Cut kernel to low memory adapt to IOT.~~
+- `1`. Memory overflow check.  
 - `5`. Port to amp/smp.
 - `6`. JS engin.
 - `7`. Port to posix interface.
