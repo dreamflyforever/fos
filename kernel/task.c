@@ -82,25 +82,25 @@ U8 task_prio_change(TCB * tcb, U32 prio)
 	return TRUE;
 }
 
+/*XXX*/
 U32 task_check_stack(TCB *tcb, U32 stack_size)
 {
 	U32 free_stk = 0;
-	STACK *task_stack = tcb->stack_ptr + 1;
+	STACK *task_stack;
 
 /*stack grow method depend on CPU*/
 #if STACK_GROW_DOWN
-	task_stack = (STACK *)(tcb->stack_ptr);
-	while ((*task_stack++ == 0) & (free_stk < stack_size)) {
+	/*x86, push stack, PS --*/
+	task_stack = (STACK *)(tcb->stack_ptr + 1);
+	while ((*task_stack++ == 0u) & (free_stk < stack_size)) {
 		free_stk++;
 	}
 #else
-	/*x86, push stack, PS plus*/
 	task_stack = (STACK *)(tcb->stack_ptr) + stack_size;
-
-	while ((*task_stack-- == 0) & (free_stk < stack_size)) {
+	while ((*task_stack-- == 0u) & (free_stk < stack_size)) {
 		free_stk++;
 	}
-#endif	
+#endif
 	/*os_printf("%s free_stk: %d\n", tcb->name, free_stk);*/
 	return free_stk;
 }
