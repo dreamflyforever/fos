@@ -47,6 +47,7 @@
 #include <device.h>
 #include <fsm.h>
 
+#define STACK_GROW_DOWN 0
 #define DEBUG 1
 #define LINUX 1
 #if LINUX
