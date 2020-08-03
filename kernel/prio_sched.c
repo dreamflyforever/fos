@@ -37,8 +37,9 @@
 
 #include <var_define.h>
 
+#define MAPTABLE 0
 /*drop the pin of fisrt bit one*/
-unsigned int  const  bitmap[256] = {
+static unsigned int  const  bitmap[256] = {
 	0u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, 3u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, /* 0x00 to 0x0F */
 	4u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, 3u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, /* 0x10 to 0x1F */
 	5u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, 3u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, /* 0x20 to 0x2F */
@@ -57,6 +58,28 @@ unsigned int  const  bitmap[256] = {
 	4u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, 3u, 0u, 1u, 0u, 2u, 0u, 1u, 0u  /* 0xF0 to 0xFF */
 };
 
+static int x, y;
+
+void bitmap_set(int prio)
+{
+	x = x | (1 << (prio & 0x7));
+	y = y | (1 << (prio >> 3));
+}
+
+void bitmap_clear(int prio)
+{
+	printf("debug...\n\n");
+}
+
+int bitmap_get()
+{
+	int a, b, prio;
+	a = bitmap[x];
+	b = bitmap[y];
+	prio = a + b*8;
+	return prio;
+}
+
 /*Search the ready-high-priority task*/
 TCB *bit_first_one_search(U32 num)
 {
@@ -64,9 +87,8 @@ TCB *bit_first_one_search(U32 num)
 	TCB *tcb_ret;
 
 	U8 i;
-#if MAP_SEARTCH
-	/*TODO: only support 8 priority task*/
-	i = bitmap[num];
+#if MAPTABLE
+	i = bitmap_get();
 	prio_list_head = &task_prio_queue[i].list;
 	tcb_ret = list_entry(prio_list_head->next, TCB, list);
 	/*return the first found task */
@@ -98,14 +120,23 @@ void prio_ready_queue_init()
 void prio_ready_queue_insert_tail(TCB * tcb)
 {
 	OS_ASSERT(tcb);
+#if MAPTABLE
+	bitmap_set(tcb->prio);
+#else
+
 	bit_set(task_prio_map, tcb->prio);
+#endif
 	list_insert_behind(&task_prio_queue[tcb->prio].list, &tcb->list);
 }
 
 void prio_ready_queue_insert_head(TCB * tcb)
 {
 	OS_ASSERT(tcb);
+#if MAPTABLE
+	bitmap_set(tcb->prio);
+#else
 	bit_set(task_prio_map, tcb->prio);
+#endif
 	list_insert_spec(&task_prio_queue[tcb->prio].list, &tcb->list);
 }
 
@@ -115,8 +146,14 @@ void prio_ready_queue_delete(TCB * tcb)
 	list_delete(&tcb->list);
 
 	/* If the task ready queue have no task, clear the corresponding task_prio_map */
-	if (is_list_last(&task_prio_queue[tcb->prio].list))
+	if (is_list_last(&task_prio_queue[tcb->prio].list)) {
+#if MAPTABLE
+		bitmap_clear(tcb->prio);
+#else
+
 		bit_clear(task_prio_map, tcb->prio);
+#endif
+	}
 }
 
 U8 prio_ready_queue_fetch()
