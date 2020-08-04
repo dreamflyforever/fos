@@ -58,26 +58,30 @@ static unsigned int  const  bitmap[256] = {
 	4u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, 3u, 0u, 1u, 0u, 2u, 0u, 1u, 0u  /* 0xF0 to 0xFF */
 };
 
-static int x, y;
+static unsigned char x, y;
+static unsigned char c[8] = {0};
 
 void bitmap_set(int prio)
 {
-	x = x | (1 << (prio & 0x7));
-	y = y | (1 << (prio >> 3));
+	unsigned char a, b;
+	a = prio & 0x7;
+	b = prio >> 3;
+	c[b] |= 1 << a;
+	y = y | 1 << b;
+}
+
+int bitmap_get()
+{
+	unsigned char a, b, prio;
+	b = bitmap[y];
+	a = bitmap[c[b]];
+	prio = b*8 + a;
+	return prio;
 }
 
 void bitmap_clear(int prio)
 {
 	printf("debug...\n\n");
-}
-
-int bitmap_get()
-{
-	int a, b, prio;
-	a = bitmap[x];
-	b = bitmap[y];
-	prio = a + b*8;
-	return prio;
 }
 
 /*Search the ready-high-priority task*/
