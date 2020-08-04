@@ -37,7 +37,7 @@
 
 #include <var_define.h>
 
-#define MAPTABLE 0
+#define MAPTABLE 1
 /*drop the pin of fisrt bit one*/
 static unsigned int  const  bitmap[256] = {
 	0u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, 3u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, /* 0x00 to 0x0F */
@@ -81,7 +81,12 @@ int bitmap_get()
 
 void bitmap_clear(int prio)
 {
-	printf("debug...\n\n");
+	unsigned char a, b;
+	a = prio & 0x7;
+	b = prio >> 3;
+	c[b] &= ~(1 << a);
+	if (c[b] == 0)
+		y = y & ~(1 << b);
 }
 
 /*Search the ready-high-priority task*/
