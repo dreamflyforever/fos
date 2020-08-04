@@ -58,8 +58,7 @@ static unsigned int  const  bitmap[256] = {
 	4u, 0u, 1u, 0u, 2u, 0u, 1u, 0u, 3u, 0u, 1u, 0u, 2u, 0u, 1u, 0u  /* 0xF0 to 0xFF */
 };
 
-static unsigned char x, y;
-static unsigned char c[8] = {0};
+static unsigned char y, c[8] = {0};
 
 void bitmap_set(int prio)
 {
