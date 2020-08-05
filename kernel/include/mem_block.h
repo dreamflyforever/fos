@@ -15,15 +15,24 @@
 #ifndef __MEM_BLOCK_H__
 #define __MEM_BLOCK_H__
 
+typedef struct MEM_POOL {
+	LIST head;
+	U32 size;
+	U32 sum;
+	U32 valid;
+	void *valid_ptr;
+} MEM_POOL;
+
 typedef struct MEM_BLOCK {
 	LIST list;
-	U32 used;
-	U32 sum;
+	void *ptr;
+	U8 if_valid;
+	U32 flag;
 } MEM_BLOCK;
 
-U8 mem_create(MEM_BLOCK *ptr, void *start, U32 sum, U32 block_size);
+U8 mem_create(MEM_POOL *ptr, void *start, U32 sum, U32 block_size);
 
-void *mem_alloca(MEM_BLOCK *ptr, U32 size);
+void *mem_alloca(MEM_POOL *ptr, U32 size);
 
-void *mem_free(MEM_BLOCK *ptr, void *address);
+void *mem_free(MEM_POOL *ptr, void *address);
 #endif

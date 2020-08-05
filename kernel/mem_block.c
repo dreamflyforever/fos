@@ -14,15 +14,58 @@
 
 #include <var_define.h>
 
-U8 mem_create(MEM_BLOCK *ptr, void *start, U32 sum, U32 block_size)
+U8 mem_create(MEM_POOL *ptr, void *start, U32 sum, U32 block_size)
 {
-
+	ptr->size = block_size;
+	ptr->valid = sum/block_size;
+	ptr->valid_ptr = start;
+	list_init(&(ptr->head));
 }
 
-void *mem_alloca(MEM_BLOCK *ptr, U32 size)
+void *mem_alloca(MEM_POOL *ptr, U32 size)
 {
+	int n;
+	void *address = NULL;
+	MEM_BLOCK mb;
+
+	n = size/ptr->size;
+	ptr->valid = ptr->valid - n -1;
+	if (ptr->valid > 0) {
+		address = ptr->valid_ptr;
+		ptr->valid_ptr = (char *)ptr->valid_ptr + ptr->valid * ptr->size;
+		mb.flag = n + 1;
+		mb.if_valid = 0;
+		mb.ptr = address;
+		list_insert_behind(&(ptr->head), &mb.list);
+	}
+	return address;
 }
 
-void *mem_free(MEM_BLOCK *ptr, void *address)
+void *mem_free(MEM_POOL *ptr, void *address)
 {
+	LIST *tmp;
+	tmp = &(ptr->head);
+	MEM_BLOCK *mb;
+	while (!is_list_last(tmp)) {
+
+		mb = list_entry(tmp->next, MEM_BLOCK, list);
+		tmp = tmp->next;
+
+		if (mb->ptr == address) {
+			mb->if_valid = 1;
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
+
+#if 0
+int main()
+{
+	char g_mem[100000];
+	MEM_POOL mp;
+	mem_create(&mp, &g_mem, 100, 10);
+	char *a = mem_alloca(&mp, 9);
+	mem_free(&mp, a);
+}
+#endif
