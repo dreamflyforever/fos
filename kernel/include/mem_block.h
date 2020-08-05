@@ -18,7 +18,6 @@
 typedef struct MEM_POOL {
 	LIST head;
 	U32 size;
-	U32 sum;
 	U32 valid;
 	void *valid_ptr;
 } MEM_POOL;

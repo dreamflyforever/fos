@@ -17,7 +17,9 @@
 U8 mem_create(MEM_POOL *ptr, void *start, U32 sum, U32 block_size)
 {
 	ptr->size = block_size;
+	/*figure up how many block*/
 	ptr->valid = sum/block_size;
+	/*record the begain address*/
 	ptr->valid_ptr = start;
 	list_init(&(ptr->head));
 }
@@ -27,13 +29,15 @@ void *mem_alloca(MEM_POOL *ptr, U32 size)
 	int n;
 	void *address = NULL;
 	MEM_BLOCK mb;
-
+	/*figure up how many block need*/
 	n = size/ptr->size;
 	ptr->valid = ptr->valid - n -1;
 	if (ptr->valid > 0) {
 		address = ptr->valid_ptr;
+		/*figure up next begain address*/
 		ptr->valid_ptr = (char *)ptr->valid_ptr + ptr->valid * ptr->size;
 		mb.flag = n + 1;
+		/*mean block is useless for the next search*/
 		mb.if_valid = 0;
 		mb.ptr = address;
 		list_insert_behind(&(ptr->head), &mb.list);
@@ -46,11 +50,10 @@ void *mem_free(MEM_POOL *ptr, void *address)
 	LIST *tmp;
 	tmp = &(ptr->head);
 	MEM_BLOCK *mb;
+	/*search the address, and flag available*/
 	while (!is_list_last(tmp)) {
-
 		mb = list_entry(tmp->next, MEM_BLOCK, list);
 		tmp = tmp->next;
-
 		if (mb->ptr == address) {
 			mb->if_valid = 1;
 			return TRUE;
