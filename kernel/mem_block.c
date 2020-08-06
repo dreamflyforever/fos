@@ -27,8 +27,10 @@ U8 mem_create(MEM_POOL *ptr, void *start, U32 sum, U32 block_size)
 void *mem_alloca(MEM_POOL *ptr, U32 size)
 {
 	int n;
+	int cpu_status;
 	void *address = NULL;
 	MEM_BLOCK mb;
+	cpu_status = critical_section_enter();
 	/*figure up how many block need*/
 	n = size/ptr->size;
 	ptr->valid = ptr->valid - n -1;
@@ -42,6 +44,7 @@ void *mem_alloca(MEM_POOL *ptr, U32 size)
 		mb.ptr = address;
 		list_insert_behind(&(ptr->head), &mb.list);
 	}
+	critical_section_exit(cpu_status);
 	return address;
 }
 
@@ -50,6 +53,8 @@ void *mem_free(MEM_POOL *ptr, void *address)
 	LIST *tmp;
 	tmp = &(ptr->head);
 	MEM_BLOCK *mb;
+	int cpu_status;
+	cpu_status = critical_section_enter();
 	/*search the address, and flag available*/
 	while (!is_list_last(tmp)) {
 		mb = list_entry(tmp->next, MEM_BLOCK, list);
@@ -59,6 +64,7 @@ void *mem_free(MEM_POOL *ptr, void *address)
 			return TRUE;
 		}
 	}
+	critical_section_exit(cpu_status);
 	return FALSE;
 }
 
