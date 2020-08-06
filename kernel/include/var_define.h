@@ -204,6 +204,9 @@ void idle_task(void *arg);
 void schedule_lock();
 void schedule_unlock();
 
+#define critical_section_enter() cpu_disable()
+#define critical_section_exit(cpu_status) cpu_enable(cpu_status)
+
 /*For port function*/
 void port_schedule();
 void start_schedule(TCB * tcb);
