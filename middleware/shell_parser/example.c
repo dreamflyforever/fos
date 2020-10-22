@@ -83,7 +83,7 @@ void shell_thread(void *arg)
 	U8 i;
 
 	while (TRUE) {
-		printf("tmd-> ");
+		printf("$ ");
 		/*catch input string */
 		for (i = 0, buff_cmd[i] = getchar(); buff_cmd[i] != '\n';
 		     i++, buff_cmd[i] = getchar()) ;
