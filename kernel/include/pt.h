@@ -20,13 +20,16 @@
 	case BEGIN: \
 		    {
 
-			    /*notic: use `\` means on the one line*/
-#define PT_BLOCK() \
+/*notic: use `\` means on the one line*/
+#define PT_BLOCK(condition) \
 		    }\
 	event = __LINE__;\
 	break; \
 	case __LINE__: \
 		       {\
+	if (!condition)	\
+		return BLOCK\
+
 
 #define PT_DEINIT() \
 		       }\
@@ -38,6 +41,7 @@
 
 #define PT_RESUME(p) \
 	p(NULL);
+
 
 #if 0
 #define print(format, ...) \
@@ -51,7 +55,7 @@ int phread_one(void *arg)
 {
 	PT_INIT();
 	print("block\n")
-		PT_BLOCK();
+		PT_BLOCK(1);
 	print("run\n");
 	PT_DEINIT();
 	return 0;
