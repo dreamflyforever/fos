@@ -875,7 +875,7 @@ extern nopoll_bool __nopoll_tls_was_init;
  */
 void nopoll_cleanup_library (void)
 {
-	
+#if 0	
 	if (__nopoll_tls_was_init) {
 		EVP_cleanup ();
 		CRYPTO_cleanup_all_ex_data ();
@@ -884,7 +884,7 @@ void nopoll_cleanup_library (void)
 		/* notify the library isn't initialized */
 		__nopoll_tls_was_init = nopoll_false;
 	} /* end if */
-	
+#endif	
 	return;
 } /* end if */
 

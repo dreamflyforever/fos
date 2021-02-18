@@ -69,7 +69,7 @@ MY_CFLAGS = -g -I . -I include -I audioenc -I third -I third/ogg -I third/speex\
 # The linker options.
 # MY_LIBS   = -lGLEW -lglut -lGLU -lGL -lX11 -lXmu -lXi -lm -L/usr/X11R6/lib -lgomp -lOpenThreads -lpthread
 #MY_LIBS   = -L/home/jim/test/linux_asr/aispeech-webapi/aispeech-speex-ogg-c-sample-20151116/lib -lm -lssl -lcrypto -ldl
-MY_LIBS   =  -lm -lssl -lcrypto -ldl -Lauth -lprovison -lpthread -luuid
+MY_LIBS   =  -lm -lssl -lcrypto -ldl -Lauth -lpthread -luuid
 
 # The pre-processor options used by the cpp (man cpp for more).
 CPPFLAGS  = 
@@ -78,7 +78,7 @@ LDFLAGS   =
 
 # The directories in which source files reside.
 # If not specified, only the current directory will be serached.
-SRCDIRS =  audioenc nopoll third/ogg third/speex main auth interface cJSON sha1 http cloud_auth tts lib translate
+SRCDIRS =  audioenc nopoll third/ogg third/speex main interface cJSON sha1 http cloud_auth tts lib translate
 
 # The executable file name.
 # If not specified, current directory name or `a.out' will be used.

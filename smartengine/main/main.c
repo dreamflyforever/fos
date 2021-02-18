@@ -427,6 +427,10 @@ int main(int argc, char *argv[])
 	printf("compile: %s\n", __TIME__);
 	char wavpath[20] = {0};
 	int i;
+	if (argv[1] == NULL) {
+		printf("usage: ./fos audio\n");
+		goto out;
+	}
 	for (i = 0; i < 1; i++) {
 		if (i == 0) {
 			memcpy(wavpath, argv[1], 10);
@@ -473,5 +477,6 @@ int main(int argc, char *argv[])
 	free(to);
 	free(top);
 #endif
+out:
 	return 0;
 }

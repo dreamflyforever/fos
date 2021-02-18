@@ -523,6 +523,7 @@ int aiengine_cancel(struct aiengine *engine)
 int check_provision(struct aiengine *agn)
 {
 	int ret;
+#if 0
 	if (agn == NULL)
 		pf("agn NULL\n");
 
@@ -537,6 +538,7 @@ int check_provision(struct aiengine *agn)
 	}
 
 	/*XXX:*/
+#endif
 	agn->provision_ok = 1;
 	return ret;
 }

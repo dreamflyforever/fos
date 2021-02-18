@@ -461,6 +461,7 @@ int nopoll_conn_tls_send (noPollConn * conn, char * buffer, int buffer_size)
 
 SSL_CTX * __nopoll_conn_get_ssl_context (noPollCtx * ctx, noPollConn * conn, noPollConnOpts * opts, nopoll_bool is_client)
 {
+#if 0
 	/* call to user defined function if the context creator is defined */
 	if (ctx && ctx->context_creator) 
 		return ctx->context_creator (ctx, conn, opts, is_client, ctx->context_creator_data);
@@ -488,6 +489,8 @@ SSL_CTX * __nopoll_conn_get_ssl_context (noPollCtx * ctx, noPollConn * conn, noP
 
 	/* reached this point, report default TLSv1 method */
 	return SSL_CTX_new (is_client ? TLSv1_client_method () : TLSv1_server_method ()); 
+#endif
+	return NULL;
 }
 
 noPollCtx * __nopoll_conn_ssl_ctx_debug = NULL;
@@ -1023,6 +1026,8 @@ noPollConn * nopoll_conn_tls_new (noPollCtx  * ctx,
 				  const char * protocols,
 				  const char * origin)
 {
+	return NULL;
+#if 0
 	/* init ssl ciphers and engines */
 	if (! __nopoll_tls_was_init) {
 		__nopoll_tls_was_init = nopoll_true;
@@ -1033,6 +1038,7 @@ noPollConn * nopoll_conn_tls_new (noPollCtx  * ctx,
 	return __nopoll_conn_new_common (ctx, options, nopoll_true, 
 					 host_ip, host_port, host_name, 
 					 get_url, protocols, origin);
+#endif
 }
 
 /** 
@@ -3964,7 +3970,7 @@ nopoll_bool __nopoll_conn_accept_complete_common (noPollCtx * ctx, noPollConnOpt
 		/* init ssl ciphers and engines */
 		if (! __nopoll_tls_was_init) {
 			__nopoll_tls_was_init = nopoll_true;
-			SSL_library_init ();
+			//SSL_library_init ();
 		} /* end if */
 
 		/* now configure chainCertificate */
