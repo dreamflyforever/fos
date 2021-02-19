@@ -329,7 +329,7 @@ char *fetch_key(const char *start, char *key, unsigned long length)
 		url[i] = p[i];
 		if (p[i] == "\0") break;
 		i++;
-		if (i == 200) break;
+		if (i == 147) break;
 	}
 
 	//printf("[%s %s %d]%s\n", __FILE__, __func__, __LINE__, url);
@@ -356,14 +356,12 @@ int agn_cb(const void *usrdata,
 	char ol[1024] ={0};
 #if DUI
 	if (aispeech_len != 0) {
-#if DUI
 		dui_result_process(message, aispeech_len, os, ol);
 		if (strlen(os) != 0) {
 			//char *url = player_url(os);
 			//printf("\nurl: %s\n", url);
 			//free(url);
 		}
-#endif
 	}
 #endif
 

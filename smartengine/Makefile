@@ -101,7 +101,7 @@ CFLAGS+=-Os -std=c99 -D _POSIX_C_SOURCE=200112L -D _BSD_SOURCE -fPIC \
 # CXXFLAGS= -std=c++0x
 CXXFLAGS= 
 # The C program compiler.
-CC     = gcc
+CC     = clang
 
 # The C++ program compiler.
 CXX    = g++
