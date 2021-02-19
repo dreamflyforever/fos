@@ -719,12 +719,14 @@ int dui_result_process(char *buf, int size,
 	char *output_speakurl, char *output_linkurl)
 {
 	int retval = 0;
+	char *linkurl = NULL;
+	char *speakurl = NULL;
+	char *output = NULL;
 	if (buf == NULL) {
 		retval = -1;
 		goto error;
 	}
-	char *linkurl = NULL;
-	char *speakurl = fetch_key(buf, "speakUrl", 0);
+	speakurl = fetch_key(buf, "speakUrl", 0);
 	if (speakurl != NULL) {
 		printf("speakUrl: %s\n", speakurl);
 		memcpy(output_speakurl, speakurl, strlen(speakurl));
@@ -734,16 +736,16 @@ int dui_result_process(char *buf, int size,
 		printf("linkUrl: %s\n", linkurl);
 		memcpy(output_linkurl, linkurl, strlen(linkurl));
 	}
-	char *output = fetch_key(buf, ",\"nlg", 0);
+	output = fetch_key(buf, ",\"nlg", 0);
 	if (output == NULL) {
 		output = fetch_key(buf, "{\"nlg", 0);
 	}
 	if (output != NULL) printf("\n\n%s\n\n", output);
 	else printf("\n\nNULL\n\n");
 
-end:
 	free(speakurl);
 	free(linkurl);
+	free(output);
 error:
 	return retval;
 }
