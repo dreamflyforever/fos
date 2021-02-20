@@ -194,9 +194,13 @@ char *tran_output(char *from, char *to, char *s)
 
 	return str;
 #endif
-	uint8_t *message = malloc(2048);
-	memset(message, 0, 2048);
+	int len;
+	char *ue = NULL;
+	char *str = NULL;
 	uint8_t tmp[16] = {0};
+	char sig[33] = {0};
+	int i;
+	uint8_t *message = malloc(2048);
 	//char *appkey = "3555d403ccf5368d";
 	//char *secret = "xPetgFul7YI8r0pOMYPRl7rBGoTlEkvp";
 	char *appkey = "45f9e7fa3ebb4054";
@@ -205,24 +209,24 @@ char *tran_output(char *from, char *to, char *s)
 	char *salt = "53489";
     	//uuid_generate(salt);
 	//uuid_unparse(uuid, salt);
+	memset(message, 0, 2048);
 	snprintf(message, 2048, "%s%s%s%s", appkey, s, salt, secret);
-	int len = strlen(message);
+	len = strlen(message);
 	printf("[%s %d]message:%s , len: %d \n", __func__, __LINE__, message, len);
 	md5((uint8_t *)message, len, tmp);
 
-	char sig[33] = {0};
-	int i;
 	for (i = 0; i < 16; i++) {
 		printf("%2.2x", tmp[i]);
 		snprintf(&sig[i*2], 3, "%2.2x", tmp[i]);
 	}
-
 	printf("\nsig: %s\n", sig);
 	memset(message, 0, 2048);
-	char *ue = url_encode(s);
-	snprintf(message, 2048, "http://openapi.youdao.com/api?q=%s&from=%s&to=%s&appKey=%s&salt=%s&sign=%s", ue, from, to, appkey, salt, sig);
+	ue = url_encode(s);
+	snprintf(message, 2048,
+		"http://openapi.youdao.com/api?q=%s&from=%s&to=%s&appKey=%s&salt=%s&sign=%s",
+		ue, from, to, appkey, salt, sig);
 	printf("url: %s, len: %d\n", message, strlen(message));
-	char *str = http_get(message);
+	str = http_get(message);
 	printf("---------\n");
 	printf("[%s]\n", str);
 	printf("---------\n");
