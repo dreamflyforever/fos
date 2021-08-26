@@ -6,6 +6,7 @@
 #include <aiengine.h>
 #include <pthread.h>
 #include <tts.h>
+#include "capture.h"
 #if 0
 	s-test.api.aispeech.com:10000
 
@@ -432,48 +433,56 @@ int main(int argc, char *argv[])
 	free(url);
 #endif
 #if 1
+	int size;  
+	FILE *fp ;
+	if ((fp = fopen("sound.pcm","w")) < 0)
+		printf("open sound.pcm fial\n");
+
+	size = rec_obj.frames * 2; /* 2 bytes/sample, 1 channels */  
+
+
+	record_init();
+
 	printf("compile: %s\n", __TIME__);
-	char wavpath[20] = {0};
 	int i;
-	if (argv[1] == NULL) {
-		printf("usage: ./fos audio\n");
-		goto out;
-	}
-	for (i = 0; i < 1; i++) {
-		if (i == 0) {
-			memcpy(wavpath, argv[1], 10);
-		} else {
-			memset(wavpath, 0, 20);
-			memcpy(wavpath, "2.wav", 18);
-		}
+
+	for (i = 0; i < 100000000000000000; i++) {
 		int bytes;
-		char buf[3200] = {0};
+		char buffer[3200] = {0};
 		agn = aiengine_new(server_cfg);
 		cloud_auth_do(server_cfg);
 		if (agn == NULL) {
 			pf("error\n");
 			return 0;
 		}
+		printf("record.............\n");
 		aiengine_start(agn, cloud_asr_param, agn_cb, NULL);
-		wav = fopen(wavpath, "rb");
-		if (!wav) {
-			printf("open wav : %s failed\n", wavpath);
-			return 0;
-		} else {
-			printf("open wav : %s success\n", wavpath);
-		}
-
-		fseek(wav, 44, SEEK_SET);
-		while ((bytes = fread(buf, 1, sizeof(buf), wav))) {
-			printf("-");
-			aiengine_feed(agn, buf, bytes);
+		int loops = 2100;
+		while (loops > 0) {
+			loops--;
+			int rc = snd_pcm_readi(rec_obj.handle, buffer, rec_obj.frames); 
+			if (rc == -EPIPE) {  
+				/* EPIPE means overrun */  
+				fprintf(stderr, "overrun occurred/n");  
+				snd_pcm_prepare(rec_obj.handle);  
+			} else if (rc < 0) {  
+				fprintf(stderr,  
+						"error from read: %s/n",  
+						snd_strerror(rc));  
+			} else if (rc != (int)rec_obj.frames) {  
+				fprintf(stderr, "short read, read %d frames/n", rc);  
+			}  
+			aiengine_feed(agn, buffer, rc);
+			rc = fwrite( buffer,1, size, fp);  
+			if (rc != size)  
+				fprintf(stderr,  "short write: wrote %d bytes/n", rc);  
 		}
 		printf("read end\n");
-		fclose(wav);
 		start = clock_get();
 		aiengine_stop(agn);
 
 		sleep(2);
+		fclose(fp); 
 		aiengine_delete(agn);
 	}
 #endif
