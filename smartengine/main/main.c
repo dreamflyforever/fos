@@ -336,6 +336,15 @@ char *fetch_key(const char *start, char *key, unsigned long length)
 	return url;
 }
 
+void player(char *os)
+{
+	char tmp[1024] = {0};
+	snprintf(tmp, 1024, "wget %s -O tmp.wav", os);
+	printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>%s\n", tmp);
+	system(tmp);
+	system("mplayer tmp.wav");
+}
+
 int agn_cb(const void *usrdata,
 		const void *message,
 		int size)
@@ -358,6 +367,7 @@ int agn_cb(const void *usrdata,
 	if (aispeech_len != 0) {
 		dui_result_process(message, aispeech_len, os, ol);
 		if (strlen(os) != 0) {
+			player(os);
 			//char *url = player_url(os);
 			//printf("\nurl: %s\n", url);
 			//free(url);
