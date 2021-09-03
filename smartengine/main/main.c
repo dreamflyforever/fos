@@ -44,7 +44,6 @@ char *url_strip(char *url)
 
 char *fetch_url(unsigned char const *start, unsigned long length)
 {
-	static int z;
 	int i;
 	char *c = NULL;
 	if ((start == NULL) || (length == 0)) {
@@ -308,7 +307,7 @@ char *result_process(char *buf, int len)
 		}
 		ret_url = tts_url_output(tts_param, url);
 		if (ret_url == NULL) {
-			printf("%d: error\n");
+			printf("%d: error\n", __LINE__);
 			while (1); }
 		free(url);
 	}
@@ -333,17 +332,21 @@ char *fetch_key(const char *start, char *key, unsigned long length)
 		if (i == 147) break;
 	}
 
-	//printf("[%s %s %d]%s\n", __FILE__, __func__, __LINE__, url);
+	printf("[%s %s %d]%s\n", __FILE__, __func__, __LINE__, url);
 	return url;
 }
 
 void player(char *os)
 {
+	char aaa[32000];
 	char tmp[1024] = {0};
 	snprintf(tmp, 1024, "wget %s -O tmp.wav", os);
 	printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>%s\n", tmp);
 	system(tmp);
 	system("mplayer tmp.wav");
+	printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< player over >>>>>>>>>>>>>>>>\n");
+
+//	snd_pcm_drop(rec_obj.handle);  
 }
 
 int agn_cb(const void *usrdata,
@@ -366,7 +369,7 @@ int agn_cb(const void *usrdata,
 	char ol[1024] ={0};
 #if DUI
 	if (aispeech_len != 0) {
-		dui_result_process(message, aispeech_len, os, ol);
+		dui_result_process((char *)message, aispeech_len, os, ol);
 		if (strlen(os) != 0) {
 			player(os);
 			//char *url = player_url(os);
@@ -433,31 +436,31 @@ int main(int argc, char *argv[])
 	free(url);
 #endif
 #if 1
-	int size;  
-	FILE *fp ;
+	int size;
+	FILE *fp;
+	char *buffer;
+#if 0
 	if ((fp = fopen("sound.pcm","w")) < 0)
 		printf("open sound.pcm fial\n");
-
-	size = rec_obj.frames * 2; /* 2 bytes/sample, 1 channels */  
-
-
-	record_init();
-
+#endif
 	printf("compile: %s\n", __TIME__);
 	int i;
 
 	for (i = 0; i < 100000000000000000; i++) {
-		int bytes;
-		char buffer[3200] = {0};
+		record_init();
+		size = rec_obj.frames * 2; /* 2 bytes/sample, 1 channels */  
+		buffer = (char *) malloc(size);
+		memset(buffer, 0, size);
+
 		agn = aiengine_new(server_cfg);
 		cloud_auth_do(server_cfg);
 		if (agn == NULL) {
 			pf("error\n");
 			return 0;
 		}
-		printf("record.............\n");
+		printf(">>>>>>>>>>>>>>>record start<<<<<<<<<<<<<<<\n");
 		aiengine_start(agn, cloud_asr_param, agn_cb, NULL);
-		int loops = 2100;
+		int loops = 1120;
 		while (loops > 0) {
 			loops--;
 			int rc = snd_pcm_readi(rec_obj.handle, buffer, rec_obj.frames); 
@@ -472,18 +475,26 @@ int main(int argc, char *argv[])
 			} else if (rc != (int)rec_obj.frames) {  
 				fprintf(stderr, "short read, read %d frames/n", rc);  
 			}  
-			aiengine_feed(agn, buffer, rc);
-			rc = fwrite( buffer,1, size, fp);  
-			if (rc != size)  
-				fprintf(stderr,  "short write: wrote %d bytes/n", rc);  
+			aiengine_feed(agn, buffer, rec_obj.frames);
+#if 0
+				rc = fwrite(buffer, 1, size, fp);  
+				if (rc != size)  
+					fprintf(stderr,  "short write: wrote %d bytes/n", rc);  
+			if (i == 2) {
+				fclose(fp); 
+				return 0;
+			}
+#endif
+			memset(buffer, 0, size);
 		}
-		printf("read end\n");
+		record_deinit();
+		printf(">>>>>>>>>>>>>>>record end<<<<<<<<<<<<<<<\n");
 		start = clock_get();
 		aiengine_stop(agn);
-
-		sleep(2);
-		fclose(fp); 
+		sleep(1);
 		aiengine_delete(agn);
+		//return 0;
+		free(buffer);
 	}
 #endif
 #if 0
