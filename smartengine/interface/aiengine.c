@@ -705,7 +705,7 @@ int aiengine_set_dui_session(struct aiengine *agn, char *buf, int size)
 			goto handle_sessionid;
 		}
 		memset(session, 0, 40);
-		memcpy(session, sessionid, 40);
+		memcpy(session, sessionid, 39);
 		printf("[%d]sessionid : %s\n", __LINE__, sessionid);
 	}
 	free(sessionid);
