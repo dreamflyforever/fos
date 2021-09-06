@@ -64,7 +64,7 @@
 # MY_CFLAGS = -ggdb3 -pipe -O2 -Wall -Wextra -fopenmp -march=native -mfpmath=sse -DLINUX -m64 -std=c++0x
 #MY_CFLAGS = -g -DLINUX 
 MY_CFLAGS = -g -I . -I include -I audioenc -I third -I third/ogg -I third/speex\
-	-I auth -I interface -I cJSON -I sha1 -I http -I cloud_auth -I tts -I lib -I record
+	-I auth -I interface -I cJSON -I sha1 -I http -I cloud_auth -I tts -I lib -I record -I queue
 
 # The linker options.
 # MY_LIBS   = -lGLEW -lglut -lGLU -lGL -lX11 -lXmu -lXi -lm -L/usr/X11R6/lib -lgomp -lOpenThreads -lpthread
@@ -78,7 +78,7 @@ LDFLAGS   =
 
 # The directories in which source files reside.
 # If not specified, only the current directory will be serached.
-SRCDIRS =  audioenc nopoll third/ogg third/speex main interface cJSON sha1 http cloud_auth tts lib translate record
+SRCDIRS =  audioenc nopoll third/ogg third/speex main interface cJSON sha1 http cloud_auth tts lib translate record queue
 
 # The executable file name.
 # If not specified, current directory name or `a.out' will be used.

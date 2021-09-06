@@ -6,6 +6,8 @@
 #include <aiengine.h>
 #include <pthread.h>
 #include <tts.h>
+#include <stdlib.h>
+#include "q.h"
 #include "capture.h"
 #if 0
 	s-test.api.aispeech.com:10000
@@ -421,7 +423,7 @@ char *cloud_asr_param = "{\
 		}\
 }";
 
-int main(int argc, char *argv[])
+int speech()
 {
 //	char *a = tran_output("EN", "zh-CHS", "hello world");
 //	free(a);
@@ -446,7 +448,7 @@ int main(int argc, char *argv[])
 	printf("compile: %s\n", __TIME__);
 	int i;
 
-	for (i = 0; i < 100000000000000000; i++) {
+	for (i = 0; i < 1; i++) {
 		record_init();
 		size = rec_obj.frames * 2; /* 2 bytes/sample, 1 channels */  
 		buffer = (char *) malloc(size);
@@ -506,5 +508,84 @@ int main(int argc, char *argv[])
 	free(top);
 #endif
 out:
+	return 0;
+}
+
+enum {
+	BAD_NETWORK = 0,
+	BAD_MOTION = 1,
+	FREE = 2,
+	END
+};
+
+char *event[END] = {"BAD_NETWORK", "BAD_MOTION", "FREE"};
+static queue_t *q_obj;
+static char *music[4] ={
+	"/home/jim/workspace/hero/aispeech/tts-tools/status1.mp3", 
+	"/home/jim/workspace/hero/aispeech/tts-tools/status2.mp3",
+	"/home/jim/workspace/hero/aispeech/tts-tools/status3.mp3",
+	"/home/jim/workspace/hero/aispeech/tts-tools/status4.mp3",
+};
+
+int event_handle()
+{
+	int i;
+	char buf[100] = {0};
+	while (1) {
+		msg_get_buf(q_obj, buf, 100);
+		if (0 == strlen(buf)) {
+			i++;
+			sleep(1);
+			if (i != 30) {
+				continue;
+			}
+		}
+
+		for (i = 0; i < (END - 1); i++) {
+			if (0 == strncmp(buf, event[i], strlen(event[i]))) {
+				break;
+			}
+		}
+
+		print("event number: %d,  %s\n", i, buf);
+
+		switch (i) {
+		case BAD_NETWORK:
+			print("\n");
+		break;
+		case BAD_MOTION:
+			print("\n");
+		break;
+		case FREE:
+			i = time(NULL);
+			print("i: %d\n", i);
+			i= i/2%4;
+			memset(buf, 0, 100);
+			snprintf(buf, 100, "mplayer %s", music[i]);
+			system(buf);
+			print("\n");
+		break;
+			print("\n");
+		default:
+			print("\n");
+		break;
+		}
+		memset(buf, 0, 100);
+		sleep(1);
+	}
+
+}
+
+int main(int argc, char *argv[])
+{
+	msg_init(&q_obj, "speech", 1024 * 10);
+	msg_put_buf(q_obj, "BAD_NETWORK", strlen("BAD_NETWORK"));
+	msg_put_buf(q_obj, "FREE", strlen("FREE"));
+	msg_put_buf(q_obj, "BAD_MOTION", strlen("BAD_MOTION"));
+	event_handle();
+	while (1) {
+		printf("end\n");
+		sleep(10);
+	};
 	return 0;
 }
