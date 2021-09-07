@@ -348,8 +348,9 @@ void player(char *os)
 	snprintf(tmp, 1024, "wget %s -O tmp.wav", os);
 	printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>%s\n", tmp);
 	system(tmp);
+	system("ffplay tmp.wav -autoexit -nodisp");
 	printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< player over >>>>>>>>>>>>>>>>\n");
-
+	timer_reset("free_speech");
 //	snd_pcm_drop(rec_obj.handle);  
 }
 
@@ -551,11 +552,11 @@ int event_handle()
 
 		switch (i) {
 		case BAD_NETWORK:
-			system("mplayer /home/jim/workspace/hero/aispeech/tts-tools/badnetwork.mp3");
+			system("play /home/jim/workspace/hero/aispeech/tts-tools/badnetwork.mp3");
 			print("\n");
 		break;
 		case BAD_MOTION:
-			system("mplayer /home/jim/workspace/hero/aispeech/tts-tools/badmotion.mp3");
+			system("play /home/jim/workspace/hero/aispeech/tts-tools/badmotion.mp3");
 			print("\n");
 		break;
 		case CLOSE:
@@ -585,21 +586,24 @@ int herodisplay_cb(int fd, char *data, int len)
 
 void free_speech(int arg)
 {
+	printf("\n==================\n");
+#if 1
 	int i;
 	char buf[100] = {0};
 	i = time(NULL);
-	i= i/2%4;
+	i= i%4;
 	memset(buf, 0, 100);
-	snprintf(buf, 100, "mplayer %s", music[i]);
-	printf("music: %s\n", buf);
+	snprintf(buf, 100, "play %s &", music[i]);
+	printf("\n>>>music: %s\n", buf);
 	system(buf);
 	timer_reset("free_speech");
+#endif
 }
 
 int main(int argc, char *argv[])
 {
 	timer_init();
-	user_timer_create("free_speech", 10, free_speech);
+	user_timer_create("free_speech", 30, free_speech);
 	msg_init(&q_obj, "speech", 1024 * 10);
 
 	mqtt_init();
