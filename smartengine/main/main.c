@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include <tts.h>
 #include <stdlib.h>
+#include "timer.h"
 #include "q.h"
 #include "capture.h"
 #if 0
@@ -531,17 +532,15 @@ int event_handle()
 {
 	int i;
 	char buf[100] = {0};
+	int retval;
 	while (1) {
-		msg_get_buf(q_obj, buf, 100);
-		if (0 == strlen(buf)) {
-			i++;
+		retval = msg_get_buf(q_obj, buf, 100);
+		if (retval == -1) {
 			sleep(1);
-			if (i != 30) {
-				continue;
-			}
+			continue;
 		}
 
-		for (i = 0; i < (END - 1); i++) {
+		for (i = 0; i < END; i++) {
 			if (0 == strncmp(buf, event[i], strlen(event[i]))) {
 				break;
 			}
@@ -552,20 +551,15 @@ int event_handle()
 		switch (i) {
 		case BAD_NETWORK:
 			print("\n");
+			timer_reset("free_speech");
 		break;
 		case BAD_MOTION:
+			timer_reset("free_speech");
 			print("\n");
 		break;
 		case FREE:
-			i = time(NULL);
-			print("i: %d\n", i);
-			i= i/2%4;
-			memset(buf, 0, 100);
-			snprintf(buf, 100, "mplayer %s", music[i]);
-			system(buf);
 			print("\n");
 		break;
-			print("\n");
 		default:
 			print("\n");
 		break;
@@ -576,8 +570,21 @@ int event_handle()
 
 }
 
+void free_speech(int arg)
+{
+	int i;
+	char buf[100] = {0};
+	i = time(NULL);
+	i= i/2%4;
+	memset(buf, 0, 100);
+	snprintf(buf, 100, "mplayer %s", music[i]);
+	system(buf);
+}
+
 int main(int argc, char *argv[])
 {
+	timer_init();
+	user_timer_create("free_speech", 30, free_speech);
 	msg_init(&q_obj, "speech", 1024 * 10);
 	msg_put_buf(q_obj, "BAD_NETWORK", strlen("BAD_NETWORK"));
 	msg_put_buf(q_obj, "FREE", strlen("FREE"));
