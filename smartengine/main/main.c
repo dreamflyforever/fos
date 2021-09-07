@@ -10,6 +10,8 @@
 #include "timer.h"
 #include "q.h"
 #include "capture.h"
+#include "ipcm_api.h"
+#include "cJSON.h"
 #if 0
 	s-test.api.aispeech.com:10000
 
@@ -346,7 +348,6 @@ void player(char *os)
 	snprintf(tmp, 1024, "wget %s -O tmp.wav", os);
 	printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>%s\n", tmp);
 	system(tmp);
-	system("mplayer tmp.wav");
 	printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< player over >>>>>>>>>>>>>>>>\n");
 
 //	snd_pcm_drop(rec_obj.handle);  
@@ -567,7 +568,12 @@ int event_handle()
 		memset(buf, 0, 100);
 		sleep(1);
 	}
+}
 
+int herodisplay_cb(int fd, char *data, int len)
+{
+	printf("[%s %d]data: %.*s\n", __func__, __LINE__, len, data);
+	return 0;
 }
 
 void free_speech(int arg)
@@ -578,21 +584,27 @@ void free_speech(int arg)
 	i= i/2%4;
 	memset(buf, 0, 100);
 	snprintf(buf, 100, "mplayer %s", music[i]);
+	printf("music: %s\n", buf);
 	system(buf);
+	timer_reset("free_speech");
 }
 
 int main(int argc, char *argv[])
 {
 	timer_init();
-	user_timer_create("free_speech", 30, free_speech);
+	user_timer_create("free_speech", 10, free_speech);
 	msg_init(&q_obj, "speech", 1024 * 10);
-	msg_put_buf(q_obj, "BAD_NETWORK", strlen("BAD_NETWORK"));
-	msg_put_buf(q_obj, "FREE", strlen("FREE"));
-	msg_put_buf(q_obj, "BAD_MOTION", strlen("BAD_MOTION"));
+
+	mqtt_init();
+	sub("herodisplay", herodisplay_cb);
+
+	//msg_put_buf(q_obj, "BAD_NETWORK", strlen("BAD_NETWORK"));
+	//msg_put_buf(q_obj, "FREE", strlen("FREE"));
+	//msg_put_buf(q_obj, "BAD_MOTION", strlen("BAD_MOTION"));
 	event_handle();
 	while (1) {
 		printf("end\n");
-		sleep(10);
+		sleep(1);
 	};
 	return 0;
 }
