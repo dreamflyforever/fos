@@ -551,9 +551,11 @@ int event_handle()
 
 		switch (i) {
 		case BAD_NETWORK:
+			system("mplayer /home/jim/workspace/hero/aispeech/tts-tools/badnetwork.mp3");
 			print("\n");
 		break;
 		case BAD_MOTION:
+			system("mplayer /home/jim/workspace/hero/aispeech/tts-tools/badmotion.mp3");
 			print("\n");
 		break;
 		case CLOSE:
@@ -561,7 +563,7 @@ int event_handle()
 			print("\n");
 		break;
 		default:
-			print("\n");
+			print("wrong info\n");
 		break;
 		}
 		memset(buf, 0, 100);
