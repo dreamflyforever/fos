@@ -49,7 +49,12 @@ int cloud_auth_do(const char *cfg)
 		sig);
 	printf("%s\n", url);
 	char *str = http_get(url);
-		if ((strstr(str, "error") != NULL) &&
+	while (str == NULL) {
+		str = http_get(url);
+		sleep(1);
+		printf("%s try do auth......\n", __func__);
+	}
+	if ((strstr(str, "error") != NULL) &&
 		(strstr(str, "frequent") == NULL)) {
 		/*XXX: notice maybe need to know the return result of http get*/
 		printf("provision error\n");

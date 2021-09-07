@@ -10,6 +10,11 @@ static int provision_http_request(void *userdata,
 {
 	int ret;
 	char *body = http_get(url);
+	while (body == NULL) {
+		body = http_get(url);
+		sleep(1);
+		printf("try do auth......\n");
+	}
 	ret = strlen(body);
 	printf("body:len %s\n", body);
 	memcpy(response, body, strlen(body));

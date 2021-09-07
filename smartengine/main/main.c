@@ -586,8 +586,6 @@ int herodisplay_cb(int fd, char *data, int len)
 
 void free_speech(int arg)
 {
-	printf("\n==================\n");
-#if 1
 	char *pub_str = "{\"action\":\"FREE\"}";
 	int i;
 	pub("herodisplay", pub_str, strlen(pub_str));
@@ -596,25 +594,28 @@ void free_speech(int arg)
 	i= i%4;
 	memset(buf, 0, 100);
 	snprintf(buf, 100, "play %s &", music[i]);
-	printf("\n>>>music: %s\n", buf);
+	//printf("\n>>>music: %s\n", buf);
 	system(buf);
 	timer_reset("free_speech");
-#endif
 }
 
 int main(int argc, char *argv[])
 {
+	/*timer for free time speech*/
 	timer_init();
 	user_timer_create("free_speech", 30, free_speech);
+
+	/*buffer queue*/
 	msg_init(&q_obj, "speech", 1024 * 10);
 
+	/*ipcm init*/
 	mqtt_init();
 	sub("herodisplay", herodisplay_cb);
 
-	//msg_put_buf(q_obj, "BAD_NETWORK", strlen("BAD_NETWORK"));
-	//msg_put_buf(q_obj, "FREE", strlen("FREE"));
-	//msg_put_buf(q_obj, "BAD_MOTION", strlen("BAD_MOTION"));
+	/*handle othe process message*/
 	event_handle();
+
+	/*never reach here*/
 	while (1) {
 		printf("end\n");
 		sleep(1);
