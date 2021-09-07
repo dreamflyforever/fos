@@ -466,7 +466,7 @@ int aiengine_stop(struct aiengine *agn)
 		if (agn->cb) {
 			pf("msg received: %s\n", buff);
 #if DUI
-			aiengine_set_dui_session(agn, buff, agn->size);
+			//aiengine_set_dui_session(agn, buff, agn->size);
 #endif
 			agn->cb(agn->usrdata, buff, agn->size);
 		} else {

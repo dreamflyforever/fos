@@ -350,7 +350,6 @@ void player(char *os)
 	system(tmp);
 	system("ffplay tmp.wav -autoexit -nodisp");
 	printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< player over >>>>>>>>>>>>>>>>\n");
-	timer_reset("free_speech");
 //	snd_pcm_drop(rec_obj.handle);  
 }
 
@@ -428,6 +427,7 @@ char *cloud_asr_param = "{\
 
 int speech()
 {
+	timer_reset("free_speech");
 //	char *a = tran_output("EN", "zh-CHS", "hello world");
 //	free(a);
 //	a = tran_output("zh-CHS", "EN", "你好");
@@ -588,7 +588,9 @@ void free_speech(int arg)
 {
 	printf("\n==================\n");
 #if 1
+	char *pub_str = "{\"action\":\"FREE\"}";
 	int i;
+	pub("herodisplay", pub_str, strlen(pub_str));
 	char buf[100] = {0};
 	i = time(NULL);
 	i= i%4;
