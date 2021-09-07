@@ -481,9 +481,9 @@ int speech()
 			}  
 			aiengine_feed(agn, buffer, rec_obj.frames);
 #if 0
-				rc = fwrite(buffer, 1, size, fp);  
-				if (rc != size)  
-					fprintf(stderr,  "short write: wrote %d bytes/n", rc);  
+			rc = fwrite(buffer, 1, size, fp);  
+			if (rc != size)  
+				fprintf(stderr,  "short write: wrote %d bytes/n", rc);  
 			if (i == 2) {
 				fclose(fp); 
 				return 0;
@@ -516,11 +516,11 @@ out:
 enum {
 	BAD_NETWORK = 0,
 	BAD_MOTION = 1,
-	FREE = 2,
+	CLOSE = 2,
 	END
 };
 
-char *event[END] = {"BAD_NETWORK", "BAD_MOTION", "FREE"};
+char *event[END] = {"BAD_NETWORK", "BAD_MOTION", "CLOSE"};
 static queue_t *q_obj;
 static char *music[4] ={
 	"/home/jim/workspace/hero/aispeech/tts-tools/status1.mp3", 
@@ -540,7 +540,7 @@ int event_handle()
 			sleep(1);
 			continue;
 		}
-
+		timer_reset("free_speech");
 		for (i = 0; i < END; i++) {
 			if (0 == strncmp(buf, event[i], strlen(event[i]))) {
 				break;
@@ -552,13 +552,12 @@ int event_handle()
 		switch (i) {
 		case BAD_NETWORK:
 			print("\n");
-			timer_reset("free_speech");
 		break;
 		case BAD_MOTION:
-			timer_reset("free_speech");
 			print("\n");
 		break;
-		case FREE:
+		case CLOSE:
+			speech();
 			print("\n");
 		break;
 		default:
@@ -573,6 +572,12 @@ int event_handle()
 int herodisplay_cb(int fd, char *data, int len)
 {
 	printf("[%s %d]data: %.*s\n", __func__, __LINE__, len, data);
+	cJSON *root = cJSON_Parse(data);
+	cJSON *action = cJSON_GetObjectItem(root, "action");
+	printf("action: %s\n", action->valuestring);
+	msg_put_buf(q_obj, action->valuestring, strlen(action->valuestring));
+	cJSON_Delete(root);
+
 	return 0;
 }
 
