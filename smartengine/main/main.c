@@ -439,7 +439,7 @@ int speech()
 #endif
 		system("killall play");
 		timer_reset("free_speech");
-
+		system("play /home/jim/workspace/hero/aispeech/tts-tools/talk.mp3");
 		record_init();
 		size = rec_obj.frames * 2; /* 2 bytes/sample, 1 channels */  
 		buffer = (char *) malloc(size);
@@ -567,12 +567,14 @@ int herodisplay_cb(int fd, char *data, int len)
 
 void free_speech(int arg)
 {
-	char *pub_str = "{\"action\":\"FREE\"}";
 	int i;
-	pub("herodisplay", pub_str, strlen(pub_str));
+	char *pub_str[] = {"{\"action\":\"WINK\"}", "{\"action\":\"LOOK_AROUND\"}",
+			"{\"action\":\"GRLAD\"}", "{\"action\":\"DIZZY\"}"};
+
 	char buf[100] = {0};
 	i = time(NULL);
 	i= i%4;
+	pub("herodisplay", pub_str[i], strlen(pub_str[i]));
 	memset(buf, 0, 100);
 	snprintf(buf, 100, "play %s &", music[i]);
 	//printf("\n>>>music: %s\n", buf);
