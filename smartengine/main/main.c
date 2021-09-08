@@ -12,15 +12,7 @@
 #include "capture.h"
 #include "ipcm_api.h"
 #include "cJSON.h"
-#if 0
-	s-test.api.aispeech.com:10000
-
-mico:
-	"error":"appKey has exceeded the expired date"
-	appKey: 14709983278595d8
-	secretKey: 85d1e668eace0ce6539c299aa02b2334
-
-#endif
+#define save_file 0
 
 char *url_strip(char *url)
 {
@@ -427,31 +419,27 @@ char *cloud_asr_param = "{\
 
 int speech()
 {
-	timer_reset("free_speech");
-//	char *a = tran_output("EN", "zh-CHS", "hello world");
-//	free(a);
-//	a = tran_output("zh-CHS", "EN", "你好");
-//	free(a);
-//	return 0;
-#if 0
-	char *url = NULL;
-	url = tts_url_output(tts_param,
-			"今天");
-	printf("\n%s\n", url);
-	free(url);
-#endif
 #if 1
 	int size;
 	FILE *fp;
 	char *buffer;
-#if 0
-	if ((fp = fopen("sound.pcm","w")) < 0)
-		printf("open sound.pcm fial\n");
-#endif
+
 	printf("compile: %s\n", __TIME__);
 	int i;
 
-	for (i = 0; i < 1; i++) {
+	for (i = 0; i < 20; i++) {
+#if save_file
+		time_t t;
+		char t_buf[1024] = {0};
+		time(&t);
+		ctime_r(&t, t_buf);
+		printf("file name: %s\n", t_buf);
+		if ((fp = fopen(t_buf,"w")) < 0)
+			printf("open sound.pcm fial\n");
+#endif
+		system("killall play");
+		timer_reset("free_speech");
+
 		record_init();
 		size = rec_obj.frames * 2; /* 2 bytes/sample, 1 channels */  
 		buffer = (char *) malloc(size);
@@ -480,18 +468,18 @@ int speech()
 			} else if (rc != (int)rec_obj.frames) {  
 				fprintf(stderr, "short read, read %d frames/n", rc);  
 			}  
-			aiengine_feed(agn, buffer, rec_obj.frames);
-#if 0
+			aiengine_feed(agn, buffer, size);
+#if save_file
 			rc = fwrite(buffer, 1, size, fp);  
-			if (rc != size)  
+			if (rc != size) {
 				fprintf(stderr,  "short write: wrote %d bytes/n", rc);  
-			if (i == 2) {
-				fclose(fp); 
-				return 0;
 			}
 #endif
 			memset(buffer, 0, size);
 		}
+#if save_file
+		fclose(fp);
+#endif
 		record_deinit();
 		printf(">>>>>>>>>>>>>>>record end<<<<<<<<<<<<<<<\n");
 		start = clock_get();
@@ -502,14 +490,7 @@ int speech()
 		free(buffer);
 	}
 #endif
-#if 0
-	char *to = tran_output("en", "zh", "COULD YOU HELP ME PLEASE");
-	printf("tran: %s\n", to);
-	char *top = fetch_key(to, "dst", strlen(to));
-	printf("\n%s\n", top);
-	free(to);
-	free(top);
-#endif
+
 out:
 	return 0;
 }
@@ -605,7 +586,7 @@ int main(int argc, char *argv[])
 	timer_init();
 	user_timer_create("free_speech", 30, free_speech);
 
-	/*buffer queue*/
+	/*buffer queue for process message*/
 	msg_init(&q_obj, "speech", 1024 * 10);
 
 	/*ipcm init*/
