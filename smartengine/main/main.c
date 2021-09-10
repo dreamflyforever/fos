@@ -460,7 +460,6 @@ int speech()
 #endif
 		system("killall play");
 		timer_reset("free_speech");
-		system("play /home/jim/workspace/hero/aispeech/tts-tools/talk.mp3");
 		record_init();
 		size = rec_obj.frames * 2; /* 2 bytes/sample, 1 channels */  
 		buffer = (char *) malloc(size);
@@ -564,6 +563,7 @@ int event_handle()
 			print("\n");
 		break;
 		case CLOSE:
+			system("play /home/jim/workspace/hero/aispeech/tts-tools/talk.mp3");
 			set_speech(OK_SPEECH);
 			print("\n");
 		break;
@@ -586,7 +586,9 @@ int herodisplay_cb(int fd, char *data, int len)
 	cJSON *root = cJSON_Parse(data);
 	cJSON *action = cJSON_GetObjectItem(root, "action");
 	printf("action: %s\n", action->valuestring);
+	if (strncmp(action->valuestring, "FLOW", 4) == 0) goto out;
 	msg_put_buf(q_obj, action->valuestring, strlen(action->valuestring));
+out:
 	cJSON_Delete(root);
 
 	return 0;
