@@ -14,6 +14,21 @@
 #include "cJSON.h"
 #define save_file 0
 
+#define OK_SPEECH 0
+#define NO_SPEECH -1
+static int g_speech_ok;
+int speech_init()
+{
+	g_speech_ok = -1;
+	return 0;
+}
+
+int set_speech(int is_ok)
+{
+	g_speech_ok = is_ok;
+	return g_speech_ok;
+}
+
 char *url_strip(char *url)
 {
 	int len;
@@ -417,6 +432,11 @@ char *cloud_asr_param = "{\
 		}\
 }";
 
+int get_speech()
+{
+	return g_speech_ok;
+}
+
 int speech()
 {
 #if 1
@@ -424,10 +444,11 @@ int speech()
 	FILE *fp;
 	char *buffer;
 
-	printf("compile: %s\n", __TIME__);
 	int i;
 
-	for (i = 0; i < 20; i++) {
+	//for (i = 0; i < 20; i++) {
+	if (get_speech() == NO_SPEECH) 
+		goto out;
 #if save_file
 		time_t t;
 		char t_buf[1024] = {0};
@@ -488,7 +509,7 @@ int speech()
 		aiengine_delete(agn);
 		//return 0;
 		free(buffer);
-	}
+	//}
 #endif
 
 out:
@@ -499,10 +520,11 @@ enum {
 	BAD_NETWORK = 0,
 	BAD_MOTION = 1,
 	CLOSE = 2,
+	AWAY = 3,
 	END
 };
 
-char *event[END] = {"BAD_NETWORK", "BAD_MOTION", "CLOSE"};
+char *event[END] = {"BAD_NETWORK", "BAD_MOTION", "CLOSE", "AWAY"};
 static queue_t *q_obj;
 static char *music[4] ={
 	"/home/jim/workspace/hero/aispeech/tts-tools/status1.mp3", 
@@ -520,6 +542,7 @@ int event_handle()
 		retval = msg_get_buf(q_obj, buf, 100);
 		if (retval == -1) {
 			sleep(1);
+			speech();
 			continue;
 		}
 		timer_reset("free_speech");
@@ -541,7 +564,11 @@ int event_handle()
 			print("\n");
 		break;
 		case CLOSE:
-			speech();
+			set_speech(OK_SPEECH);
+			print("\n");
+		break;
+		case AWAY:
+			set_speech(NO_SPEECH);
 			print("\n");
 		break;
 		default:
@@ -584,6 +611,8 @@ void free_speech(int arg)
 
 int main(int argc, char *argv[])
 {
+	speech_init();
+
 	/*timer for free time speech*/
 	timer_init();
 	user_timer_create("free_speech", 30, free_speech);
