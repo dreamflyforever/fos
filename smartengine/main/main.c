@@ -565,6 +565,7 @@ int event_handle()
 		case CLOSE:
 			system("play /home/jim/workspace/hero/aispeech/tts-tools/talk.mp3");
 			set_speech(OK_SPEECH);
+			speech();
 			print("\n");
 		break;
 		case AWAY:
@@ -586,7 +587,7 @@ int herodisplay_cb(int fd, char *data, int len)
 	cJSON *root = cJSON_Parse(data);
 	cJSON *action = cJSON_GetObjectItem(root, "action");
 	printf("action: %s\n", action->valuestring);
-	if (strncmp(action->valuestring, "FLOW", 4) == 0) goto out;
+	if (strncmp(action->valuestring, "FOLLOW", 4) == 0) goto out;
 	msg_put_buf(q_obj, action->valuestring, strlen(action->valuestring));
 out:
 	cJSON_Delete(root);
