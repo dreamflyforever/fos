@@ -12,11 +12,14 @@
 #include "capture.h"
 #include "ipcm_api.h"
 #include "cJSON.h"
-#define save_file 0
+#include "vad_api.h"
 
+#define save_file 0
+#define VAD 1
 #define OK_SPEECH 0
 #define NO_SPEECH -1
 static int g_speech_ok;
+static vad_str *vad;
 int speech_init()
 {
 	g_speech_ok = -1;
@@ -462,9 +465,8 @@ int speech()
 		timer_reset("free_speech");
 		record_init();
 		size = rec_obj.frames * 2; /* 2 bytes/sample, 1 channels */  
-		buffer = (char *) malloc(size);
+		buffer = (char *) malloc(size*2); 
 		memset(buffer, 0, size);
-
 		agn = aiengine_new(server_cfg);
 		cloud_auth_do(server_cfg);
 		if (agn == NULL) {
@@ -473,10 +475,15 @@ int speech()
 		}
 		printf(">>>>>>>>>>>>>>>record start<<<<<<<<<<<<<<<\n");
 		aiengine_start(agn, cloud_asr_param, agn_cb, NULL);
+#if VAD
+		int loops = 112000000;
+#else
 		int loops = 1120;
+#endif
 		while (loops > 0) {
 			loops--;
 			int rc = snd_pcm_readi(rec_obj.handle, buffer, rec_obj.frames); 
+			rc = snd_pcm_readi(rec_obj.handle, buffer+128, rec_obj.frames); 
 			if (rc == -EPIPE) {  
 				/* EPIPE means overrun */  
 				fprintf(stderr, "overrun occurred/n");  
@@ -487,8 +494,17 @@ int speech()
 						snd_strerror(rc));  
 			} else if (rc != (int)rec_obj.frames) {  
 				fprintf(stderr, "short read, read %d frames/n", rc);  
-			}  
-			aiengine_feed(agn, buffer, size);
+			}
+#if VAD
+			if (SILENT !=vad_feed(vad, buffer, 256)) {
+				aiengine_feed(agn, buffer, 256);
+			} else {
+				loops = 0;
+				printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>vad end<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+			}
+#else 
+			aiengine_feed(agn, buffer, 256);
+#endif
 #if save_file
 			rc = fwrite(buffer, 1, size, fp);  
 			if (rc != size) {
@@ -599,7 +615,7 @@ void free_speech(int arg)
 {
 	int i;
 	char *pub_str[] = {"{\"action\":\"WINK\"}", "{\"action\":\"LOOK_AROUND\"}",
-			"{\"action\":\"GRLAD\"}", "{\"action\":\"DIZZY\"}"};
+			"{\"action\":\"GLAD\"}", "{\"action\":\"DIZZY\"}"};
 
 	char buf[100] = {0};
 	i = time(NULL);
@@ -612,10 +628,19 @@ void free_speech(int arg)
 	timer_reset("free_speech");
 }
 
+int vad_cb(void *arg, int flag)
+{
+	vad_log("flag: %d\n", flag);
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	speech_init();
-
+#if VAD
+	vad_init(&vad, vad_cb, NULL);
+	vad_settime(vad, 180);
+#endif
 	/*timer for free time speech*/
 	timer_init();
 	user_timer_create("free_speech", 30, free_speech);
