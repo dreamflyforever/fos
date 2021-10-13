@@ -65,12 +65,12 @@
 #MY_CFLAGS = -g -DLINUX 
 MY_CFLAGS = -g -I . -I include -I audioenc -I third -I third/ogg -I third/speex\
 	-I auth -I interface -I cJSON -I sha1 -I http -I cloud_auth -I tts -I lib\
-	-I record -I queue -I tinytimer -I ipcm/baselib -I vad
+	-I record -I queue -I tinytimer -I ipcm/baselib -I vad -I third/fvad
 
 # The linker options.
 # MY_LIBS   = -lGLEW -lglut -lGLU -lGL -lX11 -lXmu -lXi -lm -L/usr/X11R6/lib -lgomp -lOpenThreads -lpthread
 #MY_LIBS   = -L/home/jim/test/linux_asr/aispeech-webapi/aispeech-speex-ogg-c-sample-20151116/lib -lm -lssl -lcrypto -ldl
-MY_LIBS   =  -lm -lssl -lcrypto -ldl -Lauth -lpthread -luuid -lasound
+MY_LIBS   =  -lm -lssl -lcrypto -ldl -Lauth -lpthread -luuid -lasound -L third/fvad -lfvad
 
 # The pre-processor options used by the cpp (man cpp for more).
 CPPFLAGS  = 

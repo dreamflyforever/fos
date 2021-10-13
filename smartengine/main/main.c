@@ -14,12 +14,23 @@
 #include "cJSON.h"
 #include "vad_api.h"
 
-#define save_file 0
 #define VAD 1
+#define FVAD 0
+
+#if FVAD
+#include "fvad.h"
+Fvad *fvad;
+#endif
+
+#define save_file 0
 #define OK_SPEECH 0
 #define NO_SPEECH -1
 static int g_speech_ok;
+
+#if VAD
 static vad_str *vad;
+#endif
+
 int speech_init()
 {
 	g_speech_ok = -1;
@@ -442,7 +453,6 @@ int get_speech()
 
 int speech()
 {
-#if 1
 	int size;
 	FILE *fp;
 	char *buffer;
@@ -476,7 +486,9 @@ int speech()
 		printf(">>>>>>>>>>>>>>>record start<<<<<<<<<<<<<<<\n");
 		aiengine_start(agn, cloud_asr_param, agn_cb, NULL);
 #if VAD
-		int loops = 112000000;
+		int loops = 2120000;
+#elif FVAD
+		int loops = 2120000;
 #else
 		int loops = 1120;
 #endif
@@ -496,11 +508,25 @@ int speech()
 				fprintf(stderr, "short read, read %d frames/n", rc);  
 			}
 #if VAD
-			if (SILENT !=vad_feed(vad, buffer, 256)) {
+			if (SILENT != vad_feed(vad, buffer, 256)) {
 				aiengine_feed(agn, buffer, 256);
 			} else {
 				loops = 0;
 				printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>vad end<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+			}
+#elif FVAD
+			/*XXX:TODO*/
+        		int vadres = fvad_process(fvad, buffer, 160);
+        		if (vadres < 0) {
+            			fprintf(stderr, "VAD processing failed\n");
+				sleep(10);
+            			goto out;
+			} else if (vadres == 1) {
+				aiengine_feed(agn, buffer, 256);
+				printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>fvad feed<<<<<<<<<<<<<<<<<<<<<<<<<\n");
+			} else {
+				loops = 0;
+				printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>fvad end<<<<<<<<<<<<<<<<<<<<<<<<<\n");
 			}
 #else 
 			aiengine_feed(agn, buffer, 256);
@@ -525,7 +551,6 @@ int speech()
 		//return 0;
 		free(buffer);
 	//}
-#endif
 
 out:
 	return 0;
@@ -639,7 +664,24 @@ int main(int argc, char *argv[])
 	speech_init();
 #if VAD
 	vad_init(&vad, vad_cb, NULL);
-	vad_settime(vad, 180);
+	vad_settime(vad, 100);
+#endif
+
+#if FVAD
+    	int mode;
+	fvad = fvad_new();
+	if (!fvad) {
+		fprintf(stderr, "out of memory\n");
+		goto out;
+	}
+
+	if (fvad_set_mode(fvad, mode) < 0) {
+                fprintf(stderr, "set mode error\n");
+	}
+	if (fvad_set_sample_rate(fvad, 16000) < 0) {
+        	fprintf(stderr, "invalid sample rate: 16000 Hz\n");
+        	goto out;
+	}
 #endif
 	/*timer for free time speech*/
 	timer_init();
@@ -654,11 +696,14 @@ int main(int argc, char *argv[])
 
 	/*handle othe process message*/
 	event_handle();
-
+out:
 	/*never reach here*/
 	while (1) {
 		printf("end\n");
 		sleep(1);
 	};
+#if FVAD
+	fvad_free(fvad);
+#endif
 	return 0;
 }
