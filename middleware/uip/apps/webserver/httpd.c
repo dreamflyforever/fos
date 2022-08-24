@@ -332,7 +332,7 @@ httpd_appcall(void)
 void
 httpd_init(void)
 {
-  uip_listen(HTONS(80));
+  uip_listen(_HTONS(80));
 }
 /*---------------------------------------------------------------------------*/
 /** @} */

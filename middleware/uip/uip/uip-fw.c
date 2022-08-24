@@ -463,10 +463,10 @@ uip_fw_forward(void)
   BUF->ttl = BUF->ttl - 1;
   
   /* Update the IP checksum. */
-  if(BUF->ipchksum >= HTONS(0xffff - 0x0100)) {
-    BUF->ipchksum = BUF->ipchksum + HTONS(0x0100) + 1;
+  if(BUF->ipchksum >= _HTONS(0xffff - 0x0100)) {
+    BUF->ipchksum = BUF->ipchksum + _HTONS(0x0100) + 1;
   } else {
-    BUF->ipchksum = BUF->ipchksum + HTONS(0x0100);
+    BUF->ipchksum = BUF->ipchksum + _HTONS(0x0100);
   }
 
   if(uip_len > 0) {

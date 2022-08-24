@@ -13,6 +13,7 @@
 #ifndef __PORT__H__
 #define __PORT__H__
 
+#define _XOPEN_SOURCE
 #include <var_define.h>
 #include <ucontext.h>
 

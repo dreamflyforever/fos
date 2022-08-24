@@ -41,7 +41,7 @@
 #include <list.h>
 #include <hw_include.h>
 
-#include <printf.h>
+//#include <printf.h>
 #include <queue.h>
 #include <mem_block.h>
 #include <device.h>
